@@ -3,5 +3,4 @@ import { User } from './user.entity';
 
 @ChildEntity('ADMINISTRADOR')
 export class Administrador extends User {
-  // Campos específicos de Administrador
 }

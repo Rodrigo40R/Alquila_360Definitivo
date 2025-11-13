@@ -1,10 +1,9 @@
-import { ChildEntity } from 'typeorm';
-import { User, TipoUsuario } from './user.entity';
+import { ChildEntity, OneToMany } from 'typeorm';
+import { User } from './user.entity';
+import { Propiedad } from './propiedad.entity';
 
 @ChildEntity('PROPIETARIO')
 export class Propietario extends User {
-  // Aquí podrías agregar campos propios,
-  // por ahora hereda todo de User.
-  // Ejemplo futuro:
-  // @Column() ruc: string;
+  @OneToMany(() => Propiedad, (propiedad) => propiedad.propietario)
+  propiedades: Propiedad[];
 }

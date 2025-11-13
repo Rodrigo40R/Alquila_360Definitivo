@@ -8,7 +8,7 @@ export class InMemoryUserRepository implements UserRepositoryPort {
   private currentId = 1;
 
   async create(data: Partial<User>): Promise<User> {
-    // Si viene ya una instancia de Propietario/Inquilino/etc, la respetamos:
+
     const user = data as User;
 
     user.id_usuario = this.currentId++;
@@ -21,7 +21,6 @@ export class InMemoryUserRepository implements UserRepositoryPort {
       user.estado_cuenta = 'ACTIVA';
     }
 
-    // Si por algún motivo no vino tipo_usuario, le ponemos uno por defecto
     if (!user.tipo_usuario) {
       user.tipo_usuario = 'INQUILINO';
     }

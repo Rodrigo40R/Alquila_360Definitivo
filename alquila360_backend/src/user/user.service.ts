@@ -34,7 +34,6 @@ export class UserService {
         user = new Administrador();
         break;
       default:
-        // Fallback por si llega algo raro (aunque el DTO ya valida)
         user = new Inquilino();
         break;
     }
@@ -61,12 +60,12 @@ export class UserService {
   }
 
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    await this.findOne(id); // lanza excepción si no existe
+    await this.findOne(id);
     return this.userRepo.update(id, updateUserDto);
   }
 
   async remove(id: number): Promise<void> {
-    await this.findOne(id); // lanza excepción si no existe
+    await this.findOne(id);
     return this.userRepo.remove(id);
   }
 }
