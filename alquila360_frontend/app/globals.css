@@ -1,40 +1,20 @@
 @import "tailwindcss";
 
-@theme {
-  --color-brand: #34D5C6;
-  --color-brand-600: #1FB7A8;
-  --color-ok: #22c55e;
-  --color-warn: #f59e0b;
-  --color-danger: #ef4444;
-  --radius-xl: 16px;
-  --radius-2xl: 24px;
-  --shadow-soft: 0 8px 24px rgba(0,0,0,0.08);
+/* Colores base */
+:root {
+  --background: #f4f4f5;
+  --foreground: #020617;
 }
 
-html, body { height: 100%; }
-
-.card {
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-soft);
-  background: white;
+/* Estilo general del body */
+body {
+  @apply bg-slate-100 text-slate-900 antialiased;
 }
 
-.btn {
-  @apply rounded-xl px-4 py-3 font-medium transition;
-}
-.btn-primary { background: var(--color-brand); color:#fff; }
-.btn-primary:hover { background: var(--color-brand-600); }
-.btn-ghost { @apply border border-slate-200 bg-white; }
-.badge {
-  @apply inline-flex items-center gap-2 rounded-full px-3 py-1 text-sm;
-}
-
-.table { @apply w-full border-separate border-spacing-y-3; }
-.table thead th { @apply text-left text-slate-500 font-normal pb-2; }
-.table tbody tr { @apply bg-white; }
-
-/* Fondo general de Alquila360 */
-.bg-alquila360 {
-  background: linear-gradient(180deg, #f6faf9 0%, #e9f5f3 100%);
-  min-height: 100vh;
+/* Fondo con logo (opcional) */
+.bg-logo {
+  background-image: url("/logoooo.svg");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
 }
