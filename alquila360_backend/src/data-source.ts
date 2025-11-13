@@ -1,18 +1,16 @@
 import { DataSource } from "typeorm"
 import { User } from "./entity/user.entity";
-import 'dotenv/config';
 
 const AppDataSource = new DataSource({
     type: "mysql",
     host: "localhost",
     port: 3306,
     username: "alquila360_admin",
-    password: "123456789",
+    password: "Quezada12!",
     database: "alquila360",
     entities: [User],
     synchronize: true,
     logging: false,
-    
 })
 
 export default AppDataSource;

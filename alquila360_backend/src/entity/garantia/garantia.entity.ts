@@ -1,5 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToOne } from 'typeorm';
-//import { Contrato } from '../contrato/contrato.entity'; (esta linea se activa despues de crear la entidad contrato)
+import { Contrato } from '../contrato/contrato.entity';
 
 @Entity('garantia')
 export class Garantia {
