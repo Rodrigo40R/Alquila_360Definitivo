@@ -2,7 +2,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Garantia } from '../entity/garantia/garantia.entity';
-//import { Contrato } from '../entity/contrato/contrato.entity'; (lo mismo que en otro, cuando se cree contrato, este codigo se activa)
+import { Contrato } from '../entity/contrato/contrato.entity';
 import { CreateGarantiaDto } from './dto/create-garantia.dto';
 import { UpdateGarantiaDto } from './dto/update-garantia.dto';
 
