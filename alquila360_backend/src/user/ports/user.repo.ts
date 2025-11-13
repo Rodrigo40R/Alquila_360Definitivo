@@ -1,4 +1,3 @@
-// src/user/ports/user.repo.ts
 import { User } from '../../entity/user.entity';
 
 export abstract class UserRepositoryPort {

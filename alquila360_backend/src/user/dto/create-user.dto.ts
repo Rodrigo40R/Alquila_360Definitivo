@@ -1,5 +1,12 @@
-// src/user/dto/create-user.dto.ts
-import { IsBoolean, IsEmail, IsOptional, IsString, MinLength } from 'class-validator';
+import {
+  IsBoolean,
+  IsEmail,
+  IsOptional,
+  IsString,
+  MinLength,
+  IsIn,
+} from 'class-validator';
+import type { TipoUsuario } from '../../entity/user.entity';
 
 export class CreateUserDto {
   @IsString()
@@ -10,8 +17,8 @@ export class CreateUserDto {
   correo: string;
 
   @IsString()
-  @IsOptional()
-  tipo_usuario?: string;
+  @IsIn(['PROPIETARIO', 'INQUILINO', 'TECNICO', 'ADMINISTRADOR'])
+  tipo_usuario: TipoUsuario;
 
   @IsBoolean()
   @IsOptional()

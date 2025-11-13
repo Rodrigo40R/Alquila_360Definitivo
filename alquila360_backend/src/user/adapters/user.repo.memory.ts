@@ -1,4 +1,3 @@
-// src/user/adapters/user.repo.memory.ts
 import { Injectable } from '@nestjs/common';
 import { UserRepositoryPort } from '../ports/user.repo';
 import { User } from '../../entity/user.entity';
@@ -9,13 +8,23 @@ export class InMemoryUserRepository implements UserRepositoryPort {
   private currentId = 1;
 
   async create(data: Partial<User>): Promise<User> {
-    const user = new User();
+    // Si viene ya una instancia de Propietario/Inquilino/etc, la respetamos:
+    const user = data as User;
+
     user.id_usuario = this.currentId++;
-    user.nombre = data.nombre!;
-    user.correo = data.correo!;
-    user.tipo_usuario = data.tipo_usuario ?? 'cliente';
-    user.verificado = data.verificado ?? false;
-    user.estado_cuenta = data.estado_cuenta ?? 'ACTIVA';
+
+    if (!user.verificado && user.verificado !== false) {
+      user.verificado = false;
+    }
+
+    if (!user.estado_cuenta) {
+      user.estado_cuenta = 'ACTIVA';
+    }
+
+    // Si por algún motivo no vino tipo_usuario, le ponemos uno por defecto
+    if (!user.tipo_usuario) {
+      user.tipo_usuario = 'INQUILINO';
+    }
 
     this.users.push(user);
     return user;
