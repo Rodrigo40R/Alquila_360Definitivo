@@ -44,7 +44,6 @@ export class PropiedadController {
     return this.propiedadService.remove(id);
   }
 
-  // Extra: obtener propiedades de un propietario específico
   @Get('propietario/:idPropietario')
   findByPropietario(
     @Param('idPropietario', ParseIntPipe) idPropietario: number,

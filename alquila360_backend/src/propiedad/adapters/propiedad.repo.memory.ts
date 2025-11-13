@@ -41,7 +41,6 @@ export class InMemoryPropiedadRepository implements PropiedadRepositoryPort {
     if (data.direccion !== undefined) propiedad.direccion = data.direccion;
     if (data.tipo !== undefined) propiedad.tipo = data.tipo;
     if (data.estado !== undefined) propiedad.estado = data.estado;
-    // normalmente no cambiamos el propietario desde aquí
 
     return propiedad;
   }

@@ -55,12 +55,11 @@ export class PropiedadService {
     id: number,
     dto: UpdatePropiedadDto,
   ): Promise<Propiedad> {
-    // Por simplicidad NO cambiamos el propietario aquí
     return this.propiedadRepo.update(id, dto);
   }
 
   async remove(id: number): Promise<void> {
-    await this.findOne(id); // lanza excepción si no existe
+    await this.findOne(id);
     return this.propiedadRepo.remove(id);
   }
 
