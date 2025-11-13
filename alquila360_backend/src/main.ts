@@ -1,6 +1,10 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import AppDataSource from './data-source';
+import 'dotenv/config';
+console.log('Usuario de la BD:', process.env.DB_USER);
+
+
 
 async function bootstrap() {
   try {

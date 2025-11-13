@@ -1,5 +1,6 @@
 import { DataSource } from "typeorm"
 import { User } from "./entity/user.entity";
+import 'dotenv/config';
 
 const AppDataSource = new DataSource({
     type: "mysql",
