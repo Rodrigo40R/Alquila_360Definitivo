@@ -14,8 +14,8 @@ export default function RootLayout({
   return (
     <html lang="es">
       <body className="bg-alquila360 text-gray-900">
-         {children}
-         </body>
+        {children}
+      </body>
     </html>
   );
 }
