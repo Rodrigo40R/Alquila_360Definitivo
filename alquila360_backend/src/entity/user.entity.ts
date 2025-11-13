@@ -1,19 +1,32 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
 
-@Entity()
+@Entity({ name: "usuarios" })
 export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
 
-    @Column()
-    name: string;
+  @PrimaryGeneratedColumn()
+  id_usuario: number;
 
-    @Column()
-    lastName: string;
+  @Column()
+  nombre: string;
 
-    @Column({ unique: true })
-    email: string;
+  @Column()
+  correo: string;
 
-    @Column()
-    password: string;
+  @Column()
+  tipo_usuario: string;
+
+  @Column({ default: false })
+  verificado: boolean;
+
+  @Column()
+  estado_cuenta: string;
+
+  login() {
+    return `El usuario ${this.nombre} ha iniciado sesión.`;
+  }
+
+  verificarCuenta() {
+    this.verificado = true;
+    return "Cuenta verificada.";
+  }
 }
