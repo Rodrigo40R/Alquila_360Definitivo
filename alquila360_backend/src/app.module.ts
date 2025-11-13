@@ -9,3 +9,15 @@ import { UserModule } from './user/user.module';
   providers: [AppService],
 })
 export class AppModule {}
+
+import { GarantiaModule } from './garantia/garantia.module';
+
+@Module({
+  imports: [
+    // ... TypeOrmModule.forRoot(config)
+    // ... otros módulos
+    GarantiaModule, // <-- Añade esto
+  ],
+  // ...
+})
+export class AppModule {}
