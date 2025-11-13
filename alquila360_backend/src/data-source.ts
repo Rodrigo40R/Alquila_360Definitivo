@@ -1,5 +1,10 @@
 import { DataSource } from "typeorm"
 import { User } from "./entity/user.entity";
+import { Propietario } from "./entity/propietario.entity";
+import { Inquilino } from "./entity/inquilino.entity";
+import { Tecnico } from "./entity/tecnico.entity";
+import { Administrador } from "./entity/administrador.entity";
+import { Propiedad } from "./entity/propiedad.entity";
 import 'dotenv/config';
 
 const AppDataSource = new DataSource({
@@ -9,7 +14,7 @@ const AppDataSource = new DataSource({
     username: "alquila360_admin",
     password: "123456789",
     database: "alquila360",
-    entities: [User],
+    entities: [User, Propietario, Inquilino, Tecnico, Administrador, Propiedad],
     synchronize: true,
     logging: false,
 })
