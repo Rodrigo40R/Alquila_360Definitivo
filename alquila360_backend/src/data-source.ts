@@ -13,7 +13,7 @@ const AppDataSource = new DataSource({
     host: "localhost",
     port: 3306,
     username: "alquila360_admin",
-    password: "123456789",
+    password: "Quezada12!",
     database: "alquila360",
     entities: [User, Propietario, Inquilino, Tecnico, Administrador, Propiedad, Ticket],
     synchronize: true,
