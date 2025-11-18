@@ -6,31 +6,31 @@ import { UpdateContratoDto } from './dto/update-contrato.dto';
 
 @Controller('contrato') // Endpoint base: /contrato
 export class ContratoController {
-    constructor(private readonly contratoService: ContratoService) {}
+  constructor(private readonly contratoService: ContratoService) {}
 
-    @Post()
-    create(@Body() createContratoDto: CreateContratoDto) {
-        return this.contratoService.create(createContratoDto);
-    }
+  @Post()
+  create(@Body() createContratoDto: CreateContratoDto) {
+    return this.contratoService.create(createContratoDto);
+  }
 
-    @Get()
-    findAll() {
-        return this.contratoService.findAll();
-    }
+  @Get()
+  findAll() {
+    return this.contratoService.findAll();
+  }
 
-    @Get(':id')
-    findOne(@Param('id') id: string) {
-        // Se usa +id para convertir el string del parámetro a número
-        return this.contratoService.findOne(+id);
-    }
+  @Get(':id')
+  findOne(@Param('id') id: string) {
+    // Se usa +id para convertir el string del parámetro a número
+    return this.contratoService.findOne(+id);
+  }
 
-    @Patch(':id')
-    update(@Param('id') id: string, @Body() updateContratoDto: UpdateContratoDto) {
-        return this.contratoService.update(+id, updateContratoDto);
-    }
+  @Patch(':id')
+  update(@Param('id') id: string, @Body() updateContratoDto: UpdateContratoDto) {
+    return this.contratoService.update(+id, updateContratoDto);
+  }
 
-    @Delete(':id')
-    remove(@Param('id') id: string) {
-        return this.contratoService.remove(+id);
-    }
+  @Delete(':id')
+  remove(@Param('id') id: string) {
+    return this.contratoService.remove(+id);
+  }
 }

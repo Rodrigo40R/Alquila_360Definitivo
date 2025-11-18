@@ -3,7 +3,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { GarantiaController } from './garantia.controller';
 import { GarantiaService } from './garantia.service';
 import { Garantia } from '../entity/garantia/garantia.entity';
-import { Contrato } from '../entity/contrato/contrato.entity';
+import { Contrato } from '../entity/contrato.entity';
 
 @Module({
     imports: [

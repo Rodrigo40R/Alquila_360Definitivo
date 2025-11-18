@@ -3,18 +3,17 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ContratoController } from './contrato.controller';
 import { ContratoService } from './contrato.service';
-import { Contrato } from '../entity/contrato/contrato.entity'; 
-// NOTA: Se deberán importar Propiedad, Propietario, Inquilino, etc., aquí también.
+import { Contrato } from '../entity/contrato.entity';
 
 @Module({
-    imports: [
-        TypeOrmModule.forFeature([
-            Contrato, 
-            // Otras entidades que use el ContratoService para validaciones
-        ]),
-    ],
-    controllers: [ContratoController],
-    providers: [ContratoService],
-    exports: [ContratoService],
+  imports: [
+    TypeOrmModule.forFeature([
+      Contrato,
+      // aquí podrías añadir otras entidades relacionadas si las usas
+    ]),
+  ],
+  controllers: [ContratoController],
+  providers: [ContratoService],
+  exports: [ContratoService],
 })
 export class ContratoModule {}
