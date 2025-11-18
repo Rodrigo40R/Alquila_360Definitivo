@@ -1,19 +1,36 @@
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToOne, JoinColumn } from 'typeorm';
+import { Contrato } from './contrato.entity';
+import { Pago } from './pago.entity';
+
+export enum EstadoCuota {
+  PENDIENTE = 'pendiente',
+  PAGADA = 'pagada',
+  VENCIDA = 'vencida',
+  MORA = 'mora'
+}
 
 @Entity()
-export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
+export class Cuota {
+  @PrimaryGeneratedColumn()
+  id_cuota: number;
 
-    @Column()
-    name: string;
+  @Column('decimal', { precision: 10, scale: 2 })
+  monto: number;
 
-    @Column()
-    lastName: string;
+  @Column()
+  fecha_vencimiento: Date;
 
-    @Column({ unique: true })
-    email: string;
+  @Column({
+    type: 'enum',
+    enum: EstadoCuota,
+    default: EstadoCuota.PENDIENTE
+  })
+  estado: EstadoCuota;
 
-    @Column()
-    password: string;
+  @ManyToOne(() => Contrato, contrato => contrato.cuotas)
+  contrato: Contrato;
+
+  @OneToOne(() => Pago, pago => pago.cuota, { nullable: true })
+  @JoinColumn()
+  pago: Pago;
 }
