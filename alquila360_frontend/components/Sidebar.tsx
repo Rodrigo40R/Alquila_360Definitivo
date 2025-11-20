@@ -1,45 +1,62 @@
-"use client";
-import Link from "next/link";
-import { useState } from "react";
-import { Ic } from "./icons";
-import { usePathname } from "next/navigation";
+// components/ui/Sidebar.tsx
+'use client';
 
-const items = [
-  { href: "/menu", label: "Graficos", icon: <Ic.Chart /> },
-  { href: "/contratos", label: "Página de Contratos", icon: <Ic.File /> },
-  { href: "/pagos", label: "Página de Pagos", icon: <Ic.Dollar /> },
-  { href: "/tickets", label: "Página Tickets", icon: <Ic.Ticket /> },
-  { href: "/reportes", label: "Página Reportes", icon: <Ic.Report /> },
-  { href: "/usuarios", label: "Gestión de Usuarios", icon: <Ic.Users /> },
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+import React from 'react';
+
+export type SidebarItem = {
+  label: string;
+  href: string;
+};
+
+export interface SidebarProps {
+  title?: string;
+  items?: SidebarItem[];
+}
+
+const defaultItems: SidebarItem[] = [
+  { href: '/principal', label: 'Dashboard' },
+  { href: '/propietario/mantenimiento', label: 'Mantenimiento' },
+  { href: '/propietario/propiedades', label: 'Propiedades' },
+  { href: '/propietario/pagos', label: 'Pagos' },
+  { href: '/propietario/reportes', label: 'Reportes' },
+  { href: '/configuracion', label: 'Configuración' },
+  { href: '/perfil', label: 'Perfil' }
 ];
 
-export default function Sidebar() {
-  const [open, setOpen] = useState(true);
+export default function Sidebar({ title = 'Propietario', items }: SidebarProps) {
   const pathname = usePathname();
 
-  return (
-    <aside className="mt-4">
-      <button onClick={() => setOpen((v) => !v)} className="rounded-md p-2 text-slate-800">
-        <Ic.Burger />
-      </button>
+  const navItems: SidebarItem[] = items && items.length > 0 ? items : defaultItems;
 
-      {open && (
-        <div className="mt-4 w-[270px] space-y-3">
-          {items.map((it) => {
-            const active = pathname === it.href;
-            return (
-              <Link
-                key={it.href}
-                href={it.href}
-                className={`flex items-center gap-3 rounded-xl border px-4 py-3 ${active ? "border-slate-900" : "border-slate-300"} bg-white`}
-              >
-                {it.icon}
-                <span className={`${active ? "font-semibold underline" : ""}`}>{it.label}</span>
-              </Link>
-            );
-          })}
-        </div>
-      )}
+  return (
+    <aside className="flex h-screen w-64 flex-col bg-[#003b3b] text-white">
+      <div className="px-6 py-4 text-lg font-semibold">
+        <div className="text-xs opacity-80">ALQUILA360</div>
+        <div className="text-base">{title}</div>
+      </div>
+
+      <nav className="mt-2 flex-1 space-y-1 px-2 text-sm">
+        {navItems.map((item) => {
+          const active = pathname === item.href;
+
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              className={`flex items-center rounded-md px-3 py-2 transition
+                ${
+                  active
+                    ? 'bg-white text-[#003b3b] font-semibold'
+                    : 'hover:bg-[#005858]'
+                }`}
+            >
+              {item.label}
+            </Link>
+          );
+        })}
+      </nav>
     </aside>
   );
 }

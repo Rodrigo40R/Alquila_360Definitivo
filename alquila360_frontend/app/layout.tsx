@@ -1,8 +1,9 @@
-import type { Metadata } from "next";
+// app/layout.tsx
 import "./globals.css";
+import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Alquila360",
+  title: "ALQUILA360",
   description: "Gestión integral de alquileres",
 };
 
@@ -13,7 +14,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-alquila360 text-gray-900">
+      <body className="min-h-screen bg-slate-900 text-slate-50 font-sans antialiased">
         {children}
       </body>
     </html>
