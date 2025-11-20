@@ -25,6 +25,7 @@ import { Pago } from './entity/pago.entity';
     MultaModule,
     PagoModule,
     CuotaModule,
+    
   ],
   controllers: [AppController],
   providers: [AppService],
