@@ -32,7 +32,6 @@ export class User {
   @Column()
   estado_cuenta: string;
 
-  // Métodos de dominio
   login() {
     return `El usuario ${this.nombre} ha iniciado sesión.`;
   }
@@ -41,23 +40,4 @@ export class User {
     this.verificado = true;
     return 'Cuenta verificada.';
   }
-}
-import { Column, Entity, PrimaryGeneratedColumn } from "typeorm";
-
-@Entity()
-export class User {
-    @PrimaryGeneratedColumn()
-    id: number;
-
-    @Column()
-    name: string;
-
-    @Column()
-    lastName: string;
-
-    @Column({ unique: true })
-    email: string;
-
-    @Column()
-    password: string;
 }

@@ -1,4 +1,3 @@
-// src/contrato/dto/update-contrato.dto.ts
 import { PartialType } from '@nestjs/mapped-types';
 import { CreateContratoDto } from './create-contrato.dto';
 

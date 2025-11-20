@@ -1,19 +1,20 @@
-// src/contrato/contrato.module.ts
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
-import { ContratoController } from './contrato.controller';
 import { ContratoService } from './contrato.service';
-import { Contrato } from '../entity/contrato.entity';
+import { ContratoController } from './contrato.controller';
+import { InMemoryContratoRepository } from './adapters/contrato.repo.memory';
+import { ContratoRepositoryPort } from './ports/contrato.repo';
+import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      Contrato,
-      // aquí podrías añadir otras entidades relacionadas si las usas
-    ]),
-  ],
+  imports: [UserModule],
   controllers: [ContratoController],
-  providers: [ContratoService],
-  exports: [ContratoService],
+  providers: [
+    ContratoService,
+    {
+      provide: ContratoRepositoryPort,
+      useClass: InMemoryContratoRepository,
+    },
+  ],
+  exports: [ContratoService, ContratoRepositoryPort],
 })
 export class ContratoModule {}

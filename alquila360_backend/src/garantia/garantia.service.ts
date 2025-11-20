@@ -1,67 +1,50 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Garantia } from '../entity/garantia/garantia.entity';
-import { Contrato } from '../entity/contrato.entity';
+import { GarantiaRepositoryPort } from './ports/garantia.repo';
 import { CreateGarantiaDto } from './dto/create-garantia.dto';
 import { UpdateGarantiaDto } from './dto/update-garantia.dto';
+import { Garantia } from '../entity/garantia.entity';
 
 @Injectable()
 export class GarantiaService {
-    constructor(
-        @InjectRepository(Garantia) 
-        private garantiaRepository: Repository<Garantia>,
-        
-        @InjectRepository(Contrato)
-        private contratoRepository: Repository<Contrato>,
-    ) {}
+  constructor(private readonly garantiaRepo: GarantiaRepositoryPort) {}
 
-    async create(createGarantiaDto: CreateGarantiaDto): Promise<Garantia> {
-        // En un servicio real, se verifica si el contratoId existe.
-        const contrato = await this.contratoRepository.findOne({ where: { id_contrato: createGarantiaDto.contratoId } });
-        if (!contrato) {
-            throw new NotFoundException(`Contrato con ID ${createGarantiaDto.contratoId} no encontrado.`);
-        }
-        
-        // 1. Crear y guardar la garantía
-        const nuevaGarantia = this.garantiaRepository.create({
-            monto: createGarantiaDto.monto,
-            descripcion: createGarantiaDto.descripcion,
-        });
-        const garantiaGuardada = await this.garantiaRepository.save(nuevaGarantia);
+  async create(dto: CreateGarantiaDto): Promise<Garantia> {
+    const garantia = new Garantia();
+    garantia.monto = dto.monto;
+    garantia.descripcion = dto.descripcion;
 
-        // 2. Asociar la garantía al contrato (esto actualiza la FK en Contrato)
-        contrato.garantia = garantiaGuardada;
-        await this.contratoRepository.save(contrato);
+    return this.garantiaRepo.create(garantia);
+  }
 
-        return garantiaGuardada;
-    }
-    
-    // Métodos find/update/remove (CRUD básicos)
-    findAll(): Promise<Garantia[]> {
-        return this.garantiaRepository.find();
-    }
-    
-    async findOne(id: number): Promise<Garantia> {
-        const garantia = await this.garantiaRepository.findOne({ where: { id_garantia: id } });
-        if (!garantia) {
-            throw new NotFoundException(`Garantía con ID ${id} no encontrada.`);
-        }
-        return garantia;
-    }
+  async findAll(): Promise<Garantia[]> {
+    return this.garantiaRepo.findAll();
+  }
 
-    async update(id: number, updateGarantiaDto: UpdateGarantiaDto): Promise<Garantia> {
-        const resultado = await this.garantiaRepository.update(id, updateGarantiaDto);
-        if (resultado.affected === 0) {
-            throw new NotFoundException(`Garantía con ID ${id} no encontrada para actualizar.`);
-        }
-        return this.findOne(id);
+  async findOne(id: number): Promise<Garantia> {
+    const garantia = await this.garantiaRepo.findOne(id);
+    if (!garantia) {
+      throw new NotFoundException(`Garantía con id ${id} no encontrada`);
     }
-    
-    async remove(id: number): Promise<void> {
-        const resultado = await this.garantiaRepository.delete(id);
-        if (resultado.affected === 0) {
-            throw new NotFoundException(`Garantía con ID ${id} no encontrada.`);
-        }
-    }
+    return garantia;
+  }
+
+  async update(
+    id: number,
+    dto: UpdateGarantiaDto,
+  ): Promise<Garantia> {
+    await this.findOne(id); // valida existencia
+    return this.garantiaRepo.update(id, dto);
+  }
+
+  async remove(id: number): Promise<void> {
+    await this.findOne(id);
+    return this.garantiaRepo.remove(id);
+  }
+
+  // método que usa la lógica de la entidad
+  async usarParaDanos(id: number, montoDano: number): Promise<Garantia> {
+    const garantia = await this.findOne(id);
+    garantia.usarParaDanos(montoDano);
+    return this.garantiaRepo.update(id, garantia);
+  }
 }

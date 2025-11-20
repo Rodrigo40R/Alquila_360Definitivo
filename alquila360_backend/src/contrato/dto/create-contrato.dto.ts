@@ -1,37 +1,31 @@
-// src/contrato/dto/create-contrato.dto.ts
-import { IsDateString, IsNotEmpty, IsNumber, IsBoolean, IsOptional, IsString } from 'class-validator';
+import {
+  IsDateString,
+  IsInt,
+  IsNumber,
+  IsOptional,
+  IsString,
+} from 'class-validator';
 
 export class CreateContratoDto {
-    @IsNotEmpty()
-    @IsDateString()
-    readonly fecha_inicio: string;
+  @IsDateString()
+  fecha_inicio: string;
 
-    @IsNotEmpty()
-    @IsDateString()
-    readonly fecha_fin: string;
+  @IsDateString()
+  fecha_fin: string;
 
-    @IsNotEmpty()
-    @IsNumber()
-    readonly monto_mensual: number; 
+  @IsNumber()
+  monto_mensual: number;
 
-    @IsOptional() // Puede tener un valor por defecto en la entidad
-    @IsBoolean()
-    readonly renovable?: boolean;
+  @IsString()
+  estado: string;
 
-    @IsOptional()
-    @IsString()
-    readonly estado?: string;
+  @IsInt()
+  id_propietario: number;
 
-    // IDs de las claves foráneas (FKs)
-    @IsNotEmpty()
-    @IsNumber()
-    readonly id_propiedad: number;
+  @IsInt()
+  id_inquilino: number;
 
-    @IsNotEmpty()
-    @IsNumber()
-    readonly id_propietario: number;
-
-    @IsNotEmpty()
-    @IsNumber()
-    readonly id_inquilino: number;
+  @IsInt()
+  @IsOptional()
+  id_garantia?: number;
 }

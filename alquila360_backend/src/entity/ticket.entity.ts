@@ -4,9 +4,11 @@ import {
   Column,
   ManyToOne,
   JoinColumn,
+  OneToOne,
 } from 'typeorm';
 import { Inquilino } from './inquilino.entity';
 import { Tecnico } from './tecnico.entity';
+import { Evaluacion } from './evaluacion.entity';
 
 @Entity({ name: 'tickets' })
 export class Ticket {
@@ -53,4 +55,9 @@ export class Ticket {
       this.subestado = nuevoSubestado;
     }
   }
+
+   @OneToOne(() => Evaluacion, (evaluacion) => evaluacion.ticket, {
+    nullable: true,
+  })
+  evaluacion: Evaluacion | null;
 }
