@@ -55,8 +55,25 @@ export class MultaService {
   }
 
   async update(id: number, dto: UpdateMultaDto): Promise<Multa> {
-    return this.multaRepo.update(id, dto);
+  const partial: Partial<Multa> = {};
+
+  if (dto.tipo !== undefined) partial.tipo = dto.tipo;
+  if (dto.monto !== undefined) partial.monto = dto.monto;
+  if (dto.descripcion !== undefined) partial.descripcion = dto.descripcion;
+  if (dto.estado !== undefined) partial.estado = dto.estado;
+
+  if (dto.fecha !== undefined) {
+    partial.fecha = new Date(dto.fecha);
   }
+
+  if (dto.id_cuota !== undefined) {
+    const cuota = new Cuota();
+    (cuota as any).id_cuota = dto.id_cuota;
+    partial.cuota = cuota;
+  }
+
+  return this.multaRepo.update(id, partial);
+}
 
   async remove(id: number): Promise<void> {
     await this.findOne(id);
