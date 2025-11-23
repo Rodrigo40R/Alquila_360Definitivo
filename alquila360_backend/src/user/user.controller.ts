@@ -7,7 +7,7 @@ import {
   Param,
   Delete,
   ParseIntPipe,
-  UseGuards,
+  UseGuards
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -18,7 +18,7 @@ import { JwtAuthGuard } from '../auth/auth.guard';
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-  /**
+    /**
    * Registro de usuario (público)
    * POST /users
    */
@@ -27,7 +27,7 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-  /**
+    /**
    * Listar todos los usuarios (protegido con JWT)
    * GET /users
    */
@@ -41,7 +41,7 @@ export class UserController {
    * Obtener un usuario por ID (protegido)
    * GET /users/:id
    */
-  @UseGuards(JwtAuthGuard)
+  //@UseGuards(JwtAuthGuard)
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
