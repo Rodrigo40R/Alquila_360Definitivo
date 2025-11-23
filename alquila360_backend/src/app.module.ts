@@ -12,6 +12,8 @@ import { MultaModule } from './multa/multa.module';
 import { PagoModule } from './pago/pago.module';
 import { CuotaModule } from './cuota/cuota.module';
 import { Pago } from './entity/pago.entity';
+import { AuthModule } from './auth/auth.module';
+import { authPlugins } from 'mysql2';
 
 @Module({
   imports: [
@@ -25,7 +27,7 @@ import { Pago } from './entity/pago.entity';
     MultaModule,
     PagoModule,
     CuotaModule,
-    
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],

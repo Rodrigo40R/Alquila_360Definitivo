@@ -1,31 +1,33 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
+import { ValidationPipe } from '@nestjs/common';
 import AppDataSource from './data-source';
 
 async function bootstrap() {
-  // Inicializar la base de datos
   try {
     await AppDataSource.initialize();
-    console.log('📦 Base de datos inicializada correctamente');
+    console.log('📦 DB inicializada');
   } catch (error) {
-    console.error('❌ Error al inicializar la base de datos:', error);
+    console.error('❌ Error al inicializar DB:', error);
   }
 
-  // Crear NestJS
   const app = await NestFactory.create(AppModule);
 
-  // Habilitar CORS
   app.enableCors({
-    origin: ['http://localhost:4200', 'http://localhost:3000'],
+    origin: ['http://localhost:3000', 'http://localhost:4200'],
     methods: 'GET,POST,PUT,PATCH,DELETE,OPTIONS',
     credentials: false,
   });
 
-  // Levantar servidor
-  const PORT = process.env.PORT ?? 3001;
-  await app.listen(PORT);
+  // 🔥 Aquí activas class-validator en TODO el proyecto
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,      // borra campos extra que no estén en el DTO
+      transform: true,      // convierte tipos (string → number, etc.)
+      forbidNonWhitelisted: false, // si quieres que explote cuando manden basura, pon true
+    }),
+  );
 
-  console.log(`🚀 Servidor iniciado en http://localhost:${PORT}`);
+  await app.listen(process.env.PORT ?? 3001);
 }
-
 bootstrap();

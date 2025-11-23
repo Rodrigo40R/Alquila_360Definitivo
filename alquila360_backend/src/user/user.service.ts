@@ -1,48 +1,20 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepositoryPort } from './ports/user.repo';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { User } from '../entity/user.entity';
-import { Propietario } from '../entity/propietario.entity';
-import { Inquilino } from '../entity/inquilino.entity';
-import { Tecnico } from '../entity/tecnico.entity';
-import { Administrador } from '../entity/administrador.entity';
+import { UserRepositoryPort } from './ports/user.repo';
 
 @Injectable()
 export class UserService {
   constructor(private readonly userRepo: UserRepositoryPort) {}
 
-  async create(createUserDto: CreateUserDto): Promise<User> {
-    const existing = await this.userRepo.findByCorreo(createUserDto.correo);
-    if (existing) {
-      throw new Error('Ya existe un usuario con ese correo');
-    }
-
-    let user: User;
-
-    switch (createUserDto.tipo_usuario) {
-      case 'PROPIETARIO':
-        user = new Propietario();
-        break;
-      case 'INQUILINO':
-        user = new Inquilino();
-        break;
-      case 'TECNICO':
-        user = new Tecnico();
-        break;
-      case 'ADMINISTRADOR':
-        user = new Administrador();
-        break;
-      default:
-        user = new Inquilino();
-        break;
-    }
-
-    user.nombre = createUserDto.nombre;
-    user.correo = createUserDto.correo;
-    user.tipo_usuario = createUserDto.tipo_usuario;
-    user.verificado = createUserDto.verificado ?? false;
-    user.estado_cuenta = createUserDto.estado_cuenta ?? 'ACTIVA';
+  async create(dto: CreateUserDto): Promise<User> {
+    const user = new User();
+    user.nombre = dto.nombre;
+    user.correo = dto.correo;
+    user.password = dto.password;
+    user.tipo_usuario = dto.tipo_usuario;
+    user.estado_cuenta = dto.estado_cuenta ?? 'ACTIVA';
 
     return this.userRepo.create(user);
   }
@@ -59,9 +31,17 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    await this.findOne(id);
-    return this.userRepo.update(id, updateUserDto);
+  async update(id: number, dto: UpdateUserDto): Promise<User> {
+    await this.findOne(id); // valida que existe
+
+    const partial: Partial<User> = {};
+    if (dto.nombre !== undefined) partial.nombre = dto.nombre;
+    if (dto.correo !== undefined) partial.correo = dto.correo;
+    if (dto.password !== undefined) partial.password = dto.password;
+    if (dto.tipo_usuario !== undefined) partial.tipo_usuario = dto.tipo_usuario;
+    if (dto.estado_cuenta !== undefined) partial.estado_cuenta = dto.estado_cuenta;
+
+    return this.userRepo.update(id, partial);
   }
 
   async remove(id: number): Promise<void> {
