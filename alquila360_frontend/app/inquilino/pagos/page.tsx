@@ -1,28 +1,69 @@
-export default function InquilinoPagos() {
+"use client";
+
+export default function InquilinoPagosPage() {
   const pagos = [
-    { monto: "$350", fecha: "Hoy", metodo: "Transferencia" },
-    { monto: "$350", fecha: "Hace 1 mes", metodo: "QR" },
-    { monto: "$350", fecha: "Hace 2 meses", metodo: "Efectivo" },
+    {
+      id: 1,
+      concepto: "Alquiler Enero",
+      fecha: "01/01/2025",
+      monto: "Bs. 2,500",
+      estado: "Pagado",
+    },
+    {
+      id: 2,
+      concepto: "Alquiler Febrero",
+      fecha: "05/02/2025",
+      monto: "Bs. 2,500",
+      estado: "Pendiente",
+    },
   ];
 
   return (
-    <main className="min-h-screen bg-slate-950 text-slate-50 p-6">
-      <h1 className="text-2xl font-bold mb-6">Historial de Pagos</h1>
-
-      <div className="space-y-4">
-        {pagos.map((p, i) => (
-          <div
-            key={i}
-            className="p-4 rounded-xl bg-slate-900 border border-slate-800 flex justify-between"
-          >
-            <div>
-              <p className="font-semibold">{p.monto}</p>
-              <p className="text-xs text-slate-400">{p.fecha}</p>
-            </div>
-            <p className="font-semibold">{p.metodo}</p>
-          </div>
-        ))}
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-slate-900">Mis pagos</h1>
+        <p className="text-sm text-slate-600">
+          Consulta tus pagos realizados y pendientes.
+        </p>
       </div>
-    </main>
+
+      <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-100 text-slate-700">
+            <tr>
+              <th className="px-4 py-3 text-left font-semibold">Concepto</th>
+              <th className="px-4 py-3 text-left font-semibold">Fecha</th>
+              <th className="px-4 py-3 text-left font-semibold">Monto</th>
+              <th className="px-4 py-3 text-left font-semibold">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {pagos.map((p) => (
+              <tr
+                key={p.id}
+                className="border-t border-slate-200 hover:bg-slate-50 transition"
+              >
+                <td className="px-4 py-3 text-slate-700">{p.concepto}</td>
+                <td className="px-4 py-3 text-slate-600">{p.fecha}</td>
+                <td className="px-4 py-3 text-emerald-600 font-semibold">
+                  {p.monto}
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      p.estado === "Pagado"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {p.estado}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
   );
 }

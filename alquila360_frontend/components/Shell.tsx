@@ -55,8 +55,8 @@ export default function Shell({
       <div className="flex flex-1">
         {/* Sidebar (si hay navItems) */}
         {navItems && navItems.length > 0 && (
-          <aside className="w-60 bg-[var(--a360-sidebar)] text-slate-100 flex flex-col">
-            <div className="h-14 flex items-center px-5 text-sm font-medium border-b border-slate-700/60">
+          <aside className="w-60 bg-[var(--a360-sidebar)] text-slate-900 flex flex-col">
+            <div className="h-14 flex items-center px-5 text-sm font-medium border-b border-slate-200/60">
               Menú
             </div>
             <nav className="flex-1 py-3 space-y-1 text-sm">
@@ -69,7 +69,7 @@ export default function Shell({
                     className={`flex items-center px-5 py-2.5 transition ${
                       active
                         ? "bg-teal-500 text-white"
-                        : "text-slate-100/80 hover:bg-slate-800 hover:text-white"
+                        : "text-slate-900/80 hover:bg-white hover:text-white"
                     }`}
                   >
                     {item.label}
@@ -102,7 +102,7 @@ export default function Shell({
       </div>
 
       {/* Footer base para zonas internas */}
-      <footer className="border-t bg-white text-xs text-slate-500 h-10 flex items-center justify-center">
+      <footer className="border-t bg-white text-xs text-slate-900 h-10 flex items-center justify-center">
         © 2025 Alquila 360 – Gestión integral de alquileres
       </footer>
     </div>
