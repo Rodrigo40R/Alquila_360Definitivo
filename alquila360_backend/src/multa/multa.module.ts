@@ -1,20 +1,29 @@
+// src/multa/multa.module.ts
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { MultaService } from './multa.service';
 import { MultaController } from './multa.controller';
-import { InMemoryMultaRepository } from './adapters/multa.repo.memory';
-import { MultaRepositoryPort } from './ports/multa.repo';
+
+import { Multa } from '../entity/multa.entity';
+import { MULTA_REPOSITORY } from './ports/multa.repo';
+import { MultaTypeOrmRepository } from './adapters/multa.repo.typeorm';
+
 import { ContratoModule } from '../contrato/contrato.module';
 
 @Module({
-  imports: [ContratoModule],
+  imports: [
+    TypeOrmModule.forFeature([Multa]),
+    ContratoModule, // para poder inyectar ContratoService
+  ],
   controllers: [MultaController],
   providers: [
     MultaService,
     {
-      provide: MultaRepositoryPort,
-      useClass: InMemoryMultaRepository,
+      provide: MULTA_REPOSITORY,
+      useClass: MultaTypeOrmRepository, // 👈 ya no usamos InMemoryMultaRepository
     },
   ],
-  exports: [MultaService, MultaRepositoryPort],
+  exports: [MultaService],
 })
 export class MultaModule {}

@@ -1,29 +1,34 @@
+// src/evaluacion/evaluacion.service.ts
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { EvaluacionRepositoryPort } from './ports/evaluacion.repo';
+
 import { CreateEvaluacionDto } from './dto/create-evaluacion.dto';
 import { UpdateEvaluacionDto } from './dto/update-evaluacion.dto';
 import { Evaluacion } from '../entity/evaluacion.entity';
-import { TicketRepositoryPort } from '../ticket/ports/ticket.repo';
+
+import { EVALUACION_REPOSITORY } from './ports/evaluacion.repo';
+import type { EvaluacionRepositoryPort } from './ports/evaluacion.repo';
+
+import { TicketService } from '../ticket/ticket.service';
 import { Ticket } from '../entity/ticket.entity';
 
 @Injectable()
 export class EvaluacionService {
   constructor(
+    @Inject(EVALUACION_REPOSITORY)
     private readonly evaluacionRepo: EvaluacionRepositoryPort,
-    private readonly ticketRepo: TicketRepositoryPort,
+
+    // ✅ usamos el servicio de ticket, no el repositorio directamente
+    private readonly ticketService: TicketService,
   ) {}
 
   async create(dto: CreateEvaluacionDto): Promise<Evaluacion> {
-    const ticket = await this.ticketRepo.findOne(dto.id_ticket);
-    if (!ticket) {
-      throw new NotFoundException(
-        `Ticket con id ${dto.id_ticket} no encontrado`,
-      );
-    }
+    const ticket = await this.ticketService.findOne(dto.id_ticket);
+    // findOne ya lanza NotFoundException si el ticket no existe
 
     const existente = await this.evaluacionRepo.findByTicket(dto.id_ticket);
     if (existente) {
@@ -56,7 +61,8 @@ export class EvaluacionService {
     id: number,
     dto: UpdateEvaluacionDto,
   ): Promise<Evaluacion> {
-    await this.findOne(id);
+    await this.findOne(id); // valida que exista
+
     const partial: Partial<Evaluacion> = {};
     if (dto.puntuacion !== undefined) partial.puntuacion = dto.puntuacion;
     if (dto.comentario !== undefined) partial.comentario = dto.comentario;
@@ -70,12 +76,8 @@ export class EvaluacionService {
   }
 
   async findByTicket(idTicket: number): Promise<Evaluacion> {
-    const ticket = await this.ticketRepo.findOne(idTicket);
-    if (!ticket) {
-      throw new NotFoundException(
-        `Ticket con id ${idTicket} no encontrado`,
-      );
-    }
+    // valida que el ticket exista
+    await this.ticketService.findOne(idTicket);
 
     const ev = await this.evaluacionRepo.findByTicket(idTicket);
     if (!ev) {

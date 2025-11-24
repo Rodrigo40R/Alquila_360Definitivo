@@ -1,20 +1,29 @@
+// src/pago/pago.module.ts
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { PagoService } from './pago.service';
 import { PagoController } from './pago.controller';
-import { InMemoryPagoRepository } from './adapters/pago.repo.memory';
-import { PagoRepositoryPort } from './ports/pago.repo';
+
+import { Pago } from '../entity/pago.entity';
+import { PAGO_REPOSITORY } from './ports/pago.repo';
+import { PagoTypeOrmRepository } from './adapters/pago.repo.typeorm';
+
 import { CuotaModule } from '../cuota/cuota.module';
 
 @Module({
-  imports: [CuotaModule],
+  imports: [
+    TypeOrmModule.forFeature([Pago]),
+    CuotaModule, // para poder inyectar CuotaService
+  ],
   controllers: [PagoController],
   providers: [
     PagoService,
     {
-      provide: PagoRepositoryPort,
-      useClass: InMemoryPagoRepository,
+      provide: PAGO_REPOSITORY,
+      useClass: PagoTypeOrmRepository, // 👈 ya no usamos InMemoryPagoRepository
     },
   ],
-  exports: [PagoService, PagoRepositoryPort],
+  exports: [PagoService],
 })
 export class PagoModule {}

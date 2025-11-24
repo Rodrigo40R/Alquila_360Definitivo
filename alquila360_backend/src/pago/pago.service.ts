@@ -1,26 +1,33 @@
+// src/pago/pago.service.ts
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { PagoRepositoryPort } from './ports/pago.repo';
+
 import { CreatePagoDto } from './dto/create-pago.dto';
 import { UpdatePagoDto } from './dto/update-pago.dto';
 import { Pago } from '../entity/pago.entity';
-import { CuotaRepositoryPort } from '../cuota/ports/cuota.repo';
+
+import { PAGO_REPOSITORY } from './ports/pago.repo';
+import type { PagoRepositoryPort } from './ports/pago.repo';
+
+import { CuotaService } from '../cuota/cuota.service';
 
 @Injectable()
 export class PagoService {
   constructor(
+    @Inject(PAGO_REPOSITORY)
     private readonly pagoRepo: PagoRepositoryPort,
-    private readonly cuotaRepo: CuotaRepositoryPort,
+
+    // ✅ usamos el servicio de cuota, no el repositorio directamente
+    private readonly cuotaService: CuotaService,
   ) {}
 
   async create(dto: CreatePagoDto): Promise<Pago> {
-    const cuota = await this.cuotaRepo.findOne(dto.id_cuota);
-    if (!cuota) {
-      throw new NotFoundException(`Cuota ${dto.id_cuota} no encontrada`);
-    }
+    const cuota = await this.cuotaService.findOne(dto.id_cuota);
+    // findOne ya lanza NotFoundException si no existe
 
     if (cuota.pago) {
       throw new BadRequestException(
@@ -36,10 +43,15 @@ export class PagoService {
 
     const creado = await this.pagoRepo.create(pago);
 
-    // actualizar estado de la cuota
+    // actualizar estado de la cuota (mínimo el estado)
     cuota.estado = 'PAGADA';
+    // si tu entidad/relación lo requiere, mantenemos la referencia en memoria
     cuota.pago = creado;
-    await this.cuotaRepo.update(cuota.id_cuota, cuota);
+
+    // reutilizamos la lógica de actualización de cuota
+    await this.cuotaService.update(cuota.id_cuota, {
+      estado: cuota.estado,
+    } as UpdatePagoDto as any); // si tu UpdateCuotaDto solo tiene estado/monto/fecha
 
     return creado;
   }
@@ -58,6 +70,7 @@ export class PagoService {
 
   async update(id: number, dto: UpdatePagoDto): Promise<Pago> {
     const partial: Partial<Pago> = {};
+
     if (dto.fecha_pago !== undefined) {
       partial.fecha_pago = new Date(dto.fecha_pago);
     }

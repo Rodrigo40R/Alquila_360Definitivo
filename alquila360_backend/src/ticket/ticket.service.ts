@@ -1,20 +1,31 @@
+// src/ticket/ticket.service.ts
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { TicketRepositoryPort } from './ports/ticket.repo';
+
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
 import { Ticket } from '../entity/ticket.entity';
-import { UserRepositoryPort } from '../user/ports/user.repo';
+
+import { TICKET_REPOSITORY } from './ports/ticket.repo';
+import type { TicketRepositoryPort } from './ports/ticket.repo';
+
+import { USER_REPOSITORY } from '../user/ports/user.repo';
+import type { UserRepositoryPort } from '../user/ports/user.repo';
+
 import { Inquilino } from '../entity/inquilino.entity';
 import { Tecnico } from '../entity/tecnico.entity';
 
 @Injectable()
 export class TicketService {
   constructor(
+    @Inject(TICKET_REPOSITORY)
     private readonly ticketRepo: TicketRepositoryPort,
+
+    @Inject(USER_REPOSITORY)
     private readonly userRepo: UserRepositoryPort,
   ) {}
 

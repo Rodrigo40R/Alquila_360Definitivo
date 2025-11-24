@@ -1,9 +1,14 @@
+// src/garantia/ports/garantia.repo.ts
 import { Garantia } from '../../entity/garantia.entity';
 
-export abstract class GarantiaRepositoryPort {
-  abstract create(garantia: Garantia): Promise<Garantia>;
-  abstract findAll(): Promise<Garantia[]>;
-  abstract findOne(id: number): Promise<Garantia | null>;
-  abstract update(id: number, data: Partial<Garantia>): Promise<Garantia>;
-  abstract remove(id: number): Promise<void>;
+// 🔹 Token para inyección de dependencias en Nest
+export const GARANTIA_REPOSITORY = 'GARANTIA_REPOSITORY';
+
+// 🔹 Puerto que debe implementar cualquier repositorio de Garantia
+export interface GarantiaRepositoryPort {
+  create(garantia: Garantia): Promise<Garantia>;
+  findAll(): Promise<Garantia[]>;
+  findOne(id: number): Promise<Garantia | null>;
+  update(id: number, data: Partial<Garantia>): Promise<Garantia>;
+  remove(id: number): Promise<void>;
 }

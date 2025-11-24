@@ -20,8 +20,11 @@ export class User {
   @Column()
   nombre: string;
 
-  @Column()
+  @Column({ unique: true })
   correo: string;
+  
+  @Column()
+  password: string;
 
   @Column({ name: 'tipo_usuario' })
   tipo_usuario: TipoUsuario;
@@ -29,9 +32,10 @@ export class User {
   @Column({ default: false })
   verificado: boolean;
 
-  @Column()
+  @Column({ default: 'ACTIVA' })
   estado_cuenta: string;
 
+  // Métodos de dominio
   login() {
     return `El usuario ${this.nombre} ha iniciado sesión.`;
   }

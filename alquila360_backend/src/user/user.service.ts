@@ -1,50 +1,25 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { UserRepositoryPort } from './ports/user.repo';
+// src/user/user.service.ts
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
+// 👇 USER_REPOSITORY es un valor (token de Nest), import normal
+import { USER_REPOSITORY } from './ports/user.repo';
+
+// 👇 UserRepositoryPort es SOLO un tipo, lo importamos con 'import type'
+import type { UserRepositoryPort } from './ports/user.repo';
+
 import { User } from '../entity/user.entity';
-import { Propietario } from '../entity/propietario.entity';
-import { Inquilino } from '../entity/inquilino.entity';
-import { Tecnico } from '../entity/tecnico.entity';
-import { Administrador } from '../entity/administrador.entity';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepo: UserRepositoryPort) {}
+  constructor(
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryPort,
+  ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
-    const existing = await this.userRepo.findByCorreo(createUserDto.correo);
-    if (existing) {
-      throw new Error('Ya existe un usuario con ese correo');
-    }
-
-    let user: User;
-
-    switch (createUserDto.tipo_usuario) {
-      case 'PROPIETARIO':
-        user = new Propietario();
-        break;
-      case 'INQUILINO':
-        user = new Inquilino();
-        break;
-      case 'TECNICO':
-        user = new Tecnico();
-        break;
-      case 'ADMINISTRADOR':
-        user = new Administrador();
-        break;
-      default:
-        user = new Inquilino();
-        break;
-    }
-
-    user.nombre = createUserDto.nombre;
-    user.correo = createUserDto.correo;
-    user.tipo_usuario = createUserDto.tipo_usuario;
-    user.verificado = createUserDto.verificado ?? false;
-    user.estado_cuenta = createUserDto.estado_cuenta ?? 'ACTIVA';
-
-    return this.userRepo.create(user);
+    return this.userRepo.create(createUserDto);
   }
 
   async findAll(): Promise<User[]> {
@@ -59,13 +34,23 @@ export class UserService {
     return user;
   }
 
+  async findByCorreo(correo: string): Promise<User | null> {
+    return this.userRepo.findByCorreo(correo);
+  }
+
   async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
-    await this.findOne(id);
+    const existing = await this.userRepo.findOne(id);
+    if (!existing) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    }
     return this.userRepo.update(id, updateUserDto);
   }
 
   async remove(id: number): Promise<void> {
-    await this.findOne(id);
+    const existing = await this.userRepo.findOne(id);
+    if (!existing) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    }
     return this.userRepo.remove(id);
   }
 }

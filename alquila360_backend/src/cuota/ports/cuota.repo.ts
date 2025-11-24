@@ -1,10 +1,15 @@
+// src/cuota/ports/cuota.repo.ts
 import { Cuota } from '../../entity/cuota.entity';
 
-export abstract class CuotaRepositoryPort {
-  abstract create(cuota: Cuota): Promise<Cuota>;
-  abstract findAll(): Promise<Cuota[]>;
-  abstract findOne(id: number): Promise<Cuota | null>;
-  abstract update(id: number, data: Partial<Cuota>): Promise<Cuota>;
-  abstract remove(id: number): Promise<void>;
-  abstract findByContrato(idContrato: number): Promise<Cuota[]>;
+// 🔹 Token para inyección de dependencias en Nest
+export const CUOTA_REPOSITORY = 'CUOTA_REPOSITORY';
+
+// 🔹 Puerto que debe implementar cualquier repositorio de Cuota
+export interface CuotaRepositoryPort {
+  create(cuota: Cuota): Promise<Cuota>;
+  findAll(): Promise<Cuota[]>;
+  findOne(id: number): Promise<Cuota | null>;
+  update(id: number, data: Partial<Cuota>): Promise<Cuota>;
+  remove(id: number): Promise<void>;
+  findByContrato(idContrato: number): Promise<Cuota[]>;
 }
