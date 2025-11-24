@@ -1,6 +1,7 @@
 // src/app.module.ts
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import 'dotenv/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -21,7 +22,7 @@ import { Multa } from './entity/multa.entity';
 import { Cuota } from './entity/cuota.entity';
 import { Pago } from './entity/pago.entity';
 
-// MÓDULOS
+// MÓDULOS (como ya los tienes)
 import { UserModule } from './user/user.module';
 import { PropiedadModule } from './propiedad/propiedad.module';
 import { TicketModule } from './ticket/ticket.module';
@@ -36,14 +37,15 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    // 👇 Aquí conectas Nest con Railway
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'turntable.proxy.rlwy.net',
-      port: 32464,
-      username: 'root',
-      password: 'tZchyCxqDbguZifPRKrYOYalRLZkaHap',
-      database: 'railway',
+      host: process.env.DB_HOST,
+      port: Number(process.env.DB_PORT),
+      username: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+
+      // 🔹 REGISTRAMOS TODAS LAS ENTIDADES AQUÍ
       entities: [
         User,
         Propietario,
@@ -60,11 +62,13 @@ import { AuthModule } from './auth/auth.module';
         Cuota,
         Pago,
       ],
-      synchronize: true, // ⚠️ solo en desarrollo; en producción pon false
+
+      // puedes quitar autoLoadEntities, ya no hace falta
+      // autoLoadEntities: true,
+      synchronize: true,
       logging: false,
     }),
 
-    // Resto de módulos de tu app
     UserModule,
     PropiedadModule,
     TicketModule,
