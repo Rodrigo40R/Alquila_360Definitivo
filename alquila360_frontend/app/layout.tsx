@@ -1,6 +1,5 @@
-// app/layout.tsx
-import "./globals.css";
 import type { Metadata } from "next";
+import "./global-style.css";
 
 export const metadata: Metadata = {
   title: "ALQUILA360",
@@ -14,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="min-h-screen bg-slate-900 text-slate-50 font-sans antialiased">
+      <body className="min-h-screen bg-white text-slate-900 antialiased">
         {children}
       </body>
     </html>

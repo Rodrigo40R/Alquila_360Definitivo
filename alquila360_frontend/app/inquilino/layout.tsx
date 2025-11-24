@@ -1,21 +1,26 @@
-import Sidebar from "@/components/sidebar/Sidebar";
-import HeaderGeneral from "@/components/ui/HeaderGeneral";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+// app/inquilino/layout.tsx
+import React from "react";
+import DashboardShell from "@/components/layout/DashboardShell";
 
 export default function InquilinoLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const menu = [
+    { href: "/inquilino/dashboard", label: "Dashboard" },
+    { href: "/inquilino/pagos", label: "Pagos" },
+    { href: "/inquilino/perfil", label: "Perfil" },
+    { href: "/inquilino/tickets", label: "Tickets" },
+  ];
+
   return (
-    <ProtectedRoute allowedRole="inquilino">
-      <div className="flex">
-        <Sidebar role="inquilino" />
-        <div className="flex-1 min-h-screen bg-slate-950">
-          <HeaderGeneral role="Inquilino" />
-          <div className="p-6">{children}</div>
-        </div>
-      </div>
-    </ProtectedRoute>
+    <DashboardShell
+      rol="Inquilino"
+      menu={menu}
+      colorSidebar="#008D6F"
+    >
+      {children}
+    </DashboardShell>
   );
 }

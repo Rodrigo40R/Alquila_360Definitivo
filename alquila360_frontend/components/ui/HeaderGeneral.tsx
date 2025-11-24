@@ -12,7 +12,7 @@ export default function HeaderGeneral({ role }: { role: string }) {
   }
 
   return (
-    <header className="w-full bg-slate-900 border-b border-slate-800 px-6 py-4 flex justify-between items-center">
+    <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
       <h2 className="text-sm text-slate-300">
         Estás conectado como:{" "}
         <span className="text-emerald-400 font-semibold">{role}</span>

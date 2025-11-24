@@ -1,21 +1,25 @@
-import Sidebar from "@/components/sidebar/Sidebar";
-import HeaderGeneral from "@/components/ui/HeaderGeneral";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+// app/tecnico/layout.tsx
+import React from "react";
+import DashboardShell from "@/components/layout/DashboardShell";
 
 export default function TecnicoLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const menu = [
+    { href: "/tecnico/dashboard", label: "Dashboard" },
+    { href: "/tecnico/tickets", label: "Tickets" },
+    { href: "/tecnico/perfil", label: "Perfil" },
+  ];
+
   return (
-    <ProtectedRoute allowedRole="tecnico">
-      <div className="flex">
-        <Sidebar role="tecnico" />
-        <div className="flex-1 min-h-screen bg-slate-950">
-          <HeaderGeneral role="Técnico" />
-          <div className="p-6">{children}</div>
-        </div>
-      </div>
-    </ProtectedRoute>
+    <DashboardShell
+      rol="Técnico"
+      menu={menu}
+      colorSidebar="#005B73"
+    >
+      {children}
+    </DashboardShell>
   );
 }

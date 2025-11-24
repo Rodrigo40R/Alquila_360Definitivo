@@ -1,21 +1,25 @@
-import Sidebar from "@/components/sidebar/Sidebar";
-import HeaderGeneral from "@/components/ui/HeaderGeneral";
-import ProtectedRoute from "@/components/auth/ProtectedRoute";
+// app/propietario/layout.tsx
+import React from "react";
+import DashboardShell from "@/components/layout/DashboardShell";
 
 export default function PropietarioLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+const menu = [
+  { href: "/propietario/dashboard", label: "Dashboard" },
+  { href: "/propietario/mantenimiento", label: "Mantenimiento (Tickets)" }, // <= AQUÍ
+  { href: "/propietario/propiedades", label: "Propiedades" },
+];
+
   return (
-    <ProtectedRoute allowedRole="propietario">
-      <div className="flex">
-        <Sidebar role="propietario" />
-        <div className="flex-1 min-h-screen bg-slate-950">
-          <HeaderGeneral role="Propietario" />
-          <div className="p-6">{children}</div>
-        </div>
-      </div>
-    </ProtectedRoute>
+    <DashboardShell
+      rol="Propietario"
+      menu={menu}
+      colorSidebar="#003B66" // azul oscuro
+    >
+      {children}
+    </DashboardShell>
   );
 }

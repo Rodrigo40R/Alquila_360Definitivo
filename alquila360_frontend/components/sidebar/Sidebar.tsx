@@ -32,7 +32,7 @@ export default function Sidebar({ role }: SidebarProps) {
   const items = menus[role];
 
   return (
-    <aside className="w-60 min-h-screen bg-slate-900 border-r border-slate-800 px-5 py-6">
+    <aside className="w-60 min-h-screen bg-white border-r border-slate-200 px-5 py-6">
       <h1 className="text-lg font-bold text-emerald-400 mb-9 tracking-wide">
         ALQUILA360
       </h1>
@@ -48,7 +48,7 @@ export default function Sidebar({ role }: SidebarProps) {
               className={`px-3 py-2 rounded-lg text-sm font-medium transition-all ${
                 active
                   ? "bg-emerald-500 text-slate-900"
-                  : "text-slate-300 hover:bg-slate-800 hover:text-white"
+                  : "text-slate-300 hover:bg-white hover:text-white"
               }`}
             >
               {item.label}

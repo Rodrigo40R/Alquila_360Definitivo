@@ -31,18 +31,18 @@ export default function PagosPropietario() {
   return (
     <div className="space-y-6">
       {/* TÍTULO */}
-      <h1 className="text-2xl font-bold text-slate-100">Pagos</h1>
+      <h1 className="text-2xl font-bold text-slate-900">Pagos</h1>
 
       {/* TABLA */}
-      <div className="w-full overflow-x-auto rounded-xl border border-slate-800 bg-slate-900">
+      <div className="w-full overflow-x-auto rounded-xl border border-slate-200 bg-white shadow-sm">
         <table className="w-full text-sm">
-          <thead className="bg-slate-800/60 text-slate-300">
+          <thead className="bg-slate-100 text-slate-700">
             <tr>
-              <th className="px-4 py-3 text-left">Propiedad</th>
-              <th className="px-4 py-3 text-left">Inquilino</th>
-              <th className="px-4 py-3 text-left">Monto</th>
-              <th className="px-4 py-3 text-left">Fecha</th>
-              <th className="px-4 py-3 text-left">Estado</th>
+              <th className="px-4 py-3 text-left font-semibold">Propiedad</th>
+              <th className="px-4 py-3 text-left font-semibold">Inquilino</th>
+              <th className="px-4 py-3 text-left font-semibold">Monto</th>
+              <th className="px-4 py-3 text-left font-semibold">Fecha</th>
+              <th className="px-4 py-3 text-left font-semibold">Estado</th>
             </tr>
           </thead>
 
@@ -50,24 +50,23 @@ export default function PagosPropietario() {
             {pagos.map((pago) => (
               <tr
                 key={pago.id}
-                className="border-t border-slate-800 hover:bg-slate-800/40 transition"
+                className="border-t border-slate-200 hover:bg-slate-50 transition"
               >
-                <td className="px-4 py-3 text-slate-200">{pago.propiedad}</td>
-                <td className="px-4 py-3 text-slate-300">{pago.inquilino}</td>
-                <td className="px-4 py-3 text-emerald-400 font-semibold">
+                <td className="px-4 py-3 text-slate-700">{pago.propiedad}</td>
+                <td className="px-4 py-3 text-slate-700">{pago.inquilino}</td>
+                <td className="px-4 py-3 text-emerald-600 font-semibold">
                   {pago.monto}
                 </td>
-                <td className="px-4 py-3 text-slate-400">{pago.fecha}</td>
+                <td className="px-4 py-3 text-slate-600">{pago.fecha}</td>
 
-                {/* ESTADO DE COLOR */}
                 <td className="px-4 py-3">
                   <span
                     className={`px-3 py-1 text-xs font-semibold rounded-full ${
                       pago.estado === "Completado"
-                        ? "bg-emerald-500/20 text-emerald-400"
+                        ? "bg-emerald-100 text-emerald-700"
                         : pago.estado === "Pendiente"
-                        ? "bg-yellow-500/20 text-yellow-400"
-                        : "bg-red-500/20 text-red-400"
+                        ? "bg-yellow-100 text-yellow-700"
+                        : "bg-red-100 text-red-700"
                     }`}
                   >
                     {pago.estado}

@@ -1,79 +1,92 @@
 "use client";
 
-import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 
-export default function DetallePropiedad() {
-  const { id } = useParams();
+type Propiedad = {
+  id: number;
+  nombre: string;
+  direccion: string;
+  inquilino: string;
+};
 
-  // Datos simulados (después puedes reemplazar con API)
-  const propiedad = {
-    nombre: "Departamento - Av. América",
-    direccion: "Cochabamba, Bolivia",
-    precio: "Bs. 2,500 / mes",
-    descripcion:
-      "Hermoso departamento ubicado en zona estratégica, cerca de supermercados, farmacias y transporte público.",
-    imagen:
-      "https://images.pexels.com/photos/1643383/pexels-photo-1643383.jpeg",
-    habitaciones: 2,
-    banos: 1,
-    superficie: "85 m²",
-    estado: "Alquilado",
+const propiedades: Propiedad[] = [
+  {
+    id: 1,
+    nombre: "Depto - Av. América",
+    direccion: "Av. América 123",
+    inquilino: "Carlos López",
+  },
+  {
+    id: 2,
+    nombre: "Casa - Tiquipaya",
+    direccion: "Calle Aurora 456",
+    inquilino: "María Gómez",
+  },
+  {
+    id: 3,
+    nombre: "Garzonier - Cala Cala",
+    direccion: "Cala Cala 23",
+    inquilino: "Sin inquilino",
+  },
+];
+
+export default function PropietarioPropiedadesPage() {
+  const router = useRouter();
+
+  const irANuevaPropiedad = () => {
+    // RUTA CORRECTA PARA TU PROYECTO
+    router.push("/propietario/propiedades/nueva");
+  };
+
+  const irADetalle = (id: number) => {
+    router.push(`/propietario/propiedades/${id}`);
   };
 
   return (
-    <div className="space-y-6">
-      {/* FOTO PRINCIPAL */}
-      <div className="h-64 w-full rounded-xl overflow-hidden border border-slate-800">
-        <img
-          src={propiedad.imagen}
-          alt={propiedad.nombre}
-          className="w-full h-full object-cover"
-        />
+    <div className="px-6 py-6 space-y-4">
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-slate-900">Mis propiedades</h1>
+
+        <button
+          type="button"
+          onClick={irANuevaPropiedad}
+          className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600"
+        >
+          Nueva propiedad
+        </button>
       </div>
 
-      {/* INFO */}
-      <div className="space-y-2">
-        <h1 className="text-2xl font-bold text-slate-100">
-          {propiedad.nombre}
-        </h1>
-        <p className="text-slate-400">{propiedad.direccion}</p>
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        {propiedades.map((p, idx) => (
+          <div
+            key={p.id}
+            className={`flex flex-col sm:flex-row items-start sm:items-center justify-between px-6 py-4 ${
+              idx !== propiedades.length - 1 ? "border-b border-slate-100" : ""
+            }`}
+          >
+            <div className="space-y-1">
+              <p className="text-sm font-semibold text-slate-900">
+                {p.nombre}
+              </p>
+              <p className="text-sm text-slate-600">{p.direccion}</p>
+              <p className="text-sm text-slate-500">
+                Inquilino:{" "}
+                <span className="font-medium text-slate-700">
+                  {p.inquilino}
+                </span>
+              </p>
+            </div>
+
+            <button
+              type="button"
+              onClick={() => irADetalle(p.id)}
+              className="mt-3 sm:mt-0 text-sm font-semibold text-emerald-600 hover:text-emerald-700 hover:underline"
+            >
+              Ver más
+            </button>
+          </div>
+        ))}
       </div>
-
-      <span
-        className={`px-4 py-1 text-xs font-semibold rounded-full ${
-          propiedad.estado === "Alquilado"
-            ? "bg-red-500/20 text-red-400"
-            : "bg-emerald-500/20 text-emerald-400"
-        }`}
-      >
-        {propiedad.estado}
-      </span>
-
-      {/* DETALLES */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
-          <p className="text-sm text-slate-400">Precio</p>
-          <h2 className="text-xl font-bold text-emerald-400">
-            {propiedad.precio}
-          </h2>
-        </div>
-
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
-          <p className="text-sm text-slate-400">Habitaciones</p>
-          <h2 className="text-xl font-bold text-slate-200">
-            {propiedad.habitaciones}
-          </h2>
-        </div>
-
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-xl">
-          <p className="text-sm text-slate-400">Superficie</p>
-          <h2 className="text-xl font-bold text-slate-200">
-            {propiedad.superficie}
-          </h2>
-        </div>
-      </div>
-
-      <p className="text-slate-300 leading-relaxed">{propiedad.descripcion}</p>
     </div>
   );
 }

@@ -1,157 +1,124 @@
-// app/page.tsx
-import Link from "next/link";
-import Button from "@/components/ui/Button";
+"use client";
+
+import Image from "next/image";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-900 text-slate-50">
-      {/* barra superior simple */}
-      <header className="border-b border-slate-700 bg-slate-900/80 backdrop-blur">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-          <div className="flex items-baseline gap-2 font-semibold tracking-wide">
-            <span className="text-sm text-emerald-400">A360</span>
-            <span>ALQUILA360</span>
-          </div>
+    <main className="min-h-screen bg-[#f5f8fa]">
 
-          <nav className="hidden gap-6 text-sm md:flex">
-            <Link href="#servicios" className="hover:text-emerald-300">
-              Servicios
-            </Link>
-            <Link href="#sobre-nosotros" className="hover:text-emerald-300">
-              Sobre nosotros
-            </Link>
-            <Link href="#contacto" className="hover:text-emerald-300">
-              Contacto
-            </Link>
-          </nav>
-
-          <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost" size="sm">
-                Iniciar sesión
-              </Button>
-            </Link>
-            <Link href="/registro">
-              <Button size="sm">Empieza ahora</Button>
-            </Link>
-          </div>
+      {/* NAVBAR SUPERIOR */}
+      <header className="w-full flex items-center justify-between px-20 py-6 bg-white shadow-sm">
+        <div className="flex items-center gap-3">
+          <Image src="/logo-icon.jpg" alt="Logo Alquila360" width={40} height={40} />
+          <Image src="/logo-text.jpg" alt="Texto Alquila360" width={160} height={40} />
         </div>
+
+        <nav className="flex items-center gap-10 text-[#223344] text-lg">
+          <a href="#inicio" className="hover:text-emerald-500 transition">Inicio</a>
+          <a href="#servicios" className="hover:text-emerald-500 transition">Servicios</a>
+          <a href="#sobre-nosotros" className="hover:text-emerald-500 transition">Sobre nosotros</a>
+          <a href="#contacto" className="hover:text-emerald-500 transition">Contacto</a>
+
+          <a
+            href="/login"
+            className="px-6 py-2 border border-emerald-500 text-emerald-600 rounded-full hover:bg-emerald-500 hover:text-white transition"
+          >
+            Iniciar Sesión
+          </a>
+        </nav>
       </header>
 
-      {/* HERO */}
-      <section className="border-b border-slate-800 bg-gradient-to-b from-slate-900 to-slate-950">
-        <div className="mx-auto grid max-w-6xl gap-10 px-4 py-16 md:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)] md:items-center">
-          <div className="space-y-6">
-            <p className="text-sm font-semibold uppercase tracking-[0.2em] text-emerald-400">
-              Plataforma para alquileres
-            </p>
-            <h1 className="text-3xl font-bold leading-tight sm:text-4xl lg:text-5xl">
-              Tu gestión de alquileres simple y segura.
-            </h1>
-            <p className="max-w-xl text-slate-200">
-              La plataforma integral para propietarios e inquilinos que te ayuda a
-              optimizar tus procesos: contratos, pagos, mantenimiento y reportes en un
-              solo lugar.
-            </p>
+      {/* HERO PRINCIPAL */}
+      <section className="py-24 px-20 grid grid-cols-2 gap-16 items-center">
+        
+        {/* LEFT CONTENT */}
+        <div>
+          <p className="tracking-[6px] text-emerald-600 font-semibold mb-4">
+            PLATAFORMA PARA ALQUILERES
+          </p>
 
-            <div className="flex flex-wrap gap-3">
-              <Link href="/registro">
-                <Button size="lg">Empieza ahora</Button>
-              </Link>
-              <Link href="#servicios">
-                <Button variant="ghost" size="lg">
-                  Descubre más
-                </Button>
-              </Link>
-            </div>
-          </div>
+          <h1 className="text-[56px] font-extrabold leading-tight text-[#0d1b2a]">
+            Tu gestión de alquileres<br />
+            simple y segura.
+          </h1>
 
-          {/* Tarjeta para la futura imagen */}
-          <div className="rounded-2xl border border-slate-700 bg-slate-900/70 p-6 text-sm text-slate-300 shadow-xl">
-            <p className="mb-1 font-semibold text-emerald-300">Vista previa</p>
-            <p>
-              Aquí va la imagen de dos personas usando la tablet.
-              <br />
-              Colócala en <code className="text-xs text-emerald-300">/public</code> y
-              reemplaza este bloque por un{" "}
-              <code className="text-xs text-emerald-300">&lt;Image /&gt;</code>.
-            </p>
+          <p className="mt-6 text-xl text-gray-600 leading-relaxed max-w-xl">
+            La plataforma integral para propietarios e inquilinos que te ayuda a optimizar tus 
+            procesos: contratos, pagos, mantenimiento y reportes en un solo lugar.
+          </p>
+
+          <div className="flex gap-6 mt-10">
+            <a
+              href="/register"
+              className="px-8 py-3 bg-emerald-600 text-white rounded-full text-lg shadow hover:bg-emerald-700 transition"
+            >
+              Empieza ahora
+            </a>
+
+            <a
+              href="#servicios"
+              className="px-8 py-3 bg-white border border-gray-300 rounded-full text-lg hover:bg-gray-100 transition"
+            >
+              Descubre más
+            </a>
           </div>
+        </div>
+
+        {/* RIGHT IMAGE */}
+        <div className="relative w-full h-[400px] bg-white rounded-3xl shadow-xl overflow-hidden">
+          <Image
+            src="/hero-login.svg"
+            alt="Imagen principal Alquila360"
+            fill
+            className="object-cover"
+          />
         </div>
       </section>
 
-      {/* SECCIÓN SERVICIOS */}
-      <section
-        id="servicios"
-        className="border-b border-slate-800 bg-slate-950 py-16"
-      >
-        <div className="mx-auto max-w-6xl px-4">
-          <h2 className="text-2xl font-bold mb-8">Nuestros servicios</h2>
+      {/* TARJETAS DE SERVICIOS */}
+      <section className="px-20 grid grid-cols-4 gap-10 pb-32">
 
-          <div className="grid gap-6 md:grid-cols-3">
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-              <h3 className="font-semibold mb-2">
-                Gestión completa de propiedades
-              </h3>
-              <p className="text-sm text-slate-300">
-                Controla contratos, pagos y mantenimiento desde un solo lugar.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-              <h3 className="font-semibold mb-2">Pagos rápidos y seguros</h3>
-              <p className="text-sm text-slate-300">
-                Acepta transferencias, QR o efectivo con recibos automáticos.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-              <h3 className="font-semibold mb-2">Reportes claros en tiempo real</h3>
-              <p className="text-sm text-slate-300">
-                Visualiza ingresos, morosidad y ocupación al instante.
-              </p>
-            </div>
-
-            <div className="rounded-xl border border-slate-800 bg-slate-900/70 p-5">
-              <h3 className="font-semibold mb-2">Seguridad y confianza</h3>
-              <p className="text-sm text-slate-300">
-                Tu información y pagos están protegidos con cifrado.
-              </p>
-            </div>
-          </div>
+        {/* Card 1 */}
+        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
+          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+            Gestión completa de propiedades
+          </h3>
+          <p className="text-gray-600">
+            Controla contratos, pagos y mantenimiento desde un solo lugar.
+          </p>
         </div>
+
+        {/* Card 2 */}
+        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
+          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+            Pagos rápidos y seguros
+          </h3>
+          <p className="text-gray-600">
+            Acepta transferencias, QR o efectivo con recibos automáticos.
+          </p>
+        </div>
+
+        {/* Card 3 */}
+        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
+          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+            Reportes claros en tiempo real
+          </h3>
+          <p className="text-gray-600">
+            Visualiza ingresos, morosidad y ocupación al instante.
+          </p>
+        </div>
+
+        {/* Card 4 */}
+        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
+          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+            Información segura y centralizada
+          </h3>
+          <p className="text-gray-600">
+            Tus datos están protegidos y siempre disponibles cuando los necesitas.
+          </p>
+        </div>
+
       </section>
-
-      {/* SOBRE NOSOTROS */}
-      <section
-        id="sobre-nosotros"
-        className="border-b border-slate-800 bg-slate-950 py-16"
-      >
-        <div className="mx-auto max-w-6xl px-4 space-y-4">
-          <h2 className="text-2xl font-bold">Sobre nosotros</h2>
-          <p className="max-w-3xl text-sm text-slate-300">
-            Alquila360 nace para digitalizar el proceso de alquiler de propiedades,
-            conectando propietarios, inquilinos y técnicos en una sola plataforma.
-            Nuestro objetivo es simplificar la administración y brindar confianza a
-            ambas partes con una herramienta accesible y profesional.
-          </p>
-        </div>
-      </section>
-
-      {/* FOOTER */}
-      <footer
-        id="contacto"
-        className="border-t border-slate-800 bg-slate-950 py-6 text-xs text-slate-400"
-      >
-        <div className="mx-auto flex max-w-6xl flex-col gap-2 px-4 md:flex-row md:items-center md:justify-between">
-          <p>
-            © 2025 Alquila360 — Gestión integral de alquileres
-          </p>
-          <p>
-            Contáctanos +591 76782341 · 4454323
-          </p>
-        </div>
-      </footer>
     </main>
   );
 }
