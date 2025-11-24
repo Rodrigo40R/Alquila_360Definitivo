@@ -6,18 +6,20 @@ interface RegisterUserInput {
   nombre: string;
   correo: string;
   password: string;
-  tipo_usuario: string; // lo enviamos ya en mayúsculas desde el front
+  // Lo enviamos ya en mayúsculas desde el front si tu backend lo requiere
+  tipo_usuario: string;
 }
 
 /**
  * Registro de usuario contra el backend NestJS.
+ * Ajusta la URL/base si es necesario.
  */
 export async function registerUser(data: RegisterUserInput) {
   const baseUrl =
-    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001"; // ajusta el puerto si hace falta
+    process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
   const res = await fetch(`${baseUrl}/users`, {
-    // si usas prefix 'api', sería `${baseUrl}/api/users`
+    // si usas prefijo 'api', sería `${baseUrl}/api/users`
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -46,8 +48,8 @@ export async function registerUser(data: RegisterUserInput) {
 }
 
 /**
- * Guarda en localStorage una “sesión” sencilla con rol y correo.
- * La usas para controlar accesos en el front.
+ * Guarda una “sesión” sencilla en localStorage con rol y correo.
+ * La usas sólo en el front.
  */
 export function loginUser(rol: Rol, email: string) {
   if (typeof window === "undefined") return;

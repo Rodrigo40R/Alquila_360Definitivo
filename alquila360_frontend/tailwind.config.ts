@@ -13,7 +13,7 @@ const config: Config = {
       },
     },
   },
-  plugins: [], // SIN @tailwindcss/forms
+  plugins: [],
 };
 
 export default config;
