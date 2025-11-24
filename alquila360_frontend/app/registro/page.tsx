@@ -4,22 +4,54 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Button from "@/components/ui/Button";
+import { registerUser, Rol } from "@/lib/auth";
 
-const ROLES = [
+const ROLES: { id: Rol; label: string }[] = [
   { id: "propietario", label: "Propietario" },
   { id: "inquilino", label: "Inquilino" },
   { id: "tecnico", label: "Técnico" },
 ];
 
 export default function RegistroPage() {
-  const [rol, setRol] = useState<string>("propietario");
   const router = useRouter();
 
-  function handleSubmit(e: FormEvent) {
-    e.preventDefault();
-    // Registro simulado → te mando al login
-    router.push("/login");
+  // 🔹 Estados para los campos del formulario
+  const [nombreCompleto, setNombreCompleto] = useState("");
+  const [correo, setCorreo] = useState("");
+  const [contrasenia, setContrasenia] = useState("");
+  const [confirmarContrasenia, setConfirmarContrasenia] = useState("");
+  const [rol, setRol] = useState<Rol>("propietario");
+
+  // 🔹 Estados para control de UI
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  async function handleSubmit(e: FormEvent) {
+  e.preventDefault();
+  setError(null);
+
+  if (contrasenia !== confirmarContrasenia) {
+    setError("Las contraseñas no coinciden");
+    return;
   }
+
+  setLoading(true);
+
+  try {
+    await registerUser({
+      nombre: nombreCompleto,          // 👈 ahora sí mandamos "nombre"
+      correo,
+      password: contrasenia,           // 👈 mapeamos "contrasenia" → "password"
+      tipo_usuario: rol.toUpperCase(), // 👈 "propietario" → "PROPIETARIO"
+    });
+
+    router.push("/login");
+  } catch (err: any) {
+    setError(err.message ?? "Error al crear la cuenta");
+  } finally {
+    setLoading(false);
+  }
+}
 
   return (
     <main className="min-h-screen bg-white text-slate-900 flex items-center justify-center px-4">
@@ -43,7 +75,13 @@ export default function RegistroPage() {
             <input
               type="text"
               required
+<<<<<<< HEAD
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+=======
+              value={nombreCompleto}
+              onChange={(e) => setNombreCompleto(e.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+>>>>>>> master
               placeholder="Tu nombre"
             />
           </div>
@@ -55,7 +93,13 @@ export default function RegistroPage() {
             <input
               type="email"
               required
+<<<<<<< HEAD
               className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+=======
+              value={correo}
+              onChange={(e) => setCorreo(e.target.value)}
+              className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+>>>>>>> master
               placeholder="tucorreo@ejemplo.com"
             />
           </div>
@@ -68,7 +112,13 @@ export default function RegistroPage() {
               <input
                 type="password"
                 required
+<<<<<<< HEAD
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+=======
+                value={contrasenia}
+                onChange={(e) => setContrasenia(e.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+>>>>>>> master
                 placeholder="••••••••"
               />
             </div>
@@ -79,7 +129,13 @@ export default function RegistroPage() {
               <input
                 type="password"
                 required
+<<<<<<< HEAD
                 className="w-full rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-900 placeholder:text-slate-900 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+=======
+                value={confirmarContrasenia}
+                onChange={(e) => setConfirmarContrasenia(e.target.value)}
+                className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
+>>>>>>> master
                 placeholder="••••••••"
               />
             </div>
@@ -107,8 +163,19 @@ export default function RegistroPage() {
             </div>
           </div>
 
-          <Button type="submit" size="md" className="w-full mt-2">
-            Crear cuenta
+          {error && (
+            <p className="text-xs text-red-400 bg-red-950/40 border border-red-800 rounded-xl px-3 py-2">
+              {error}
+            </p>
+          )}
+
+          <Button
+            type="submit"
+            size="md"
+            className="w-full mt-2"
+            disabled={loading}
+          >
+            {loading ? "Creando cuenta..." : "Crear cuenta"}
           </Button>
         </form>
 

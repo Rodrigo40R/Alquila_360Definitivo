@@ -1,8 +1,8 @@
 import axios from "axios";
 
 export const instance = axios.create({
-  baseURL: 'http://localhost:3001',
+  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001",
   headers: {
-    mode: 'cors'
-  }
+    "Content-Type": "application/json",
+  },
 });
