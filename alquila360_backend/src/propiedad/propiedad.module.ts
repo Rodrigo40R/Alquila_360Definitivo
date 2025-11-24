@@ -1,20 +1,29 @@
+// src/propiedad/propiedad.module.ts
 import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+
 import { PropiedadService } from './propiedad.service';
 import { PropiedadController } from './propiedad.controller';
-import { InMemoryPropiedadRepository } from './adapters/propiedad.repo.memory';
-import { PropiedadRepositoryPort } from './ports/propiedad.repo';
+
+import { Propiedad } from '../entity/propiedad.entity';
+import { PROPIEDAD_REPOSITORY } from './ports/propiedad.repo';
+import { PropiedadTypeOrmRepository } from './adapters/propiedad.repo.typeorm';
+
 import { UserModule } from '../user/user.module';
 
 @Module({
-  imports: [UserModule],
+  imports: [
+    TypeOrmModule.forFeature([Propiedad]),
+    UserModule,
+  ],
   controllers: [PropiedadController],
   providers: [
     PropiedadService,
     {
-      provide: PropiedadRepositoryPort,
-      useClass: InMemoryPropiedadRepository,
+      provide: PROPIEDAD_REPOSITORY,
+      useClass: PropiedadTypeOrmRepository, // 👈 ya no usamos InMemoryPropiedadRepository
     },
   ],
-  exports: [PropiedadService, PropiedadRepositoryPort],
+  exports: [PropiedadService],
 })
 export class PropiedadModule {}

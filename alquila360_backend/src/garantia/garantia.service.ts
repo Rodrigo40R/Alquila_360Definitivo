@@ -1,12 +1,18 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { GarantiaRepositoryPort } from './ports/garantia.repo';
+// src/garantia/garantia.service.ts
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateGarantiaDto } from './dto/create-garantia.dto';
 import { UpdateGarantiaDto } from './dto/update-garantia.dto';
 import { Garantia } from '../entity/garantia.entity';
 
+import { GARANTIA_REPOSITORY } from './ports/garantia.repo';
+import type { GarantiaRepositoryPort } from './ports/garantia.repo';
+
 @Injectable()
 export class GarantiaService {
-  constructor(private readonly garantiaRepo: GarantiaRepositoryPort) {}
+  constructor(
+    @Inject(GARANTIA_REPOSITORY)
+    private readonly garantiaRepo: GarantiaRepositoryPort,
+  ) {}
 
   async create(dto: CreateGarantiaDto): Promise<Garantia> {
     const garantia = new Garantia();

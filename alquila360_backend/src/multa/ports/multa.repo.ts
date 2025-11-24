@@ -1,10 +1,15 @@
+// src/multa/ports/multa.repo.ts
 import { Multa } from '../../entity/multa.entity';
 
-export abstract class MultaRepositoryPort {
-  abstract create(multa: Multa): Promise<Multa>;
-  abstract findAll(): Promise<Multa[]>;
-  abstract findOne(id: number): Promise<Multa | null>;
-  abstract update(id: number, data: Partial<Multa>): Promise<Multa>;
-  abstract remove(id: number): Promise<void>;
-  abstract findByContrato(idContrato: number): Promise<Multa[]>;
+// 🔹 Token para inyección de dependencias en Nest
+export const MULTA_REPOSITORY = 'MULTA_REPOSITORY';
+
+// 🔹 Puerto que debe implementar cualquier repositorio de Multa
+export interface MultaRepositoryPort {
+  create(multa: Multa): Promise<Multa>;
+  findAll(): Promise<Multa[]>;
+  findOne(id: number): Promise<Multa | null>;
+  update(id: number, data: Partial<Multa>): Promise<Multa>;
+  remove(id: number): Promise<void>;
+  findByContrato(idContrato: number): Promise<Multa[]>;
 }

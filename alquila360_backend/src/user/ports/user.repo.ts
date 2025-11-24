@@ -1,10 +1,17 @@
+// src/user/ports/user.repo.ts
 import { User } from '../../entity/user.entity';
+import { CreateUserDto } from '../dto/create-user.dto';
+import { UpdateUserDto } from '../dto/update-user.dto';
 
-export abstract class UserRepositoryPort {
-  abstract create(data: Partial<User>): Promise<User>;
-  abstract findAll(): Promise<User[]>;
-  abstract findOne(id: number): Promise<User | null>;
-  abstract update(id: number, data: Partial<User>): Promise<User>;
-  abstract remove(id: number): Promise<void>;
-  abstract findByCorreo(correo: string): Promise<User | null>;
+// Token de inyección
+export const USER_REPOSITORY = 'USER_REPOSITORY';
+
+// Contrato que implementan los repositorios de User
+export interface UserRepositoryPort {
+  create(data: CreateUserDto): Promise<User>;
+  findAll(): Promise<User[]>;
+  findOne(id: number): Promise<User | null>;
+  update(id: number, data: UpdateUserDto): Promise<User>;
+  remove(id: number): Promise<void>;
+  findByCorreo(correo: string): Promise<User | null>;
 }

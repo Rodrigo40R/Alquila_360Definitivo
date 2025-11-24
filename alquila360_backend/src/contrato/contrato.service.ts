@@ -1,13 +1,21 @@
+// src/contrato/contrato.service.ts
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { ContratoRepositoryPort } from './ports/contrato.repo';
+
 import { CreateContratoDto } from './dto/create-contrato.dto';
 import { UpdateContratoDto } from './dto/update-contrato.dto';
 import { Contrato } from '../entity/contrato.entity';
-import { UserRepositoryPort } from '../user/ports/user.repo';
+
+import { CONTRATO_REPOSITORY } from './ports/contrato.repo';
+import type { ContratoRepositoryPort } from './ports/contrato.repo';
+
+import { USER_REPOSITORY } from '../user/ports/user.repo';
+import type { UserRepositoryPort } from '../user/ports/user.repo';
+
 import { Propietario } from '../entity/propietario.entity';
 import { Inquilino } from '../entity/inquilino.entity';
 import { Garantia } from '../entity/garantia.entity';
@@ -15,7 +23,10 @@ import { Garantia } from '../entity/garantia.entity';
 @Injectable()
 export class ContratoService {
   constructor(
+    @Inject(CONTRATO_REPOSITORY)
     private readonly contratoRepo: ContratoRepositoryPort,
+
+    @Inject(USER_REPOSITORY)
     private readonly userRepo: UserRepositoryPort,
   ) {}
 
@@ -58,7 +69,6 @@ export class ContratoService {
 
     if (dto.id_garantia !== undefined) {
       const garantia = new Garantia();
-      // asumimos que la PK es id_garantia
       (garantia as any).id_garantia = dto.id_garantia;
       contrato.garantia = garantia;
     } else {
@@ -80,11 +90,9 @@ export class ContratoService {
     return contrato;
   }
 
-  async update(
-    id: number,
-    dto: UpdateContratoDto,
-  ): Promise<Contrato> {
-    const contrato = await this.findOne(id);
+  async update(id: number, dto: UpdateContratoDto): Promise<Contrato> {
+    // Validar que exista
+    await this.findOne(id);
 
     const partial: Partial<Contrato> = {};
 
@@ -100,7 +108,6 @@ export class ContratoService {
     if (dto.estado !== undefined) {
       partial.estado = dto.estado;
     }
-
     if (dto.id_garantia !== undefined) {
       const garantia = new Garantia();
       (garantia as any).id_garantia = dto.id_garantia;

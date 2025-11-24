@@ -1,22 +1,25 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+// src/user/user.service.ts
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+
+// 👇 USER_REPOSITORY es un valor (token de Nest), import normal
+import { USER_REPOSITORY } from './ports/user.repo';
+
+// 👇 UserRepositoryPort es SOLO un tipo, lo importamos con 'import type'
+import type { UserRepositoryPort } from './ports/user.repo';
+
 import { User } from '../entity/user.entity';
-import { UserRepositoryPort } from './ports/user.repo';
 
 @Injectable()
 export class UserService {
-  constructor(private readonly userRepo: UserRepositoryPort) {}
+  constructor(
+    @Inject(USER_REPOSITORY)
+    private readonly userRepo: UserRepositoryPort,
+  ) {}
 
-  async create(dto: CreateUserDto): Promise<User> {
-    const user = new User();
-    user.nombre = dto.nombre;
-    user.correo = dto.correo;
-    user.password = dto.password;
-    user.tipo_usuario = dto.tipo_usuario;
-    user.estado_cuenta = dto.estado_cuenta ?? 'ACTIVA';
-
-    return this.userRepo.create(user);
+  async create(createUserDto: CreateUserDto): Promise<User> {
+    return this.userRepo.create(createUserDto);
   }
 
   async findAll(): Promise<User[]> {
@@ -31,21 +34,23 @@ export class UserService {
     return user;
   }
 
-  async update(id: number, dto: UpdateUserDto): Promise<User> {
-    await this.findOne(id); // valida que existe
+  async findByCorreo(correo: string): Promise<User | null> {
+    return this.userRepo.findByCorreo(correo);
+  }
 
-    const partial: Partial<User> = {};
-    if (dto.nombre !== undefined) partial.nombre = dto.nombre;
-    if (dto.correo !== undefined) partial.correo = dto.correo;
-    if (dto.password !== undefined) partial.password = dto.password;
-    if (dto.tipo_usuario !== undefined) partial.tipo_usuario = dto.tipo_usuario;
-    if (dto.estado_cuenta !== undefined) partial.estado_cuenta = dto.estado_cuenta;
-
-    return this.userRepo.update(id, partial);
+  async update(id: number, updateUserDto: UpdateUserDto): Promise<User> {
+    const existing = await this.userRepo.findOne(id);
+    if (!existing) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    }
+    return this.userRepo.update(id, updateUserDto);
   }
 
   async remove(id: number): Promise<void> {
-    await this.findOne(id);
+    const existing = await this.userRepo.findOne(id);
+    if (!existing) {
+      throw new NotFoundException(`Usuario con id ${id} no encontrado`);
+    }
     return this.userRepo.remove(id);
   }
 }

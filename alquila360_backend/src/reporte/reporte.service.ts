@@ -1,15 +1,30 @@
-import { Injectable, NotFoundException, BadRequestException } from '@nestjs/common';
-import { ReporteRepositoryPort } from './ports/reporte.repo';
+// src/reporte/reporte.service.ts
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
+
 import { CreateReporteDto } from './dto/create-reporte.dto';
 import { UpdateReporteDto } from './dto/update-reporte.dto';
 import { Reporte } from '../entity/reporte.entity';
-import { UserRepositoryPort } from '../user/ports/user.repo';
+
+import { REPORTE_REPOSITORY } from './ports/reporte.repo';
+import type { ReporteRepositoryPort } from './ports/reporte.repo';
+
+import { USER_REPOSITORY } from '../user/ports/user.repo';
+import type { UserRepositoryPort } from '../user/ports/user.repo';
+
 import { Administrador } from '../entity/administrador.entity';
 
 @Injectable()
 export class ReporteService {
   constructor(
+    @Inject(REPORTE_REPOSITORY)
     private readonly reporteRepo: ReporteRepositoryPort,
+
+    @Inject(USER_REPOSITORY)
     private readonly userRepo: UserRepositoryPort,
   ) {}
 
@@ -52,6 +67,9 @@ export class ReporteService {
     id: number,
     dto: UpdateReporteDto,
   ): Promise<Reporte> {
+    // valida existencia
+    await this.findOne(id);
+
     const partial: Partial<Reporte> = {};
     if (dto.tipo !== undefined) partial.tipo = dto.tipo;
     if (dto.fecha !== undefined) partial.fecha = new Date(dto.fecha);

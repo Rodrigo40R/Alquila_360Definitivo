@@ -1,25 +1,29 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
-import { MultaRepositoryPort } from './ports/multa.repo';
+// src/multa/multa.service.ts
+import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+
 import { CreateMultaDto } from './dto/create-multa.dto';
 import { UpdateMultaDto } from './dto/update-multa.dto';
 import { Multa } from '../entity/multa.entity';
-import { ContratoRepositoryPort } from '../contrato/ports/contrato.repo';
 import { Cuota } from '../entity/cuota.entity';
+
+import { MULTA_REPOSITORY } from './ports/multa.repo';
+import type { MultaRepositoryPort } from './ports/multa.repo';
+
+import { ContratoService } from '../contrato/contrato.service';
 
 @Injectable()
 export class MultaService {
   constructor(
+    @Inject(MULTA_REPOSITORY)
     private readonly multaRepo: MultaRepositoryPort,
-    private readonly contratoRepo: ContratoRepositoryPort,
+
+    // ✅ usamos el servicio de contrato, no el repo
+    private readonly contratoService: ContratoService,
   ) {}
 
   async create(dto: CreateMultaDto): Promise<Multa> {
-    const contrato = await this.contratoRepo.findOne(dto.id_contrato);
-    if (!contrato) {
-      throw new NotFoundException(
-        `Contrato ${dto.id_contrato} no encontrado`,
-      );
-    }
+    // ContratoService.findOne ya lanza NotFoundException si no existe
+    const contrato = await this.contratoService.findOne(dto.id_contrato);
 
     const multa = new Multa();
     multa.tipo = dto.tipo;
@@ -30,13 +34,14 @@ export class MultaService {
     multa.contrato = contrato;
 
     if (dto.id_cuota !== undefined) {
-      const cuota = new Cuota();      
+      const cuota = new Cuota();
       (cuota as any).id_cuota = dto.id_cuota;
       multa.cuota = cuota;
     } else {
       multa.cuota = null;
     }
 
+    // método de dominio en la entidad
     multa.registrarMulta();
 
     return this.multaRepo.create(multa);
@@ -55,25 +60,28 @@ export class MultaService {
   }
 
   async update(id: number, dto: UpdateMultaDto): Promise<Multa> {
-  const partial: Partial<Multa> = {};
+    // opcional: validar que exista
+    await this.findOne(id);
 
-  if (dto.tipo !== undefined) partial.tipo = dto.tipo;
-  if (dto.monto !== undefined) partial.monto = dto.monto;
-  if (dto.descripcion !== undefined) partial.descripcion = dto.descripcion;
-  if (dto.estado !== undefined) partial.estado = dto.estado;
+    const partial: Partial<Multa> = {};
 
-  if (dto.fecha !== undefined) {
-    partial.fecha = new Date(dto.fecha);
+    if (dto.tipo !== undefined) partial.tipo = dto.tipo;
+    if (dto.monto !== undefined) partial.monto = dto.monto;
+    if (dto.descripcion !== undefined) partial.descripcion = dto.descripcion;
+    if (dto.estado !== undefined) partial.estado = dto.estado;
+
+    if (dto.fecha !== undefined) {
+      partial.fecha = new Date(dto.fecha);
+    }
+
+    if (dto.id_cuota !== undefined) {
+      const cuota = new Cuota();
+      (cuota as any).id_cuota = dto.id_cuota;
+      partial.cuota = cuota;
+    }
+
+    return this.multaRepo.update(id, partial);
   }
-
-  if (dto.id_cuota !== undefined) {
-    const cuota = new Cuota();
-    (cuota as any).id_cuota = dto.id_cuota;
-    partial.cuota = cuota;
-  }
-
-  return this.multaRepo.update(id, partial);
-}
 
   async remove(id: number): Promise<void> {
     await this.findOne(id);
