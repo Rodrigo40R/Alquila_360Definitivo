@@ -40,7 +40,7 @@ export const AppDataSource = new DataSource({
     Cuota,
     Pago,
   ],
-  synchronize: true,
+  synchronize: false,
   logging: true,
 });
 
