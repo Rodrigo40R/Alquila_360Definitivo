@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -15,7 +16,6 @@ export default function RegisterPage() {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Validaciones mínimas
     if (!nombre || !correo || !password || !confirmar) {
       alert("Completa todos los campos.");
       return;
@@ -31,39 +31,43 @@ export default function RegisterPage() {
       return;
     }
 
-    // Simulación de registro exitoso
     alert("Cuenta creada con éxito");
-
-    // 🔥 REDIRECCIÓN INMEDIATA AL LOGIN
     router.push("/login");
   };
 
   return (
-    <div className="flex justify-center items-center bg-[#0E1E25] min-h-screen p-6">
-      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl px-10 py-12">
+    <div className="min-h-screen bg-[#0E1E25] flex items-center justify-center px-4 py-8">
+      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl px-10 py-12">
         
-        {/* LOGO */}
-        <div className="flex items-center justify-center mb-4">
-          <div className="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
-            A
-          </div>
-          <span className="ml-3 text-2xl font-bold text-gray-800">ALQUILA360</span>
+        {/* LOGO + TEXTO CENTRADOS */}
+        <div className="flex flex-col items-center mb-6">
+          <Image
+            src="/logo-icon.png"
+            alt="Logo Alquila360"
+            width={48}
+            height={48}
+          />
+          <Image
+            src="/logo-text.png"
+            alt="Texto Alquila360"
+            width={170}
+            height={40}
+            className="mt-2"
+          />
         </div>
 
-        <h2 className="text-center text-3xl font-bold text-gray-800">
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center">
           Crea tu cuenta ALQUILA360
         </h2>
-        <p className="text-center text-gray-500 mb-8">
+        <p className="text-center text-gray-500 mt-2">
           Únete a la plataforma y simplifica tu gestión de alquileres.
         </p>
 
-        {/* FORMULARIO */}
-        <form onSubmit={handleRegister} className="space-y-4">
-
+        <form onSubmit={handleRegister} className="space-y-4 mt-6">
           <input
             type="text"
             placeholder="Nombre Completo"
-            className="w-full p-3 rounded-lg border"
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             value={nombre}
             onChange={(e) => setNombre(e.target.value)}
           />
@@ -71,7 +75,7 @@ export default function RegisterPage() {
           <input
             type="email"
             placeholder="Correo Electrónico"
-            className="w-full p-3 rounded-lg border"
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             value={correo}
             onChange={(e) => setCorreo(e.target.value)}
           />
@@ -79,7 +83,7 @@ export default function RegisterPage() {
           <input
             type="password"
             placeholder="Contraseña"
-            className="w-full p-3 rounded-lg border"
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
@@ -87,23 +91,31 @@ export default function RegisterPage() {
           <input
             type="password"
             placeholder="Confirmar Contraseña"
-            className="w-full p-3 rounded-lg border"
+            className="w-full p-3 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-emerald-500"
             value={confirmar}
             onChange={(e) => setConfirmar(e.target.value)}
           />
 
-          {/* TÉRMINOS */}
-          <label className="flex items-center text-sm text-gray-600 mt-2">
+          <label className="flex items-start gap-2 text-sm text-gray-600 mt-2">
             <input
               type="checkbox"
-              className="mr-2"
+              className="mt-1"
               checked={acepto}
               onChange={(e) => setAcepto(e.target.checked)}
             />
-            He leído y acepto los <b className="text-emerald-600 ml-1">Términos y Condiciones</b> y la <b className="text-emerald-600 ml-1">Política de Privacidad</b>.
+            <span>
+              He leído y acepto los{" "}
+              <span className="text-emerald-600 font-semibold">
+                Términos y Condiciones
+              </span>{" "}
+              y la{" "}
+              <span className="text-emerald-600 font-semibold">
+                Política de Privacidad
+              </span>
+              .
+            </span>
           </label>
 
-          {/* BOTÓN */}
           <button
             type="submit"
             className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-lg font-semibold transition"
@@ -112,7 +124,7 @@ export default function RegisterPage() {
           </button>
         </form>
 
-        <p className="text-center text-gray-600 mt-4">
+        <p className="text-center text-gray-600 mt-6 text-sm">
           ¿Ya tienes una cuenta?{" "}
           <a href="/login" className="text-emerald-600 font-semibold">
             INICIAR SESIÓN
@@ -122,3 +134,4 @@ export default function RegisterPage() {
     </div>
   );
 }
+

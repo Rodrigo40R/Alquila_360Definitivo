@@ -5,59 +5,81 @@ import Image from "next/image";
 export default function HomePage() {
   return (
     <main className="min-h-screen bg-[#f5f8fa]">
-
       {/* NAVBAR SUPERIOR */}
-      <header className="w-full flex items-center justify-between px-20 py-6 bg-white shadow-sm">
-        <div className="flex items-center gap-3">
-          <Image src="/logo-icon.jpg" alt="Logo Alquila360" width={40} height={40} />
-          <Image src="/logo-text.jpg" alt="Texto Alquila360" width={160} height={40} />
+      <header className="w-full bg-white shadow-sm">
+        <div className="flex h-20 items-center justify-between px-20">
+          {/* LOGO COMPLETO */}
+          <div className="flex items-center">
+            <Image
+              src="/logo-full.png" // 👈 logo completo
+              alt="Alquila360"
+              width={220}
+              height={50}
+              className="object-contain"
+            />
+          </div>
+
+          <nav className="flex items-center gap-10 text-lg text-[#223344]">
+            <a href="#inicio" className="transition hover:text-emerald-500">
+              Inicio
+            </a>
+            <a href="#servicios" className="transition hover:text-emerald-500">
+              Servicios
+            </a>
+            <a
+              href="#sobre-nosotros"
+              className="transition hover:text-emerald-500"
+            >
+              Sobre nosotros
+            </a>
+            <a href="#contacto" className="transition hover:text-emerald-500">
+              Contacto
+            </a>
+
+            <a
+              href="/login"
+              className="rounded-full border border-emerald-500 px-6 py-2 text-emerald-600 transition hover:bg-emerald-500 hover:text-white"
+            >
+              Iniciar Sesión
+            </a>
+          </nav>
         </div>
-
-        <nav className="flex items-center gap-10 text-[#223344] text-lg">
-          <a href="#inicio" className="hover:text-emerald-500 transition">Inicio</a>
-          <a href="#servicios" className="hover:text-emerald-500 transition">Servicios</a>
-          <a href="#sobre-nosotros" className="hover:text-emerald-500 transition">Sobre nosotros</a>
-          <a href="#contacto" className="hover:text-emerald-500 transition">Contacto</a>
-
-          <a
-            href="/login"
-            className="px-6 py-2 border border-emerald-500 text-emerald-600 rounded-full hover:bg-emerald-500 hover:text-white transition"
-          >
-            Iniciar Sesión
-          </a>
-        </nav>
       </header>
 
       {/* HERO PRINCIPAL */}
-      <section className="py-24 px-20 grid grid-cols-2 gap-16 items-center">
-        
+      <section
+        id="inicio"
+        className="grid grid-cols-2 items-center gap-16 px-20 py-24"
+      >
         {/* LEFT CONTENT */}
         <div>
-          <p className="tracking-[6px] text-emerald-600 font-semibold mb-4">
+          <p className="mb-4 font-semibold tracking-[6px] text-emerald-600">
             PLATAFORMA PARA ALQUILERES
           </p>
 
           <h1 className="text-[56px] font-extrabold leading-tight text-[#0d1b2a]">
-            Tu gestión de alquileres<br />
+            Tu gestión de alquileres
+            <br />
             simple y segura.
           </h1>
 
-          <p className="mt-6 text-xl text-gray-600 leading-relaxed max-w-xl">
-            La plataforma integral para propietarios e inquilinos que te ayuda a optimizar tus 
-            procesos: contratos, pagos, mantenimiento y reportes en un solo lugar.
+          <p className="mt-6 max-w-xl text-xl leading-relaxed text-gray-600">
+            La plataforma integral para propietarios e inquilinos que te ayuda a
+            optimizar tus procesos: contratos, pagos, mantenimiento y reportes
+            en un solo lugar.
           </p>
 
-          <div className="flex gap-6 mt-10">
+          <div className="mt-10 flex gap-6">
             <a
               href="/register"
-              className="px-8 py-3 bg-emerald-600 text-white rounded-full text-lg shadow hover:bg-emerald-700 transition"
+              className="rounded-full bg-emerald-600 px-8 py-3 text-lg text-white shadow hover:bg-emerald-700 transition"
             >
               Empieza ahora
             </a>
 
             <a
               href="#servicios"
-              className="px-8 py-3 bg-white border border-gray-300 rounded-full text-lg hover:bg-gray-100 transition"
+              className="rounded-full border border-gray-300 bg-white px-8 py-3 text-lg hover:bg-gray-100 transition"
             >
               Descubre más
             </a>
@@ -65,9 +87,9 @@ export default function HomePage() {
         </div>
 
         {/* RIGHT IMAGE */}
-        <div className="relative w-full h-[400px] bg-white rounded-3xl shadow-xl overflow-hidden">
+        <div className="relative h-[400px] w-full overflow-hidden rounded-3xl bg-white shadow-xl">
           <Image
-            src="/hero-login.svg"
+            src="/hero-login.png"
             alt="Imagen principal Alquila360"
             fill
             className="object-cover"
@@ -76,11 +98,13 @@ export default function HomePage() {
       </section>
 
       {/* TARJETAS DE SERVICIOS */}
-      <section className="px-20 grid grid-cols-4 gap-10 pb-32">
-
+      <section
+        id="servicios"
+        className="grid grid-cols-4 gap-10 px-20 pb-32"
+      >
         {/* Card 1 */}
-        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
-          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+        <div className="rounded-2xl bg-white p-8 shadow transition hover:shadow-lg">
+          <h3 className="mb-2 text-xl font-bold text-[#0d1b2a]">
             Gestión completa de propiedades
           </h3>
           <p className="text-gray-600">
@@ -89,8 +113,8 @@ export default function HomePage() {
         </div>
 
         {/* Card 2 */}
-        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
-          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+        <div className="rounded-2xl bg-white p-8 shadow transition hover:shadow-lg">
+          <h3 className="mb-2 text-xl font-bold text-[#0d1b2a]">
             Pagos rápidos y seguros
           </h3>
           <p className="text-gray-600">
@@ -99,8 +123,8 @@ export default function HomePage() {
         </div>
 
         {/* Card 3 */}
-        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
-          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+        <div className="rounded-2xl bg-white p-8 shadow transition hover:shadow-lg">
+          <h3 className="mb-2 text-xl font-bold text-[#0d1b2a]">
             Reportes claros en tiempo real
           </h3>
           <p className="text-gray-600">
@@ -109,15 +133,15 @@ export default function HomePage() {
         </div>
 
         {/* Card 4 */}
-        <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
-          <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
+        <div className="rounded-2xl bg-white p-8 shadow transition hover:shadow-lg">
+          <h3 className="mb-2 text-xl font-bold text-[#0d1b2a]">
             Información segura y centralizada
           </h3>
           <p className="text-gray-600">
-            Tus datos están protegidos y siempre disponibles cuando los necesitas.
+            Tus datos están protegidos y siempre disponibles cuando los
+            necesitas.
           </p>
         </div>
-
       </section>
     </main>
   );
