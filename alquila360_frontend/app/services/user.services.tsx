@@ -16,10 +16,16 @@ export const getUsers = async () => {
   return response.data;
 };
 
-export const createUser = async (user: Partial<User>) => {
+export const createUser = async (user: {
+  nombre: string;
+  correo: string;
+  password: string;
+  tipo_usuario: string;
+}) => {
   const response = await instance.post(BASE_PATH, user);
   return response.data;
 };
+
 
 export const getUserById = async (id: number) => {
   const response = await instance.get(`${BASE_PATH}/${id}`);
