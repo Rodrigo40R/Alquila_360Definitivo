@@ -73,9 +73,10 @@ export default function AdminContratosPage() {
       )}
       {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {/* RESUMEN */}
+      {/* CONTENIDO */}
       {!loading && !error && (
         <>
+          {/* RESUMEN */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
               <p className="text-xs font-medium text-slate-500">Activos</p>
@@ -113,6 +114,7 @@ export default function AdminContratosPage() {
                 <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
                   <tr>
                     <th className="px-6 py-3 text-left">N°</th>
+                    <th className="px-6 py-3 text-left">Propietario</th>
                     <th className="px-6 py-3 text-left">Inquilino</th>
                     <th className="px-6 py-3 text-left">Monto mensual</th>
                     <th className="px-6 py-3 text-left">Inicio</th>
@@ -124,6 +126,9 @@ export default function AdminContratosPage() {
                   {contratos.map((c) => (
                     <tr key={c.id} className="hover:bg-slate-50/80">
                       <td className="px-6 py-4 text-slate-500">{c.numero}</td>
+                      <td className="px-6 py-4 text-slate-900">
+                        {c.propietario}
+                      </td>
                       <td className="px-6 py-4 text-slate-900">
                         {c.inquilino}
                       </td>
@@ -148,7 +153,7 @@ export default function AdminContratosPage() {
                   {contratos.length === 0 && (
                     <tr>
                       <td
-                        colSpan={6}
+                        colSpan={7}
                         className="px-6 py-6 text-center text-sm text-slate-400"
                       >
                         No hay contratos registrados todavía.
