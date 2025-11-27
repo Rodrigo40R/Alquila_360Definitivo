@@ -9,8 +9,8 @@ export default function HomePage() {
       {/* NAVBAR SUPERIOR */}
       <header className="w-full flex items-center justify-between px-20 py-6 bg-white shadow-sm">
         <div className="flex items-center gap-3">
-          <Image src="/../logo-icon.png" alt="Logo Alquila360" width={40} height={40} />
-          <Image src="/../logo-text.png" alt="Texto Alquila360" width={160} height={40} />
+          <Image src="/logo-icon.png" alt="Logo Alquila360" width={40} height={40} />
+          <Image src="/logo-text.png" alt="Texto Alquila360" width={160} height={40} />
         </div>
 
         <nav className="flex items-center gap-10 text-[#223344] text-lg">
@@ -67,7 +67,7 @@ export default function HomePage() {
         {/* RIGHT IMAGE */}
         <div className="relative w-full h-[400px] bg-white rounded-3xl shadow-xl overflow-hidden">
           <Image
-            src="/hero-login.svg"
+            src="/hero-login.png"   // <- coincide con tu archivo de public
             alt="Imagen principal Alquila360"
             fill
             className="object-cover"
@@ -77,8 +77,6 @@ export default function HomePage() {
 
       {/* TARJETAS DE SERVICIOS */}
       <section className="px-20 grid grid-cols-4 gap-10 pb-32">
-
-        {/* Card 1 */}
         <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
           <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
             Gestión completa de propiedades
@@ -88,7 +86,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Card 2 */}
         <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
           <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
             Pagos rápidos y seguros
@@ -98,7 +95,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Card 3 */}
         <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
           <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
             Reportes claros en tiempo real
@@ -108,7 +104,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Card 4 */}
         <div className="p-8 bg-white rounded-2xl shadow hover:shadow-lg transition">
           <h3 className="font-bold text-xl text-[#0d1b2a] mb-2">
             Información segura y centralizada
@@ -117,7 +112,6 @@ export default function HomePage() {
             Tus datos están protegidos y siempre disponibles cuando los necesitas.
           </p>
         </div>
-
       </section>
     </main>
   );
