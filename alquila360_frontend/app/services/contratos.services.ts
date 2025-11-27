@@ -4,6 +4,7 @@ export type Contrato = {
   id: number;
   numero: string;
   inquilino: string;
+  propietario: string; 
   inicio: string;
   fin: string;
   monto_mensual: number;
@@ -37,7 +38,6 @@ function mapEstadoBackToFront(estadoBack: string): EstadoContrato {
   return "Finalizada";
 }
 
-// 🔹 Mapeo contrato backend -> contrato front
 function mapContratoFromBackToFront(c: any): Contrato {
   return {
     id: c.id_contrato ?? c.id ?? 0,
@@ -46,6 +46,10 @@ function mapContratoFromBackToFront(c: any): Contrato {
       c.inquilino?.nombre_completo ||
       c.inquilino?.nombre ||
       "Inquilino sin nombre",
+    propietario:
+      c.propietario?.nombre_completo ||
+      c.propietario?.nombre ||
+      "Propietario sin nombre",
     inicio: c.fecha_inicio,
     fin: c.fecha_fin,
     monto_mensual: Number(c.monto_mensual ?? 0),
