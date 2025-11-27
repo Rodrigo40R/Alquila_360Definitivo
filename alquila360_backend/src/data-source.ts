@@ -41,7 +41,7 @@ export const AppDataSource = new DataSource({
     Pago,
   ],
   synchronize: false,
-  logging: true,
+  logging: false,
 });
 
 export default AppDataSource;

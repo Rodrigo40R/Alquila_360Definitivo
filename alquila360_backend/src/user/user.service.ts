@@ -2,11 +2,12 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
+import { InquilinoDashboardDto } from './dto/inquilino-dashboard.dto';
 
-// 👇 USER_REPOSITORY es un valor (token de Nest), import normal
+// 👇 Token de inyección del repositorio
 import { USER_REPOSITORY } from './ports/user.repo';
 
-// 👇 UserRepositoryPort es SOLO un tipo, lo importamos con 'import type'
+// 👇 Solo es tipo, para TypeScript
 import type { UserRepositoryPort } from './ports/user.repo';
 
 import { User } from '../entity/user.entity';
@@ -52,5 +53,57 @@ export class UserService {
       throw new NotFoundException(`Usuario con id ${id} no encontrado`);
     }
     return this.userRepo.remove(id);
+  }
+
+  /**
+   * Datos del dashboard del inquilino a partir del id de usuario.
+   */
+  async getInquilinoDashboard(userId: number): Promise<InquilinoDashboardDto> {
+    // 1. Buscar usuario usando el repositorio inyectado
+    const user = await this.userRepo.findOne(userId);
+
+    if (!user) {
+      throw new NotFoundException(`Usuario con id ${userId} no encontrado`);
+    }
+
+    // (OPCIONAL) validar que sea inquilino según tu modelo
+    // if (user.tipo_usuario !== 'INQUILINO') {
+    //   throw new ForbiddenException('El usuario no es un inquilino');
+    // }
+
+    // 2. TODO: aquí deberías consultar contratos, cuotas/pagos, tickets, etc.
+    //    De momento dejamos datos mock para que el endpoint funcione
+    //    y puedas conectar el frontend y defender la idea.
+
+    const proximoPago = '2026-02-12'; // TODO: calcular desde la tabla cuotas
+    const montoMensual = 350;         // TODO: sacar del contrato activo
+    const ticketsActivos = 2;         // TODO: contar tickets con estado ABIERTO
+
+    const ultimosPagos = [
+      {
+        monto: 350,
+        fecha: new Date().toISOString(),
+        estado: 'PAGADO',
+      },
+      {
+        monto: 350,
+        fecha: new Date('2025-10-27').toISOString(),
+        estado: 'PAGADO',
+      },
+      {
+        monto: 350,
+        fecha: new Date('2025-09-27').toISOString(),
+        estado: 'PAGADO',
+      },
+    ];
+
+    const dto: InquilinoDashboardDto = {
+      proximoPago,
+      montoMensual,
+      ticketsActivos,
+      ultimosPagos,
+    };
+
+    return dto;
   }
 }

@@ -3,16 +3,67 @@
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
 
+import {
+  createTicket,
+  type Prioridad,
+} from "../../../services/ticket.services";
+
 export default function NuevoTicketPage() {
   const router = useRouter();
-  const [propiedad, setPropiedad] = useState("");
-  const [tipo, setTipo] = useState("");
-  const [prioridad, setPrioridad] = useState<"Alta" | "Media" | "Baja">("Media");
 
-  const handleSubmit = (e: FormEvent) => {
+  const [propiedad, setPropiedad] = useState(""); // ID inquilino (provisional)
+  const [tipo, setTipo] = useState("");           // descripción
+  const [prioridad, setPrioridad] = useState<Prioridad>("Media");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
-    alert("Ticket registrado (simulado).");
-    router.push("/admin/tickets");
+
+    if (!propiedad.trim() || !tipo.trim()) {
+      setError("Propiedad de y tipo de problema son obligatorios.");
+      return;
+    }
+
+    const idInquilino = Number(propiedad.trim());
+
+    if (Number.isNaN(idInquilino)) {
+      setError(
+        "Por ahora, en 'Propiedad de' debes escribir el ID numérico del inquilino (ej: 26)."
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      await createTicket({
+        descripcion: tipo,
+        prioridad,
+        idInquilino,
+      });
+
+      router.push("/admin/tickets");
+    } catch (err: any) {
+      const raw = err?.response?.data ?? err;
+      console.error("Error creando ticket:", raw);
+
+      let mensaje = "No se pudo registrar el ticket.";
+
+      if (typeof raw === "string") {
+        mensaje = raw;
+      } else if (typeof raw?.message === "string") {
+        mensaje = raw.message;
+      } else if (Array.isArray(raw?.message)) {
+        mensaje = raw.message.join(" | ");
+      }
+
+      setError(mensaje);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -23,16 +74,23 @@ export default function NuevoTicketPage() {
           Registra una nueva solicitud de mantenimiento.
         </p>
 
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+            {error}
+          </p>
+        )}
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-sm font-medium text-slate-700 mb-1">
-              Propiedad
+              Propiedad de
             </label>
             <input
               type="text"
               value={propiedad}
               onChange={(e) => setPropiedad(e.target.value)}
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Ej. 26 (ID del inquilino)"
             />
           </div>
 
@@ -56,7 +114,7 @@ export default function NuevoTicketPage() {
             <select
               value={prioridad}
               onChange={(e) =>
-                setPrioridad(e.target.value as "Alta" | "Media" | "Baja")
+                setPrioridad(e.target.value as Prioridad)
               }
               className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
             >
@@ -71,14 +129,17 @@ export default function NuevoTicketPage() {
               type="button"
               onClick={() => router.push("/admin/tickets")}
               className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              disabled={loading}
             >
               Cancelar
             </button>
+
             <button
               type="submit"
-              className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
+              className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-70"
+              disabled={loading}
             >
-              Guardar ticket
+              {loading ? "Guardando..." : "Guardar ticket"}
             </button>
           </div>
         </form>

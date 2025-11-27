@@ -1,99 +1,151 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import React, { useState } from "react";
+import { FormEvent, useState } from "react";
 
-export default function NuevoTicketAdminPage() {
+import {
+  createTicket,
+  type Prioridad,
+} from "../../../services/ticket.services";
+
+export default function NuevoTicketPage() {
   const router = useRouter();
-  const [titulo, setTitulo] = useState("");
-  const [propiedad, setPropiedad] = useState("");
-  const [descripcion, setDescripcion] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const [propiedad, setPropiedad] = useState(""); // ID inquilino (provisional)
+  const [tipo, setTipo] = useState("");           // descripción
+  const [prioridad, setPrioridad] = useState<Prioridad>("Media");
+
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
 
-    // aquí iría el POST real a tu API
-    console.log({
-      titulo,
-      propiedad,
-      descripcion,
-    });
+    if (!propiedad.trim() || !tipo.trim()) {
+      setError("Propiedad de y tipo de problema son obligatorios.");
+      return;
+    }
 
-    // por ahora solo volvemos a la lista de mantenimiento
-    router.push("/admin/mantenimiento");
+    const idInquilino = Number(propiedad.trim());
+
+    if (Number.isNaN(idInquilino)) {
+      setError(
+        "Por ahora, en 'Propiedad de' escribe el ID numérico del inquilino (ej: 4)."
+      );
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      await createTicket({
+        descripcion: tipo,   // va a dto.descripcion
+        prioridad,
+        idInquilino,
+      });
+
+      router.push("/admin/tickets");
+    } catch (err: any) {
+      const raw = err?.response?.data ?? err;
+
+      // log sin console.error para que Next no saque pantalla roja
+      console.log("Error creando ticket (completo):", err);
+
+      let mensaje = "No se pudo registrar el ticket.";
+
+      if (typeof raw === "string") {
+        mensaje = raw;
+      } else if (typeof raw?.message === "string") {
+        mensaje = raw.message;
+      } else if (Array.isArray(raw?.message)) {
+        mensaje = raw.message.join(" | ");
+      }
+
+      setError(mensaje);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">
-          Nuevo ticket de mantenimiento
-        </h1>
+    <div className="px-6 py-6">
+      <div className="max-w-2xl mx-auto bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <h1 className="text-xl font-bold text-slate-900">Nuevo ticket</h1>
         <p className="text-sm text-slate-500">
-          Registra un nuevo ticket para dar seguimiento al mantenimiento.
+          Registra una nueva solicitud de mantenimiento.
         </p>
+
+        {error && (
+          <p className="text-sm text-red-600 bg-red-50 border border-red-100 rounded-md px-3 py-2">
+            {error}
+          </p>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Propiedad de
+            </label>
+            <input
+              type="text"
+              value={propiedad}
+              onChange={(e) => setPropiedad(e.target.value)}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Ej. 4 (ID del inquilino)"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Tipo de problema
+            </label>
+            <input
+              type="text"
+              value={tipo}
+              onChange={(e) => setTipo(e.target.value)}
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
+              placeholder="Ej. Fuga de gas, corte de luz…"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1">
+              Prioridad
+            </label>
+            <select
+              value={prioridad}
+              onChange={(e) =>
+                setPrioridad(e.target.value as Prioridad)
+              }
+              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 bg-white"
+            >
+              <option value="Alta">Alta</option>
+              <option value="Media">Media</option>
+              <option value="Baja">Baja</option>
+            </select>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-2">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/tickets")}
+              className="rounded-full border border-slate-300 px-4 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50"
+              disabled={loading}
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              className="rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white hover:bg-emerald-600 disabled:opacity-70"
+              disabled={loading}
+            >
+              {loading ? "Guardando..." : "Guardar ticket"}
+            </button>
+          </div>
+        </form>
       </div>
-
-      <form
-        onSubmit={handleSubmit}
-        className="max-w-xl space-y-5 rounded-xl bg-white p-6 shadow-sm"
-      >
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700">
-            Título del ticket
-          </label>
-          <input
-            required
-            value={titulo}
-            onChange={(e) => setTitulo(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-            placeholder="Ej: Fuga de agua en cocina"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700">
-            Propiedad
-          </label>
-          <input
-            required
-            value={propiedad}
-            onChange={(e) => setPropiedad(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-            placeholder="Ej: Depto - Av. América"
-          />
-        </div>
-
-        <div className="space-y-1">
-          <label className="text-sm font-medium text-slate-700">
-            Descripción
-          </label>
-          <textarea
-            required
-            value={descripcion}
-            onChange={(e) => setDescripcion(e.target.value)}
-            className="w-full rounded-lg border border-slate-200 px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
-            rows={4}
-            placeholder="Describe el problema que se debe atender…"
-          />
-        </div>
-
-        <div className="flex items-center gap-3">
-          <button
-            type="submit"
-            className="rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-700"
-          >
-            Guardar ticket
-          </button>
-          <button
-            type="button"
-            onClick={() => router.push("/admin/mantenimiento")}
-            className="text-sm font-medium text-slate-600 hover:text-slate-900"
-          >
-            Cancelar
-          </button>
-        </div>
-      </form>
     </div>
   );
 }
