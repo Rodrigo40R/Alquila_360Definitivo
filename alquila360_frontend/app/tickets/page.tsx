@@ -1,61 +1,90 @@
-import Shell from "@/components/Shell";
-import Image from "next/image";
+"use client";
 
-function Col({ title, children }:{title:string; children:React.ReactNode}) {
+export default function TicketsAdminPage() {
+  const tickets = [
+    {
+      id: "#03",
+      propiedad: "Santa Fe 203",
+      inquilino: "Luis Felipe",
+      tecnico: "Pedro Gómez",
+      prioridad: "Alta",
+      estado: "En proceso",
+    },
+    {
+      id: "#04",
+      propiedad: "Lorenzo 203",
+      inquilino: "Ana López",
+      tecnico: "Por asignar",
+      prioridad: "Media",
+      estado: "Registrado",
+    },
+  ];
+
   return (
-    <div className="space-y-4">
-      <h3 className="text-2xl font-semibold">{title}</h3>
-      <div className="space-y-4">{children}</div>
+    <div className="space-y-6">
+      <div className="flex items-center justify-between gap-2">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Tickets de mantenimiento
+          </h1>
+          <p className="text-sm text-slate-600">
+            Vista general de tickets para administración.
+          </p>
+        </div>
+        <button className="px-4 py-2 rounded-md bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600">
+          + Nuevo ticket
+        </button>
+      </div>
+
+      <div className="rounded-xl border border-slate-200 bg-white shadow-sm w-full overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead className="bg-slate-100 text-slate-700">
+            <tr>
+              <th className="px-4 py-3 text-left font-semibold">N° Ticket</th>
+              <th className="px-4 py-3 text-left font-semibold">Propiedad</th>
+              <th className="px-4 py-3 text-left font-semibold">Inquilino</th>
+              <th className="px-4 py-3 text-left font-semibold">Técnico</th>
+              <th className="px-4 py-3 text-left font-semibold">Prioridad</th>
+              <th className="px-4 py-3 text-left font-semibold">Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tickets.map((t) => (
+              <tr
+                key={t.id}
+                className="border-t border-slate-200 hover:bg-slate-50 transition"
+              >
+                <td className="px-4 py-3 text-slate-700">{t.id}</td>
+                <td className="px-4 py-3 text-slate-700">{t.propiedad}</td>
+                <td className="px-4 py-3 text-slate-700">{t.inquilino}</td>
+                <td className="px-4 py-3 text-slate-600">{t.tecnico}</td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      t.prioridad === "Alta"
+                        ? "bg-red-100 text-red-700"
+                        : "bg-yellow-100 text-yellow-700"
+                    }`}
+                  >
+                    {t.prioridad}
+                  </span>
+                </td>
+                <td className="px-4 py-3">
+                  <span
+                    className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                      t.estado === "En proceso"
+                        ? "bg-emerald-100 text-emerald-700"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {t.estado}
+                  </span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
-  );
-}
-
-function Card({ children }:{children:React.ReactNode}) {
-  return <div className="card p-4 border border-slate-200">{children}</div>;
-}
-
-export default function Page() {
-  return (
-    <Shell title="Contrato">
-      <h1 className="text-4xl font-bold mb-6">Tickets de Mantenimiento</h1>
-      <div className="mb-6">
-        <button className="btn bg-green-500 text-white">+ Crear ticket</button>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Col title="Pendiente">
-          <Card>
-            <div className="badge bg-yellow-100 text-yellow-700 mb-2">Prioridad</div>
-            <p className="mb-3">Cerradura de la puerta no funciona y es difícil de abrir</p>
-            <div className="text-slate-600 mb-3">📷 2</div>
-            <button className="btn w-full bg-black text-white">Asignar Tecnico</button>
-          </Card>
-        </Col>
-
-        <Col title="En proceso">
-          <Card>
-            <div className="badge bg-yellow-100 text-yellow-700 mb-2">Prioridad</div>
-            <p className="mb-3">Fuga de agua en el lavabo del baño principal</p>
-            <div className="mb-3 overflow-hidden rounded-xl border">
-              <Image src="/hero-login.svg" alt="img" width={600} height={350} />
-            </div>
-            <div className="text-right font-semibold">$750</div>
-            <button className="btn w-full bg-green-500 text-white mt-3">Actualizar Estado</button>
-          </Card>
-        </Col>
-
-        <Col title="Finalizado">
-          <Card>
-            <div className="badge bg-green-100 text-green-700 mb-2">PriorIdad</div>
-            <p className="mb-3">Se ha pintado y reparado el muro dañado</p>
-            <div className="mb-3 overflow-hidden rounded-xl border">
-              <Image src="/hero-login.svg" alt="img" width={600} height={350} />
-            </div>
-            <div className="text-slate-600 mb-3">📷 2</div>
-            <button className="btn w-full bg-black text-white">Actualizar Estado</button>
-          </Card>
-        </Col>
-      </div>
-    </Shell>
   );
 }

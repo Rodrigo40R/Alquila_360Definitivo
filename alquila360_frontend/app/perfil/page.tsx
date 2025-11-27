@@ -1,22 +1,21 @@
-import Shell from "@/components/Shell";
+"use client";
 
-export default function Page() {
+import Input from "@/components/ui/Input";
+import Button from "@/components/ui/Button";
+
+export default function EditarPerfilPage() {
   return (
-    <Shell title="Perfil">
-      <div className="mx-auto max-w-xl">
-        <div className="card border border-slate-200 p-8">
-          <div className="mx-auto mb-6 h-16 w-16 rounded-full border-2 border-slate-900 flex items-center justify-center">
-            <div className="h-8 w-8 rounded-full border-2 border-slate-900" />
-          </div>
-          <div className="space-y-1 text-slate-700">
-            <div><b>Nombre:</b> Juanito Perez</div>
-            <div><b>Rol:</b> Administrador</div>
-            <div><b>Correo electronico:</b> juanito.pz@mail.com</div>
-            <div><b>numero de celular:</b> +591 63902234</div>
-            <div><b>numero de referencia:</b> +591 76322345</div>
-          </div>
-        </div>
+    <div className="space-y-6 max-w-xl">
+      <h1 className="text-2xl font-bold text-slate-900">Editar perfil</h1>
+
+      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
+        <Input label="Nombre" defaultValue="Mateo" />
+        <Input label="Correo" defaultValue="mateo@gmail.com" />
+        <Input label="Contraseña" type="password" />
+        <Input label="Teléfono" defaultValue="+591 72000000" />
+
+        <Button type="submit">Guardar cambios</Button>
       </div>
-    </Shell>
+    </div>
   );
 }

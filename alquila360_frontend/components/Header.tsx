@@ -1,16 +1,19 @@
-import { Ic } from "./icons";
-import AvatarMenu from "./AvatarMenu";
+"use client";
 
-export default function Header({ title }: { title: string }) {
+import Link from "next/link";
+
+export default function Header() {
   return (
-    <header className="border-b bg-white">
-      <div className="mx-auto max-w-7xl px-6 h-14 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Ic.Logo />
-          <span className="text-slate-700">| {title}</span>
-        </div>
-        <AvatarMenu />
-      </div>
+    <header className="w-full bg-white border-b border-slate-200 px-6 py-4 flex justify-between items-center">
+      <Link href="/" className="font-bold text-slate-900 text-lg">
+        ALQUILA360
+      </Link>
+
+      <nav className="flex gap-6 text-sm text-slate-700">
+        <Link href="/sobre-nosotros">Sobre nosotros</Link>
+        <Link href="/services">Servicios</Link>
+        <Link href="/login">Login</Link>
+      </nav>
     </header>
   );
 }

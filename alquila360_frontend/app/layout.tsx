@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import "./globals.css";
+import "./global-style.css";
 
 export const metadata: Metadata = {
-  title: "Alquila360",
+  title: "ALQUILA360",
   description: "Gestión integral de alquileres",
 };
 
@@ -13,7 +13,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es">
-      <body className="bg-alquila360 text-gray-900">
+      <body className="min-h-screen bg-white text-slate-900 antialiased">
         {children}
       </body>
     </html>

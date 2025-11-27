@@ -1,35 +1,72 @@
-import { Body, Controller, Delete, Get, Param, Post, Put } from "@nestjs/common";
-import { UserService } from "./user.service";
-import { User } from "src/entity/user.entity";
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  ParseIntPipe,
+  UseGuards
+} from '@nestjs/common';
+import { UserService } from './user.service';
+import { CreateUserDto } from './dto/create-user.dto';
+import { UpdateUserDto } from './dto/update-user.dto';
+import { JwtAuthGuard } from '../auth/auth.guard';
 
-@Controller('/user')
+@Controller('users')
 export class UserController {
-    constructor(private readonly userService: UserService) {
+  constructor(private readonly userService: UserService) {}
 
-    }
+    /**
+   * Registro de usuario (público)
+   * POST /users
+   */
+  @Post()
+  create(@Body() createUserDto: CreateUserDto) {
+    return this.userService.create(createUserDto);
+  }
 
-    @Post()
-    createUser(@Body() user: User) {
-        return this.userService.createUser(user)
-    }
+    /**
+   * Listar todos los usuarios (protegido con JWT)
+   * GET /users
+   */
+  //@UseGuards(JwtAuthGuard)
+  @Get()
+  findAll() {
+    return this.userService.findAll();
+  }
 
-    @Get()
-    getAllUsers() {
-        return this.userService.getAllUsers();
-    }
+  /**
+   * Obtener un usuario por ID (protegido)
+   * GET /users/:id
+   */
+  //@UseGuards(JwtAuthGuard)
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.findOne(id);
+  }
 
-    @Get('/:id')
-    getUserByID(@Param() param: any) {
-        return this.userService.getUserById(param.id);
-    }
+  /**
+   * Actualizar un usuario (protegido)
+   * PATCH /users/:id
+   */
+  ///@UseGuards(JwtAuthGuard)
+  @Patch(':id')
+  update(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateUserDto: UpdateUserDto,
+  ) {
+    return this.userService.update(id, updateUserDto);
+  }
 
-    @Put('/:id')
-    updateUser(@Param() param: any, @Body() user: User) {
-        return this.userService.updateUser(param.id, user);
-    }
-
-    @Delete('/:id')
-    deleteUser(@Param() param: any) {
-        return this.userService.deleteUser(param.id);
-    }
+  /**
+   * Eliminar un usuario (protegido)
+   * DELETE /users/:id
+   */
+  ///@UseGuards(JwtAuthGuard)
+  @Delete(':id')
+  remove(@Param('id', ParseIntPipe) id: number) {
+    return this.userService.remove(id);
+  }
 }
