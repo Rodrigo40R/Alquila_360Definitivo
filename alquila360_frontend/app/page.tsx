@@ -9,9 +9,8 @@ export default function HomePage() {
       {/* NAVBAR SUPERIOR */}
       <header className="w-full flex items-center justify-between px-20 py-6 bg-white shadow-sm">
         <div className="flex items-center gap-3">
-          <Image src="/logo-icon.png" alt="Logo Alquila360" width={40} height={40} />
-          <Image src="/logo-text.png" alt="Texto Alquila360" width={160} height={40} />
-
+          <Image src="/../logo-icon.png" alt="Logo Alquila360" width={40} height={40} />
+          <Image src="/../logo-text.png" alt="Texto Alquila360" width={160} height={40} />
         </div>
 
         <nav className="flex items-center gap-10 text-[#223344] text-lg">
@@ -68,13 +67,12 @@ export default function HomePage() {
         {/* RIGHT IMAGE */}
         <div className="relative w-full h-[400px] bg-white rounded-3xl shadow-xl overflow-hidden">
           <Image
-            src="/hero-login.png"
+            src="/hero-login.svg"
             alt="Imagen principal Alquila360"
             fill
             className="object-cover"
           />
         </div>
-
       </section>
 
       {/* TARJETAS DE SERVICIOS */}
