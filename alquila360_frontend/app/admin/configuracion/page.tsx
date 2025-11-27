@@ -15,7 +15,8 @@ export default function ConfiguracionAdminPage() {
 
         <Input label="Teléfono de soporte" defaultValue="+591 70000000" />
 
-        <Button variant="primary" className="w-full">
+        {/* Botón corregido sin variant */}
+        <Button className="w-full bg-emerald-600 text-white py-2 rounded-md hover:bg-emerald-700 transition">
           Guardar cambios
         </Button>
       </div>

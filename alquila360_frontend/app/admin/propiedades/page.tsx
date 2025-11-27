@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 
 type Propiedad = {
@@ -8,6 +9,7 @@ type Propiedad = {
   tipo: string;
   ubicacion: string;
   estado: "Disponible" | "Ocupada";
+  imagen: string;
 };
 
 const propiedades: Propiedad[] = [
@@ -17,6 +19,7 @@ const propiedades: Propiedad[] = [
     tipo: "Departamento",
     ubicacion: "Cochabamba",
     estado: "Ocupada",
+    imagen: "/propiedad-1.png",
   },
   {
     id: 2,
@@ -24,6 +27,7 @@ const propiedades: Propiedad[] = [
     tipo: "Casa",
     ubicacion: "Tiquipaya",
     estado: "Ocupada",
+    imagen: "/propiedad-2.png",
   },
   {
     id: 3,
@@ -31,6 +35,7 @@ const propiedades: Propiedad[] = [
     tipo: "Garzonier",
     ubicacion: "Cala Cala",
     estado: "Disponible",
+    imagen: "/propiedad-3.png",
   },
 ];
 
@@ -38,7 +43,8 @@ export default function AdminPropiedadesPage() {
   const router = useRouter();
 
   return (
-    <div className="px-6 py-6 space-y-6">
+    <div className="px-6 py-6 space-y-8">
+      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Propiedades</h1>
@@ -46,6 +52,7 @@ export default function AdminPropiedadesPage() {
             Registro de propiedades administradas en el sistema.
           </p>
         </div>
+
         <button
           type="button"
           onClick={() => router.push("/admin/propiedades/nueva")}
@@ -56,49 +63,51 @@ export default function AdminPropiedadesPage() {
         </button>
       </div>
 
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-100 px-6 py-3 flex items-center justify-between">
-          <p className="text-sm font-medium text-slate-700">
-            Propiedades registradas
-          </p>
-          <p className="text-xs text-slate-400">
-            {propiedades.length} propiedades en total
-          </p>
-        </div>
+      {/* GRID DE PROPIEDADES */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        {propiedades.map((p) => (
+          <div
+            key={p.id}
+            className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
+          >
+            {/* IMAGEN */}
+            <div className="relative h-48 w-full">
+              <Image
+                src={p.imagen}
+                alt={p.nombre}
+                fill
+                className="object-cover"
+              />
+            </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
-              <tr>
-                <th className="px-6 py-3 text-left">Nombre</th>
-                <th className="px-6 py-3 text-left">Tipo</th>
-                <th className="px-6 py-3 text-left">Ubicación</th>
-                <th className="px-6 py-3 text-left">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {propiedades.map((p) => (
-                <tr key={p.id} className="hover:bg-slate-50/80">
-                  <td className="px-6 py-4 text-slate-900">{p.nombre}</td>
-                  <td className="px-6 py-4 text-slate-700">{p.tipo}</td>
-                  <td className="px-6 py-4 text-slate-700">{p.ubicacion}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={
-                        "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
-                        (p.estado === "Disponible"
-                          ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                          : "bg-sky-100 text-sky-700 border border-sky-200")
-                      }
-                    >
-                      {p.estado}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+            {/* INFO */}
+            <div className="p-5 space-y-2">
+              <p className="font-bold text-slate-900 text-lg">{p.nombre}</p>
+              <p className="text-sm text-slate-600">{p.tipo}</p>
+              <p className="text-sm text-slate-600">{p.ubicacion}</p>
+
+              {/* ESTADO */}
+              <span
+                className={
+                  "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold mt-2 " +
+                  (p.estado === "Disponible"
+                    ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
+                    : "bg-sky-100 text-sky-700 border border-sky-200")
+                }
+              >
+                {p.estado}
+              </span>
+
+              {/* BOTÓN extra opcional */}
+              <button
+                className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition"
+                onClick={() => router.push(`/admin/propiedades/${p.id}`)}
+              >
+                Ver detalles
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   );
