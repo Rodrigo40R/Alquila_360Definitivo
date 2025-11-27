@@ -17,6 +17,7 @@ const ROLES: { id: RolFront; label: string }[] = [
   { id: "Técnico", label: "Técnico" },
 ];
 
+// Front → tipo Rol (minúsculas) que usa tu helper loginUser
 function mapRolToTipoUsuario(rol: RolFront): Rol {
   switch (rol) {
     case "Administrador":
@@ -32,7 +33,7 @@ function mapRolToTipoUsuario(rol: RolFront): Rol {
   }
 }
 
-// UI → tipo_usuario mayúsculas para el backend
+// UI → tipo_usuario mayúsculas para el backend (TipoUsuarioBack)
 function mapRolFrontToTipoUsuario(rol: RolFront): TipoUsuarioBack {
   switch (rol) {
     case "Administrador":
@@ -84,9 +85,28 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
+      // 1️⃣ Rol del front → tipo_usuario que el backend entiende
+      const tipo_usuario = mapRolFrontToTipoUsuario(rol);
+
+      // 2️⃣ Llamada REAL al backend
+      const { access_token, user } = await loginApi({
+        correo,
+        password,
+        tipo_usuario,
+      });
+
+      // 3️⃣ Opcional: guardar token en localStorage para futuras peticiones
+      if (typeof window !== "undefined") {
+        localStorage.setItem("token", access_token);
+        // si quieres, también puedes guardar algo del user:
+        // localStorage.setItem("user", JSON.stringify(user));
+      }
+
+      // 4️⃣ Guardar sesión en tu helper del front (simulación/estado)
       const rolBack = mapRolToTipoUsuario(rol);
       loginUser(rolBack, correo);
 
+      // 5️⃣ Redirigir al dashboard correspondiente
       router.push(rutaDashboardPorRol(rol));
     } catch (error: any) {
       console.error(error);
@@ -106,7 +126,7 @@ export default function LoginPage() {
           {/* LOGO COMPLETO */}
           <div className="flex items-center">
             <Image
-              src="/logo-full.png"   // 👈 nombre del archivo en /public
+              src="/logo-full.png"
               alt="Alquila360"
               width={220}
               height={50}
