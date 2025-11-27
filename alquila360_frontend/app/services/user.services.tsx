@@ -33,7 +33,7 @@ export const getUserById = async (id: number) => {
 };
 
 export const updateUser = async (id: number, userData: Partial<User>) => {
-  const response = await instance.put(`${BASE_PATH}/${id}`, userData);
+  const response = await instance.patch(`${BASE_PATH}/${id}`, userData);
   return response.data;
 };
 
