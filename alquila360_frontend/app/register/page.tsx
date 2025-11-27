@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 
@@ -12,22 +12,29 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [acepto, setAcepto] = useState(false);
+  const [rol, setRol] = useState<Rol>("propietario");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null); // 👈 mensaje bonito
+
+  async function handleRegister(e: FormEvent) {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
     if (!nombre || !correo || !password || !confirmar) {
-      alert("Completa todos los campos.");
+      setError("Completa todos los campos.");
       return;
     }
 
     if (password !== confirmar) {
-      alert("Las contraseñas no coinciden.");
+      setError("Las contraseñas no coinciden.");
       return;
     }
 
     if (!acepto) {
-      alert("Debes aceptar términos y condiciones.");
+      setError("Debes aceptar términos y condiciones.");
       return;
     }
 
@@ -118,9 +125,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-lg font-semibold transition"
+            disabled={loading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-lg font-semibold transition disabled:opacity-50"
           >
-            Registrarse
+            {loading ? "Creando cuenta..." : "Registrarse"}
           </button>
         </form>
 

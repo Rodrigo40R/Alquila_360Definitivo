@@ -1,48 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-
-type EstadoContrato = "Activa" | "Por vencer" | "Finalizada";
-
-type Contrato = {
-  id: number;
-  numero: string;
-  propiedad: string;
-  inquilino: string;
-  inicio: string;
-  fin: string;
-  estado: EstadoContrato;
-};
-
-const contratos: Contrato[] = [
-  {
-    id: 1,
-    numero: "#201",
-    propiedad: "Departamento - Av. América",
-    inquilino: "Carlos López",
-    inicio: "01/02/2025",
-    fin: "01/02/2026",
-    estado: "Activa",
-  },
-  {
-    id: 2,
-    numero: "#202",
-    propiedad: "Casa - Tiquipaya",
-    inquilino: "María Gómez",
-    inicio: "15/01/2025",
-    fin: "15/01/2026",
-    estado: "Por vencer",
-  },
-  {
-    id: 3,
-    numero: "#203",
-    propiedad: "Garzonier - Cala Cala",
-    inquilino: "José Ramírez",
-    inicio: "01/01/2024",
-    fin: "01/01/2025",
-    estado: "Finalizada",
-  },
-];
+import { useEffect, useState } from "react";
+import {
+  getContratos,
+  type Contrato,
+  type EstadoContrato,
+} from "@/app/services/contratos.services";
 
 function pillEstado(estado: EstadoContrato) {
   if (estado === "Activa") {
@@ -56,6 +20,27 @@ function pillEstado(estado: EstadoContrato) {
 
 export default function AdminContratosPage() {
   const router = useRouter();
+
+  const [contratos, setContratos] = useState<Contrato[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function cargarContratos() {
+      try {
+        setLoading(true);
+        const data = await getContratos();
+        setContratos(data);
+      } catch (err) {
+        console.error(err);
+        setError("No se pudieron obtener los contratos.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarContratos();
+  }, []);
 
   const activas = contratos.filter((c) => c.estado === "Activa").length;
   const porVencer = contratos.filter((c) => c.estado === "Por vencer").length;
@@ -82,71 +67,105 @@ export default function AdminContratosPage() {
         </button>
       </div>
 
-      {/* RESUMEN */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Activos</p>
-          <p className="mt-1 text-2xl font-bold text-emerald-600">{activas}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Por vencer</p>
-          <p className="mt-1 text-2xl font-bold text-amber-500">{porVencer}</p>
-        </div>
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-          <p className="text-xs font-medium text-slate-500">Finalizados</p>
-          <p className="mt-1 text-2xl font-bold text-slate-700">
-            {finalizadas}
-          </p>
-        </div>
-      </div>
+      {/* ESTADOS DE CARGA / ERROR */}
+      {loading && (
+        <p className="text-sm text-slate-500">Cargando contratos...</p>
+      )}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {/* TABLA */}
-      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
-        <div className="border-b border-slate-100 px-6 py-3 flex items-center justify-between">
-          <p className="text-sm font-medium text-slate-700">
-            Contratos registrados
-          </p>
-          <p className="text-xs text-slate-400">
-            {contratos.length} contratos en total
-          </p>
-        </div>
+      {/* CONTENIDO */}
+      {!loading && !error && (
+        <>
+          {/* RESUMEN */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-slate-500">Activos</p>
+              <p className="mt-1 text-2xl font-bold text-emerald-600">
+                {activas}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-slate-500">Por vencer</p>
+              <p className="mt-1 text-2xl font-bold text-amber-500">
+                {porVencer}
+              </p>
+            </div>
+            <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+              <p className="text-xs font-medium text-slate-500">Finalizados</p>
+              <p className="mt-1 text-2xl font-bold text-slate-700">
+                {finalizadas}
+              </p>
+            </div>
+          </div>
 
-        <div className="overflow-x-auto">
-          <table className="min-w-full text-sm">
-            <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
-              <tr>
-                <th className="px-6 py-3 text-left">N°</th>
-                <th className="px-6 py-3 text-left">Propiedad</th>
-                <th className="px-6 py-3 text-left">Inquilino</th>
-                <th className="px-6 py-3 text-left">Inicio</th>
-                <th className="px-6 py-3 text-left">Fin</th>
-                <th className="px-6 py-3 text-left">Estado</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
-              {contratos.map((c) => (
-                <tr key={c.id} className="hover:bg-slate-50/80">
-                  <td className="px-6 py-4 text-slate-500">{c.numero}</td>
-                  <td className="px-6 py-4 text-slate-900">{c.propiedad}</td>
-                  <td className="px-6 py-4 text-slate-700">{c.inquilino}</td>
-                  <td className="px-6 py-4 text-slate-600">{c.inicio}</td>
-                  <td className="px-6 py-4 text-slate-600">{c.fin}</td>
-                  <td className="px-6 py-4">
-                    <span
-                      className={
-                        "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
-                        pillEstado(c.estado)
-                      }
-                    >
-                      {c.estado}
-                    </span>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-      </div>
+          {/* TABLA */}
+          <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+            <div className="border-b border-slate-100 px-6 py-3 flex items-center justify-between">
+              <p className="text-sm font-medium text-slate-700">
+                Contratos registrados
+              </p>
+              <p className="text-xs text-slate-400">
+                {contratos.length} contratos en total
+              </p>
+            </div>
+
+            <div className="overflow-x-auto">
+              <table className="min-w-full text-sm">
+                <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+                  <tr>
+                    <th className="px-6 py-3 text-left">N°</th>
+                    <th className="px-6 py-3 text-left">Propietario</th>
+                    <th className="px-6 py-3 text-left">Inquilino</th>
+                    <th className="px-6 py-3 text-left">Monto mensual</th>
+                    <th className="px-6 py-3 text-left">Inicio</th>
+                    <th className="px-6 py-3 text-left">Fin</th>
+                    <th className="px-6 py-3 text-left">Estado</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100">
+                  {contratos.map((c) => (
+                    <tr key={c.id} className="hover:bg-slate-50/80">
+                      <td className="px-6 py-4 text-slate-500">{c.numero}</td>
+                      <td className="px-6 py-4 text-slate-900">
+                        {c.propietario}
+                      </td>
+                      <td className="px-6 py-4 text-slate-900">
+                        {c.inquilino}
+                      </td>
+                      <td className="px-6 py-4 text-slate-700">
+                        {c.monto_mensual.toFixed(2)}
+                      </td>
+                      <td className="px-6 py-4 text-slate-600">{c.inicio}</td>
+                      <td className="px-6 py-4 text-slate-600">{c.fin}</td>
+                      <td className="px-6 py-4">
+                        <span
+                          className={
+                            "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
+                            pillEstado(c.estado)
+                          }
+                        >
+                          {c.estado}
+                        </span>
+                      </td>
+                    </tr>
+                  ))}
+
+                  {contratos.length === 0 && (
+                    <tr>
+                      <td
+                        colSpan={7}
+                        className="px-6 py-6 text-center text-sm text-slate-400"
+                      >
+                        No hay contratos registrados todavía.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </>
+      )}
     </div>
   );
 }

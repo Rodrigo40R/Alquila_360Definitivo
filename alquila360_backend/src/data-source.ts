@@ -17,13 +17,13 @@ import { Multa } from './entity/multa.entity';
 import { Cuota } from './entity/cuota.entity';
 import { Pago } from './entity/pago.entity';
 
-const AppDataSource = new DataSource({
+export const AppDataSource = new DataSource({
   type: 'mysql',
-  host: 'turntable.proxy.rlwy.net',
-  port: 32464,
-  username: 'root',
-  password: 'tZchyCxqDbguZifPRKrYOYalRLZkaHap',
-  database: 'railway',
+  host: process.env.DB_HOST,
+  port: Number(process.env.DB_PORT),
+  username: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   entities: [
     User,
     Propietario,
@@ -45,4 +45,3 @@ const AppDataSource = new DataSource({
 });
 
 export default AppDataSource;
-export { AppDataSource };
