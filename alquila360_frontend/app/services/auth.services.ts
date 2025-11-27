@@ -1,7 +1,5 @@
 "use client";
 
-export type RolFront = "propietario" | "inquilino" | "tecnico" | "administrador";
-
 export type TipoUsuarioBack =
   | "PROPIETARIO"
   | "INQUILINO"
@@ -18,7 +16,7 @@ const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
 export async function login(data: LoginInput) {
-  // 👇 AJUSTA *UNA* DE ESTAS DOS LÍNEAS SEGÚN TU main.ts
+  // 👇 AJUSTA *UNA* DE ESTAS DOS LÍNEAS SEGÚN tu main.ts
 
   // 1) Si NO tienes app.setGlobalPrefix('api'):
   const url = `${BASE_URL}/auth/login`;

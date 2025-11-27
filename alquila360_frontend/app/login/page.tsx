@@ -5,6 +5,7 @@ import Link from "next/link";
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { loginUser, type Rol } from "@/lib/auth";
+import { login as loginApi, type TipoUsuarioBack } from "../services/auth.services";
 
 type RolFront = "" | "Administrador" | "Propietario" | "Inquilino" | "Técnico";
 
@@ -16,7 +17,8 @@ const ROLES: { id: RolFront; label: string }[] = [
   { id: "Técnico", label: "Técnico" },
 ];
 
-function mapRolToTipoUsuario(rol: RolFront): Rol {
+// UI → tipo Rol (minúsculas) para auth.ts
+function mapRolFrontToRol(rol: RolFront): Rol {
   switch (rol) {
     case "Administrador":
       return "administrador";
@@ -28,6 +30,22 @@ function mapRolToTipoUsuario(rol: RolFront): Rol {
       return "tecnico";
     default:
       return "propietario";
+  }
+}
+
+// UI → tipo_usuario mayúsculas para el backend
+function mapRolFrontToTipoUsuario(rol: RolFront): TipoUsuarioBack {
+  switch (rol) {
+    case "Administrador":
+      return "ADMINISTRADOR";
+    case "Propietario":
+      return "PROPIETARIO";
+    case "Inquilino":
+      return "INQUILINO";
+    case "Técnico":
+      return "TECNICO";
+    default:
+      return "PROPIETARIO";
   }
 }
 
@@ -53,24 +71,38 @@ export default function LoginPage() {
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
 
     if (!rol || !correo || !password) {
-      alert("Completa todos los campos.");
+      setErrorMsg("Completa todos los campos.");
       return;
     }
 
     setLoading(true);
+    setErrorMsg(null);
+
     try {
-      const rolBack = mapRolToTipoUsuario(rol);
-      loginUser(rolBack, correo);
+      const rolBack = mapRolFrontToRol(rol);
+      const tipo_usuario = mapRolFrontToTipoUsuario(rol);
+
+      const { access_token } = await loginApi({
+        correo,
+        password,
+        tipo_usuario,
+      });
+
+      // guarda sesión en localStorage (rol + correo + token)
+      loginUser(rolBack, correo, access_token);
 
       router.push(rutaDashboardPorRol(rol));
-    } catch (error) {
+    } catch (error: any) {
       console.error(error);
-      alert("Error al iniciar sesión. Verifica tus datos.");
+      setErrorMsg(
+        error?.message || "Error al iniciar sesión. Verifica tus datos."
+      );
     } finally {
       setLoading(false);
     }
@@ -117,7 +149,7 @@ export default function LoginPage() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-6 py-12 lg:flex-row">
-          {/* IMAGEN + TEXTO IZQUIERDA */}
+          {/* Columna izquierda */}
           <div className="flex-1 text-white">
             <div className="relative mb-8 h-80 w-full overflow-hidden rounded-xl">
               <Image
@@ -199,6 +231,13 @@ export default function LoginPage() {
                     className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                   />
                 </div>
+
+                {/* ERROR */}
+                {errorMsg && (
+                  <p className="text-xs text-red-500 text-center">
+                    {errorMsg}
+                  </p>
+                )}
 
                 <div className="flex items-center justify-between text-xs text-slate-500">
                   <button type="button" className="hover:text-emerald-600">
