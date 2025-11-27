@@ -17,8 +17,7 @@ const ROLES: { id: RolFront; label: string }[] = [
   { id: "Técnico", label: "Técnico" },
 ];
 
-// UI → tipo Rol (minúsculas) para auth.ts
-function mapRolFrontToRol(rol: RolFront): Rol {
+function mapRolToTipoUsuario(rol: RolFront): Rol {
   switch (rol) {
     case "Administrador":
       return "administrador";
@@ -85,17 +84,8 @@ export default function LoginPage() {
     setErrorMsg(null);
 
     try {
-      const rolBack = mapRolFrontToRol(rol);
-      const tipo_usuario = mapRolFrontToTipoUsuario(rol);
-
-      const { access_token } = await loginApi({
-        correo,
-        password,
-        tipo_usuario,
-      });
-
-      // guarda sesión en localStorage (rol + correo + token)
-      loginUser(rolBack, correo, access_token);
+      const rolBack = mapRolToTipoUsuario(rol);
+      loginUser(rolBack, correo);
 
       router.push(rutaDashboardPorRol(rol));
     } catch (error: any) {
@@ -109,26 +99,22 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-[#1f2933] text-slate-900 flex flex-col">
-      {/* NAVBAR SUPERIOR */}
+    <div className="flex min-h-screen flex-col bg-[#1f2933] text-slate-900">
+      {/* NAVBAR SUPERIOR CON LOGO COMPLETO */}
       <header className="w-full bg-white shadow-sm">
-        <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
-          <div className="flex items-center gap-2">
+        <div className="mx-auto flex h-20 max-w-6xl items-center justify-between px-8">
+          {/* LOGO COMPLETO */}
+          <div className="flex items-center">
             <Image
-              src="/logo-icon.jpg"
-              alt="Alquila360 logo"
-              width={40}
-              height={40}
-              className="rounded-full"
-            />
-            <Image
-              src="/logo-text.jpg"
+              src="/logo-full.png"   // 👈 nombre del archivo en /public
               alt="Alquila360"
-              width={140}
-              height={32}
+              width={220}
+              height={50}
+              className="object-contain"
             />
           </div>
 
+          {/* MENÚ SUPERIOR */}
           <nav className="hidden gap-8 text-sm text-slate-700 md:flex">
             <a href="#" className="hover:text-emerald-600">
               Inicio
@@ -153,34 +139,36 @@ export default function LoginPage() {
       {/* CONTENIDO PRINCIPAL */}
       <main className="flex-1">
         <div className="mx-auto flex max-w-6xl flex-col items-center gap-10 px-6 py-12 lg:flex-row">
-          {/* Columna izquierda */}
+          {/* IMAGEN + TEXTO IZQUIERDA */}
           <div className="flex-1 text-white">
-            <div className="relative mb-8 h-80 w-full overflow-hidden rounded-xl bg-slate-800">
+            <div className="relative mb-8 h-80 w-full overflow-hidden rounded-xl">
               <Image
-                src="/hero-login.svg"
+                src="/login-illustration.png"
                 alt="Gestión de alquileres"
                 fill
                 className="object-cover"
               />
             </div>
+
             <h2 className="mb-3 text-3xl font-semibold">
               Tu gestión de alquileres
               <br />
               Más simple y segura
             </h2>
+
             <p className="text-sm text-slate-200">
               Administra contratos, pagos, propiedades y tickets de
               mantenimiento desde una sola plataforma.
             </p>
           </div>
 
-          {/* Columna derecha: tarjeta de login */}
+          {/* FORMULARIO DE LOGIN */}
           <div className="flex-1">
             <div className="mx-auto w-full max-w-md rounded-3xl bg-[#f6f6f6] px-10 py-10 shadow-lg">
               <div className="mb-6 flex items-center justify-center gap-3">
                 <Image
-                  src="/logo.svg"
-                  alt="Alquila360"
+                  src="/logo-icon.png"
+                  alt="Alquila360 logo"
                   width={40}
                   height={40}
                 />
@@ -269,8 +257,8 @@ export default function LoginPage() {
 
       {/* FOOTER */}
       <footer className="mt-auto border-t border-slate-800 bg-[#1f2933] py-3 text-center text-xs text-slate-300">
-        © 2025 Alquila 360 – Gestión integral de alquileres · Contáctanos
-        +591 76782341 · 4454323
+        © 2025 Alquila 360 – Gestión integral de alquileres · Contáctanos +591
+        76782341 · 4454323
       </footer>
     </div>
   );
