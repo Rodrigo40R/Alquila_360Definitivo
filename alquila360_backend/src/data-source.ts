@@ -40,7 +40,7 @@ const AppDataSource = new DataSource({
     Cuota,
     Pago,
   ],
-  synchronize: true, // mismo comentario: solo dev
+  synchronize: false, // mismo comentario: solo dev
   logging: false,
 });
 
