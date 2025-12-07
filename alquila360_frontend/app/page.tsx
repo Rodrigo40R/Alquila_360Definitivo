@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 
 export default function HomePage() {
   return (
@@ -20,28 +21,37 @@ export default function HomePage() {
           </div>
 
           <nav className="flex items-center gap-10 text-lg text-[#223344]">
-            <a href="#inicio" className="transition hover:text-emerald-500">
+            <Link href="/" className="transition hover:text-emerald-500">
               Inicio
-            </a>
-            <a href="#servicios" className="transition hover:text-emerald-500">
+            </Link>
+
+            <Link
+              href="/services"
+              className="transition hover:text-emerald-500"
+            >
               Servicios
-            </a>
-            <a
-              href="#sobre-nosotros"
+            </Link>
+
+            <Link
+              href="/sobre-nosotros"
               className="transition hover:text-emerald-500"
             >
               Sobre nosotros
-            </a>
-            <a href="#contacto" className="transition hover:text-emerald-500">
-              Contacto
-            </a>
+            </Link>
 
-            <a
+            <Link
+              href="/contacto"
+              className="transition hover:text-emerald-500"
+            >
+              Contacto
+            </Link>
+
+            <Link
               href="/login"
               className="rounded-full border border-emerald-500 px-6 py-2 text-emerald-600 transition hover:bg-emerald-500 hover:text-white"
             >
               Iniciar Sesión
-            </a>
+            </Link>
           </nav>
         </div>
       </header>
@@ -70,19 +80,19 @@ export default function HomePage() {
           </p>
 
           <div className="mt-10 flex gap-6">
-            <a
+            <Link
               href="/register"
               className="rounded-full bg-emerald-600 px-8 py-3 text-lg text-white shadow hover:bg-emerald-700 transition"
             >
               Empieza ahora
-            </a>
+            </Link>
 
-            <a
-              href="#servicios"
+            <Link
+              href="/servicios"
               className="rounded-full border border-gray-300 bg-white px-8 py-3 text-lg hover:bg-gray-100 transition"
             >
               Descubre más
-            </a>
+            </Link>
           </div>
         </div>
 

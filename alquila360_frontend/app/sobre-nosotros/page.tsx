@@ -1,48 +1,118 @@
-/*export default function SobreNosotros() {
-  return (
-    <div className="space-y-10 max-w-3xl">
-      <h1 className="text-4xl font-bold text-slate-900">Sobre ALQUILA360</h1>
+"use client";
 
-      <p className="text-slate-700 leading-relaxed text-lg">
-        Somos una plataforma diseñada para facilitar la gestión de alquileres y
-        conectar propietarios, inquilinos, técnicos y proveedores en un entorno
-        seguro, moderno y eficiente.
-      </p>
+import Image from "next/image";
 
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-        <p className="text-xl font-semibold text-slate-900">
-          Nuestra misión
-        </p>
-        <p className="text-slate-700">
-          Simplificar procesos de alquiler y brindar herramientas digitales que
-          permitan gestionar propiedades de forma clara y eficiente.
-        </p>
-      </section>
-
-      <section className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-        <p className="text-xl font-semibold text-slate-900">Nuestros valores</p>
-
-        <ul className="space-y-2 text-slate-700">
-          <li>• Transparencia</li>
-          <li>• Seguridad</li>
-          <li>• Rapidez</li>
-          <li>• Organización</li>
-          <li>• Tecnología moderna</li>
-        </ul>
-      </section>
-    </div>
-  );
-}
-*/
 export default function SobreNosotrosPage() {
   return (
-    <main className="min-h-screen px-8 py-12">
-      <h1 className="text-3xl font-bold mb-4">Sobre nosotros</h1>
-      <p className="text-slate-700 leading-relaxed">
-        Aquí va la historia de Alquila360, misión, visión, y por qué facilita
-        la gestión de alquileres para administradores, propietarios, inquilinos
-        y técnicos.
-      </p>
+    <main className="min-h-screen bg-[#f7f7f7] text-[#111111]">
+      {/* NAVBAR SUPERIOR */}
+      <header className="w-full bg-white shadow-sm">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-8">
+          {/* LOGO COMPLETO */}
+          <div className="flex items-center">
+            <Image
+              src="/logo-full.png"
+              alt="Alquila360"
+              width={200}
+              height={50}
+            />
+          </div>
+
+          {/* MENÚ */}
+          <nav className="flex gap-10 text-base text-[#303030]">
+            <a href="/" className="hover:text-emerald-600">
+              Inicio
+            </a>
+            <a href="/services" className="hover:text-emerald-600">
+              Servicios
+            </a>
+            <a href="/contacto" className="hover:text-emerald-600">
+              Contacto
+            </a>
+            <a
+              href="/sobre-nosotros"
+              className="font-semibold text-emerald-600"
+            >
+              Sobre nosotros
+            </a>
+          </nav>
+
+          <a
+            href="/login"
+            className="rounded-full border border-emerald-500 px-6 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-white"
+          >
+            Iniciar Sesión
+          </a>
+        </div>
+      </header>
+
+      {/* CONTENIDO */}
+      <section className="mx-auto max-w-7xl px-10 py-16">
+        <h1 className="mb-10 text-5xl font-bold">Sobre nosotros</h1>
+
+        <div className="space-y-16">
+          {/* BLOQUE 1: LOGO + TEXTO */}
+          <div className="flex flex-col items-center gap-10 md:flex-row">
+            {/* LOGO GRANDE */}
+            <div className="flex-1 flex justify-center">
+              <Image
+                src="/logo-sobre.png" // pon aquí tu png del logo grande
+                alt="Logo Alquila360"
+                width={260}
+                height={260}
+              />
+            </div>
+
+            {/* TEXTO */}
+            <div className="flex-1 text-base leading-relaxed">
+              <p className="mb-2">
+                <span className="font-bold">Alquila360</span> nace para
+                digitalizar el proceso de alquiler de propiedades, conectando
+                propietarios, inquilinos y técnicos en una sola plataforma.
+              </p>
+              <p>
+                Nuestro objetivo es simplificar la administración y brindar
+                confianza a ambas partes con una herramienta accesible y
+                profesional.
+              </p>
+            </div>
+          </div>
+
+          {/* BLOQUE 2: TEXTO + MUÑEQUITOS */}
+          <div className="flex flex-col items-center gap-10 md:flex-row">
+            {/* TEXTO ABAJO (MISMO TEXTO) */}
+            <div className="flex-1 text-base leading-relaxed">
+              <p className="mb-2">
+                <span className="font-bold">Alquila360</span> nace para
+                digitalizar el proceso de alquiler de propiedades, conectando
+                propietarios, inquilinos y técnicos en una sola plataforma.
+              </p>
+              <p>
+                Nuestro objetivo es simplificar la administración y brindar
+                confianza a ambas partes con una herramienta accesible y
+                profesional.
+              </p>
+            </div>
+
+            {/* IMAGEN MUÑEQUITOS */}
+            <div className="flex-1 flex justify-center">
+              <Image
+                src="/team.png" // aquí va la imagen de los muñequitos
+                alt="Equipo Alquila360"
+                width={380}
+                height={220}
+                className="object-contain"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t bg-[#1f2933] px-6 py-3 text-center text-xs text-gray-300">
+        © 2025 Alquila 360 – Gestión integral de alquileres · Contáctanos +591
+        76782341 · 4454323
+      </footer>
     </main>
   );
 }
