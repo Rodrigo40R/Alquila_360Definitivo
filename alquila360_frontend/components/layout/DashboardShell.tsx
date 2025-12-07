@@ -33,24 +33,22 @@ export default function DashboardShell({
         className="w-72 flex flex-col text-white"
         style={{ backgroundColor: colorSidebar }}
       >
-        {/* LOGO + ROL */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-50/10 border border-emerald-300/70 overflow-hidden">
+        {/* LOGO GRANDE + ROL */}
+        <div className="flex flex-col items-center justify-center px-4 py-6 border-b border-white/10">
+          <div className="w-full flex justify-center">
             <Image
-              src="/logo-icon.png"
-              alt="Alquila360 logo"
-              width={32}
-              height={32}
+              src="/logo_generico.png"
+              alt="Logo Alquila 360"
+              width={220}           // 🔹 más ancho
+              height={70}
               className="object-contain"
             />
           </div>
 
-          <div className="flex flex-col leading-tight">
-            <p className="text-xs opacity-80">{rol}</p>
-            <p className="text-sm font-semibold tracking-wide">
-              ALQUILA360
-            </p>
-          </div>
+          {/* ROL, MÁS CERCA DEL LOGO */}
+          <p className="mt-1 text-sm font-medium tracking-wide">
+            {rol}
+          </p>
         </div>
 
         {/* MENÚ */}
@@ -64,7 +62,7 @@ export default function DashboardShell({
                 className={`flex items-center rounded-lg px-4 py-2 text-sm font-medium transition ${
                   active
                     ? "bg-white text-slate-900 shadow-sm"
-                    : "text-white/80 hover:bg-white/10 hover:text-white"
+                    : "text-white/80 hover:bg:white/10 hover:text-white"
                 }`}
               >
                 {item.label}
@@ -73,7 +71,7 @@ export default function DashboardShell({
           })}
         </nav>
 
-        {/* FOOTER SIDEBAR */}
+        {/* FOOTER */}
         <div className="px-6 py-4 border-t border-white/10 text-xs text-white/70">
           © 2025 Alquila 360 – Gestión integral de alquileres
         </div>
@@ -81,7 +79,6 @@ export default function DashboardShell({
 
       {/* CONTENIDO */}
       <main className="flex-1 flex flex-col">
-        {/* BARRA SUPERIOR */}
         <header className="flex items-center justify-end px-8 py-4 bg-white shadow-sm">
           <form action="/login">
             <button
@@ -98,4 +95,3 @@ export default function DashboardShell({
     </div>
   );
 }
-
