@@ -19,7 +19,7 @@ const propiedades: Propiedad[] = [
     tipo: "Departamento",
     ubicacion: "Cochabamba",
     estado: "Ocupada",
-    imagen: "/propiedad-1.png",
+    imagen: "/departamento.png",
   },
   {
     id: 2,
@@ -35,7 +35,7 @@ const propiedades: Propiedad[] = [
     tipo: "Garzonier",
     ubicacion: "Cala Cala",
     estado: "Disponible",
-    imagen: "/propiedad-3.png",
+    imagen: "/garzonier.png",
   },
 ];
 

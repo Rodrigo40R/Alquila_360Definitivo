@@ -1,96 +1,136 @@
 "use client";
 
-import Input from "@/components/ui/Input";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createUser } from "@/app/services/user.services";
 
 export default function CrearUsuarioAdmin() {
   const router = useRouter();
 
   const [nombre, setNombre] = useState("");
-  const [correo, setCorreo] = useState("");
-  const [rol, setRol] = useState("INQUILINO");
-  const [password, setPassword] = useState("");
+  const [apellido, setApellido] = useState("");
+  const [lugarReferencia, setLugarReferencia] = useState("");
+  const [fechaNacimiento, setFechaNacimiento] = useState("");
+  const [celular, setCelular] = useState("");
+  const [numeroReferencia, setNumeroReferencia] = useState("");
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  async function handleSubmit(e: React.FormEvent) {
+  function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setLoading(true);
-    setError(null);
 
-    try {
-      await createUser({
-        nombre,
-        correo,
-        password,
-        tipo_usuario: rol,
-      });
+    console.log({
+      nombre,
+      apellido,
+      lugarReferencia,
+      fechaNacimiento,
+      celular,
+      numeroReferencia,
+    });
 
-      router.push("/admin/usuarios");
-    } catch (err: any) {
-      console.error(err);
-      setError("No se pudo crear el usuario");
-    } finally {
-      setLoading(false);
-    }
+    alert("Formulario demo enviado");
   }
 
   return (
-    <div className="space-y-6 max-w-xl">
-      <h1 className="text-2xl font-bold text-slate-900">Nuevo usuario</h1>
+    <div className="w-full flex justify-center">
+      {/* CARD */}
+      <div className="mt-8 w-full max-w-3xl rounded-2xl bg-slate-50 px-10 py-10 shadow-sm border border-slate-200">
+        <h2 className="mb-8 text-2xl font-bold text-slate-900">
+          Nuevo Usuario
+        </h2>
 
-      {error && (
-        <p className="text-sm text-red-500 bg-red-50 border border-red-200 px-3 py-2 rounded-md">
-          {error}
-        </p>
-      )}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* NOMBRE / APELLIDO */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-sm text-slate-700">Nombre</label>
+              <input
+                type="text"
+                placeholder="Ingrese el nombre"
+                value={nombre}
+                onChange={(e) => setNombre(e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
 
-      <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-sm text-slate-700">Apellido</label>
+              <input
+                type="text"
+                placeholder="Ingrese su apellido"
+                value={apellido}
+                onChange={(e) => setApellido(e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
 
-        <Input
-          label="Nombre completo"
-          value={nombre}
-          onChange={(e) => setNombre(e.target.value)}
-        />
+          {/* LUGAR DE REFERENCIA */}
+          <div className="space-y-1">
+            <label className="text-sm text-slate-700">Lugar de referencia</label>
+            <input
+              type="text"
+              placeholder="Ingrese el lugar de referencia"
+              value={lugarReferencia}
+              onChange={(e) => setLugarReferencia(e.target.value)}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
 
-        <Input
-          label="Correo electrónico"
-          value={correo}
-          onChange={(e) => setCorreo(e.target.value)}
-        />
+          {/* FECHA NACIMIENTO / CELULAR */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-1">
+              <label className="text-sm text-slate-700">
+                Fecha de nacimiento
+              </label>
+              <input
+                type="date"
+                value={fechaNacimiento}
+                onChange={(e) => setFechaNacimiento(e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
 
-        <Input
-          label="Contraseña"
-          type="password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
+            <div className="space-y-1">
+              <label className="text-sm text-slate-700">Celular</label>
+              <input
+                type="tel"
+                placeholder="Ingrese el celular"
+                value={celular}
+                onChange={(e) => setCelular(e.target.value)}
+                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+              />
+            </div>
+          </div>
 
-        <div className="space-y-1">
-          <label className="text-sm text-slate-600">Rol</label>
-          <select
-            className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
-            value={rol}
-            onChange={(e) => setRol(e.target.value)}
-          >
-            <option value="INQUILINO">Inquilino</option>
-            <option value="PROPIETARIO">Propietario</option>
-            <option value="TECNICO">Técnico</option>
-            <option value="ADMINISTRADOR">Admin</option>
-          </select>
-        </div>
+          {/* NÚMERO DE REFERENCIA */}
+          <div className="space-y-1">
+            <label className="text-sm text-slate-700">Número de referencia</label>
+            <input
+              type="text"
+              placeholder="Ingrese el número"
+              value={numeroReferencia}
+              onChange={(e) => setNumeroReferencia(e.target.value)}
+              className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+            />
+          </div>
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full bg-emerald-600 text-white hover:bg-emerald-700 py-2 rounded-full text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
-        >
-          {loading ? "Creando usuario..." : "Guardar usuario"}
-        </button>
-      </form>
+          {/* BOTONES */}
+          <div className="mt-4 flex items-center justify-end gap-6">
+            <button
+              type="button"
+              onClick={() => router.push("/admin/usuarios")}
+              className="text-sm text-slate-600 hover:text-slate-800 transition"
+            >
+              Cancelar
+            </button>
+
+            <button
+              type="submit"
+              className="rounded-md bg-emerald-500 px-6 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-600 hover:shadow-lg transition"
+            >
+              Guardar y Generar
+            </button>
+          </div>
+        </form>
+      </div>
     </div>
   );
 }

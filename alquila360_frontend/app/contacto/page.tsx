@@ -1,66 +1,147 @@
-/*"use client";
+"use client";
 
-export default function ContactoPage() {
+import Image from "next/image";
+
+function Item({ label, value }: { label: string; value: string }) {
   return (
-    <div className="space-y-12 max-w-3xl">
-      <h1 className="text-4xl font-bold text-slate-900">Contacto</h1>
-
-      <p className="text-slate-700 text-lg">
-        Si deseas comunicarte con nosotros, podemos ayudarte por estos medios:
-      </p>
-
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-        <Item label="Teléfono" value="+591 700-00000" />
-        <Item label="Email" value="contacto@alquila360.com" />
-        <Item label="WhatsApp" value="+591 700-00000" />
-        <Item label="Dirección" value="Cochabamba, Bolivia" />
-      </div>
-
-      <button className="px-6 py-3 bg-emerald-500 hover:bg-emerald-600 text-white rounded-md font-semibold">
-        Enviar mensaje
-      </button>
-    </div>
-  );
-}
-
-function Item({ label, value }: any) {
-  return (
-    <div className="flex justify-between text-sm">
+    <div className="flex justify-between gap-6 text-sm md:text-base">
       <span className="text-slate-600">{label}</span>
-      <span className="font-semibold text-slate-900">{value}</span>
+      <span className="font-semibold text-slate-900 text-right">
+        {value}
+      </span>
     </div>
   );
 }
-*/
+
 export default function ContactoPage() {
   return (
-    <main className="min-h-screen px-8 py-12">
-      <h1 className="text-3xl font-bold mb-4">Contacto</h1>
-      <p className="text-slate-700 mb-6">
-        Aquí puedes poner un formulario o la info de contacto.
-      </p>
-      <form className="max-w-xl space-y-4">
-        <input
-          type="text"
-          placeholder="Nombre"
-          className="w-full rounded-md border px-3 py-2"
-        />
-        <input
-          type="email"
-          placeholder="Correo"
-          className="w-full rounded-md border px-3 py-2"
-        />
-        <textarea
-          placeholder="Mensaje"
-          className="w-full rounded-md border px-3 py-2 h-32"
-        />
-        <button
-          type="submit"
-          className="rounded-md bg-emerald-500 px-5 py-2 text-white font-semibold hover:bg-emerald-600"
-        >
-          Enviar
-        </button>
-      </form>
+    <main className="min-h-screen bg-[#f7f7f7] text-[#111111]">
+      {/* NAVBAR SUPERIOR */}
+      <header className="w-full bg-white shadow-sm">
+        <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-8">
+          {/* LOGO COMPLETO */}
+          <div className="flex items-center">
+            <Image
+              src="/logo-full.png"
+              alt="Alquila360"
+              width={200}
+              height={50}
+              className="object-contain"
+            />
+          </div>
+
+          {/* MENÚ */}
+          <nav className="hidden gap-10 text-base text-[#303030] md:flex">
+            <a href="/" className="hover:text-emerald-600">
+              Inicio
+            </a>
+            <a href="/services" className="hover:text-emerald-600">
+              Servicios
+            </a>
+            <a
+              href="/contacto"
+              className="font-semibold text-emerald-600"
+            >
+              Contacto
+            </a>
+            <a href="/sobre-nosotros" className="hover:text-emerald-600">
+              Sobre nosotros
+            </a>
+          </nav>
+
+          <a
+            href="/login"
+            className="rounded-full border border-emerald-500 px-6 py-2 text-sm font-semibold text-emerald-600 transition hover:bg-emerald-500 hover:text-white"
+          >
+            Iniciar Sesión
+          </a>
+        </div>
+      </header>
+
+      {/* CONTENIDO */}
+      <section className="mx-auto max-w-7xl px-8 py-16">
+        <div className="grid gap-12 md:grid-cols-2">
+          {/* COLUMNA IZQUIERDA: INFO DE CONTACTO */}
+          <div>
+            <h1 className="mb-4 text-4xl font-bold text-slate-900">
+              Contacto
+            </h1>
+            <p className="mb-8 text-lg text-slate-700">
+              Si deseas comunicarte con nosotros, podemos ayudarte por estos
+              medios:
+            </p>
+
+            <div className="space-y-4 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+              <Item label="Teléfono" value="+591 700-00000" />
+              <Item label="Email" value="contacto@alquila360.com" />
+              <Item label="WhatsApp" value="+591 700-00000" />
+              <Item label="Dirección" value="Cochabamba, Bolivia" />
+            </div>
+          </div>
+
+          {/* COLUMNA DERECHA: FORMULARIO SIMPLE */}
+          <div className="rounded-2xl bg-white p-6 shadow-sm">
+            <h2 className="mb-4 text-xl font-semibold text-slate-900">
+              Envíanos un mensaje
+            </h2>
+            <p className="mb-6 text-sm text-slate-600">
+              Déjanos tus datos y un breve mensaje, y nos pondremos en
+              contacto contigo.
+            </p>
+
+            <form
+              className="space-y-4"
+              onSubmit={(e) => e.preventDefault()} // solo front por ahora
+            >
+              <div className="space-y-1 text-sm">
+                <label className="font-medium text-slate-800">
+                  Nombre
+                </label>
+                <input
+                  type="text"
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  placeholder="Escribe tu nombre"
+                />
+              </div>
+
+              <div className="space-y-1 text-sm">
+                <label className="font-medium text-slate-800">
+                  Correo electrónico
+                </label>
+                <input
+                  type="email"
+                  className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  placeholder="tucorreo@ejemplo.com"
+                />
+              </div>
+
+              <div className="space-y-1 text-sm">
+                <label className="font-medium text-slate-800">
+                  Mensaje
+                </label>
+                <textarea
+                  rows={4}
+                  className="w-full resize-none rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+                  placeholder="Cuéntanos en qué podemos ayudarte"
+                />
+              </div>
+
+              <button
+                type="submit"
+                className="mt-2 w-full rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white shadow-md transition hover:bg-emerald-600"
+              >
+                Enviar mensaje
+              </button>
+            </form>
+          </div>
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer className="border-t bg-[#1f2933] px-6 py-3 text-center text-xs text-gray-300">
+        © 2025 Alquila 360 – Gestión integral de alquileres · Contáctanos +591
+        76782341 · 4454323
+      </footer>
     </main>
   );
 }
