@@ -1,4 +1,4 @@
-"use client";
+/*"use client";
 
 export default function ContactoPage() {
   return (
@@ -29,5 +29,38 @@ function Item({ label, value }: any) {
       <span className="text-slate-600">{label}</span>
       <span className="font-semibold text-slate-900">{value}</span>
     </div>
+  );
+}
+*/
+export default function ContactoPage() {
+  return (
+    <main className="min-h-screen px-8 py-12">
+      <h1 className="text-3xl font-bold mb-4">Contacto</h1>
+      <p className="text-slate-700 mb-6">
+        Aquí puedes poner un formulario o la info de contacto.
+      </p>
+      <form className="max-w-xl space-y-4">
+        <input
+          type="text"
+          placeholder="Nombre"
+          className="w-full rounded-md border px-3 py-2"
+        />
+        <input
+          type="email"
+          placeholder="Correo"
+          className="w-full rounded-md border px-3 py-2"
+        />
+        <textarea
+          placeholder="Mensaje"
+          className="w-full rounded-md border px-3 py-2 h-32"
+        />
+        <button
+          type="submit"
+          className="rounded-md bg-emerald-500 px-5 py-2 text-white font-semibold hover:bg-emerald-600"
+        >
+          Enviar
+        </button>
+      </form>
+    </main>
   );
 }

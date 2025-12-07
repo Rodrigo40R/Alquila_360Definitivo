@@ -1,4 +1,4 @@
-export default function ServicesPage() {
+/*export default function ServicesPage() {
   const servicios = [
     {
       titulo: "Gestión completa de propiedades",
@@ -36,5 +36,17 @@ export default function ServicesPage() {
         ))}
       </div>
     </div>
+  );
+}
+*/
+export default function ServiciosPage() {
+  return (
+    <main className="min-h-screen px-8 py-12">
+      <h1 className="text-3xl font-bold mb-4">Servicios</h1>
+      <p className="text-slate-700">
+        Aquí va la descripción de los servicios de Alquila360 (gestión de
+        contratos, propiedades, tickets, pagos, etc.).
+      </p>
+    </main>
   );
 }

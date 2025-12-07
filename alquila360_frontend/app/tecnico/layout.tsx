@@ -9,15 +9,15 @@ export default function TecnicoLayout({
 }) {
   const menu = [
     { href: "/tecnico/dashboard", label: "Dashboard" },
-    { href: "/tecnico/tickets", label: "Tickets" },
-    { href: "/tecnico/perfil", label: "Perfil" },
+    { href: "/tecnico/tickets", label: "Mantenimiento (Tickets)" },
+    //{ href: "/tecnico/perfil", label: "Perfil" },
   ];
 
   return (
     <DashboardShell
       rol="Técnico"
       menu={menu}
-      colorSidebar="#005B73"
+      colorSidebar="#4F7942"
     >
       {children}
     </DashboardShell>

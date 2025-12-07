@@ -116,7 +116,7 @@ export default function LoginPage() {
           {/* LOGO COMPLETO */}
           <div className="flex items-center">
             <Image
-              src="/logo-full.png"   // 👈 nombre del archivo en /public
+              src="/logo-full.png"
               alt="Alquila360"
               width={220}
               height={50}
@@ -126,20 +126,22 @@ export default function LoginPage() {
 
           {/* MENÚ SUPERIOR */}
           <nav className="hidden gap-8 text-sm text-slate-700 md:flex">
-            <a href="#" className="hover:text-emerald-600">
+            <Link href="/" className="hover:text-emerald-600">
               Inicio
-            </a>
-            <a href="#" className="hover:text-emerald-600">
+            </Link>
+            <Link href="/services" className="hover:text-emerald-600">
               Servicios
-            </a>
-            <a href="#" className="hover:text-emerald-600">
+            </Link>
+            <Link href="/contacto" className="hover:text-emerald-600">
               Contacto
-            </a>
-            <a href="#" className="hover:text-emerald-600">
+            </Link>
+            <Link href="/sobre-nosotros" className="hover:text-emerald-600">
               Sobre nosotros
-            </a>
+            </Link>
           </nav>
 
+          {/* Aquí tiene sentido que este botón te lleve a la landing o no haga nada,
+              pero lo dejo igual que antes para no romper tu UX */}
           <button className="rounded-full border border-emerald-500 px-5 py-2 text-sm font-semibold text-emerald-600 hover:bg-emerald-50">
             Iniciar Sesión
           </button>

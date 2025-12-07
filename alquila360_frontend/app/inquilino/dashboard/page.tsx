@@ -1,149 +1,212 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  getInquilinoDashboard,
-  type DashboardInquilino,
-} from "@/app/services/user.services";
-import { getCurrentUser } from "@/lib/auth";
+import React, { useState } from "react";
 
-// "2026-02-12" -> "12 FEB"
-function formatFechaCorta(iso: string) {
-  const date = new Date(iso);
-  const dia = date.getDate().toString().padStart(2, "0");
-  const mes = date.toLocaleString("es-ES", { month: "short" }).toUpperCase();
-  return `${dia} ${mes}`;
-}
+export default function InquilinoDashboardPage() {
+  const [showForm, setShowForm] = useState(false);
 
-// Devuelve textos tipo "Hoy", "Hace 1 mes", etc.
-function formatFechaRelativa(iso: string) {
-  const fecha = new Date(iso);
-  const hoy = new Date();
-
-  const diffMs = hoy.getTime() - fecha.getTime();
-  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-  if (diffDias === 0) return "Hoy";
-  if (diffDias === 1) return "Hace 1 día";
-  if (diffDias < 30) return `Hace ${diffDias} días`;
-
-  const diffMeses = Math.floor(diffDias / 30);
-  if (diffMeses === 1) return "Hace 1 mes";
-  return `Hace ${diffMeses} meses`;
-}
-
-export default function DashboardInquilinoPage() {
-  const [dashboard, setDashboard] = useState<DashboardInquilino | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    async function cargarDashboard() {
-      try {
-        setLoading(true);
-
-        const user = getCurrentUser();
-        console.log("Usuario en sesión (dashboard):", user);
-
-        if (!user) {
-          setError("No hay usuario en sesión. Inicia sesión nuevamente.");
-          return;
-        }
-
-        if (!user.id) {
-          setError(
-            "El usuario en sesión no tiene un id válido (revisa el payload del JWT en la consola)."
-          );
-          return;
-        }
-
-          const data = await getInquilinoDashboard(user.id);
-        setDashboard(data);
-      } catch (err: any) {
-        console.error(err);
-        setError("No se pudo cargar el panel del inquilino.");
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    cargarDashboard();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-slate-900">
-          Panel del Inquilino
-        </h1>
-        <p>Cargando...</p>
-      </div>
-    );
-  }
-
-  if (error || !dashboard) {
-    return (
-      <div className="space-y-8">
-        <h1 className="text-3xl font-bold text-slate-900">
-          Panel del Inquilino
-        </h1>
-        <p className="text-red-500">{error ?? "Error al cargar datos"}</p>
-      </div>
-    );
-  }
-
-  // 👇 MISMO FORMATO QUE TENÍAS
-  const datos = {
-    proximoPago: formatFechaCorta(dashboard.proximoPago),
-    monto: `Bs. ${dashboard.montoMensual}`,
-    ticketsActivos: dashboard.ticketsActivos,
+  // Datos de ejemplo (luego los puedes traer del backend)
+  const proximaCuota = {
+    monto: 850,
+    venceEnDias: 5,
+    fecha: "22 de Noviembre de 2025",
+    alquiler: 750,
+    gastosComunes: 100,
+    multaMora: 0,
   };
 
-  const pagos = dashboard.ultimosPagos.map((pago) => ({
-    monto: `Bs. ${pago.monto}`,
-    estado: pago.estado === "PAGADO" ? "Pagado" : pago.estado,
-    fecha: formatFechaRelativa(pago.fecha),
-  }));
+  const cuotaVencida = {
+    monto: 935,
+    diasMora: 31,
+    fecha: "15 de Octubre de 2025",
+    alquiler: 750,
+    gastosComunes: 100,
+    multaMora: 85,
+  };
 
   return (
-    <div className="space-y-8">
-      <h1 className="text-3xl font-bold text-slate-900">Panel del Inquilino</h1>
+    <div className="flex flex-col gap-8">
+      {/* TÍTULO */}
+      <header>
+        <h1 className="text-2xl font-bold text-slate-900">Inquilino</h1>
+      </header>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Próximo pago</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {datos.proximoPago}
-          </p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Monto mensual</p>
-          <p className="text-2xl font-bold text-emerald-600">{datos.monto}</p>
-        </div>
-        <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-          <p className="text-sm text-slate-500">Tickets activos</p>
-          <p className="text-2xl font-bold text-slate-900">
-            {datos.ticketsActivos}
-          </p>
-        </div>
-      </div>
+      {/* SI showForm ES true → MUESTRO EL FORMULARIO */}
+      {showForm ? (
+        <section className="flex justify-center">
+          <div className="w-full max-w-3xl bg-[#f3f3f3] rounded-3xl p-8 shadow-sm border border-slate-200">
+            <h2 className="text-xl font-bold mb-6">Pagar</h2>
 
-      <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
-        <p className="font-semibold text-slate-900 mb-4">Últimos pagos</p>
-        <div className="space-y-3">
-          {pagos.map((p, i) => (
-            <div key={i} className="flex justify-between border-b pb-3">
-              <div>
-                <p className="font-medium text-slate-900">{p.monto}</p>
-                <p className="text-xs text-slate-500">{p.fecha}</p>
+            <form className="space-y-5 text-sm text-slate-800">
+              {/* Nombre de la factura */}
+              <div className="space-y-1">
+                <label className="block font-medium">Nombre de la factura</label>
+                <input
+                  type="text"
+                  placeholder="Ingrese el nombre"
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
               </div>
-              <span className="px-3 py-1 text-xs rounded-full bg-emerald-100 text-emerald-700">
-                {p.estado}
-              </span>
+
+              {/* NIT */}
+              <div className="space-y-1">
+                <label className="block font-medium">Número de NIT</label>
+                <input
+                  type="text"
+                  placeholder="Ingrese el NIT"
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              {/* Fecha + Método de pago */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="space-y-1">
+                  <label className="block font-medium">
+                    Fecha de adquisición
+                  </label>
+                  <input
+                    type="date"
+                    defaultValue="2025-08-17"
+                    className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                  />
+                </div>
+
+                <div className="space-y-1">
+                  <label className="block font-medium">Método de pago</label>
+                  <select className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500">
+                    <option>Seleccione una opción</option>
+                    <option>Transferencia bancaria</option>
+                    <option>Tarjeta de crédito</option>
+                    <option>Efectivo</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Cuotas pendientes */}
+              <div className="space-y-1">
+                <label className="block font-medium">Cuotas Pendientes</label>
+                <input
+                  type="number"
+                  placeholder="Ingrese el monto"
+                  className="w-full border border-slate-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+              </div>
+
+              {/* Botones */}
+              <div className="flex justify-end gap-4 pt-4 text-sm">
+                <button
+                  type="button"
+                  className="text-slate-600 hover:text-slate-800"
+                  onClick={() => setShowForm(false)}
+                >
+                  Cancelar
+                </button>
+
+                <button
+                  type="submit"
+                  className="px-5 py-2 rounded-md bg-emerald-500 hover:bg-emerald-600 text-white font-semibold"
+                >
+                  Guardar y Pagar
+                </button>
+              </div>
+            </form>
+          </div>
+        </section>
+      ) : (
+        /* SI showForm ES false → MUESTRO LAS TARJETAS */
+        <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {/* Tarjeta izquierda */}
+          <article className="bg-[#f9a64a] rounded-3xl p-6 shadow-lg flex flex-col justify-between">
+            <div className="space-y-2 text-center text-white">
+              <p className="text-xl font-extrabold">¡ATENCIÓN!</p>
+              <p className="font-semibold">
+                Vence en {proximaCuota.venceEnDias} días
+              </p>
             </div>
-          ))}
-        </div>
-      </div>
+
+            <div className="bg-white rounded-2xl mt-4 p-6 space-y-3 text-slate-800">
+              <p className="text-4xl font-bold text-center">
+                ${" "}
+                {proximaCuota.monto.toLocaleString("es-BO", {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <p className="text-center text-sm text-slate-600">
+                {proximaCuota.fecha}
+              </p>
+
+              <div className="border-t border-slate-300 pt-4 space-y-1 text-sm">
+                <div className="flex justify-between">
+                  <span>Alquiler de Propiedad:</span>
+                  <span>${proximaCuota.alquiler}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Gastos Comunes / Mantenimiento:</span>
+                  <span>${proximaCuota.gastosComunes}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Multas por Mora:</span>
+                  <span>
+                    ${proximaCuota.multaMora}{" "}
+                    {proximaCuota.multaMora === 0 && "(N/A)"}
+                  </span>
+                </div>
+              </div>
+
+              <button
+                className="mt-4 w-full bg-[#169c92] hover:bg-[#12857c] text-white font-semibold py-2.5 rounded-lg"
+                onClick={() => setShowForm(true)}
+              >
+                Pagar Cuota
+              </button>
+            </div>
+          </article>
+
+          {/* Tarjeta derecha */}
+          <article className="bg-[#e65b4f] rounded-3xl p-6 shadow-lg flex flex-col justify-between">
+            <div className="space-y-2 text-center text-white">
+              <p className="text-xl font-extrabold">¡CUOTA VENCIDA!</p>
+              <p className="font-semibold">
+                {cuotaVencida.diasMora} días de mora
+              </p>
+            </div>
+
+            <div className="bg-white rounded-2xl mt-4 p-6 space-y-3 text-slate-800">
+              <p className="text-4xl font-bold text-center">
+                $
+                {cuotaVencida.monto.toLocaleString("es-BO", {
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+              <p className="text-center text-sm text-slate-600">
+                {cuotaVencida.fecha}
+              </p>
+
+              <ul className="border-t border-slate-300 pt-4 space-y-1 text-sm list-disc list-inside">
+                <li>Alquiler de Propiedad: ${cuotaVencida.alquiler}</li>
+                <li>
+                  Gastos Comunes / Mantenimiento: $
+                  {cuotaVencida.gastosComunes}
+                </li>
+                <li>
+                  Multa por Pago Tardío (10%): ${cuotaVencida.multaMora}
+                </li>
+              </ul>
+
+              <button
+                className="mt-4 w-full bg-[#e65b4f] hover:bg-[#c8483d] text-white font-semibold py-2.5 rounded-lg"
+                onClick={() => setShowForm(true)}
+              >
+                Pagar Cuota
+              </button>
+            </div>
+          </article>
+        </section>
+      )}
+
+      <footer className="mt-6 text-center text-xs text-slate-500">
+        © 2025 Alquila 360 – Gestión integral de alquileres
+      </footer>
     </div>
   );
 }

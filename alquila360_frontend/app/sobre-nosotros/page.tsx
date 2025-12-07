@@ -1,4 +1,4 @@
-export default function SobreNosotros() {
+/*export default function SobreNosotros() {
   return (
     <div className="space-y-10 max-w-3xl">
       <h1 className="text-4xl font-bold text-slate-900">Sobre ALQUILA360</h1>
@@ -31,5 +31,18 @@ export default function SobreNosotros() {
         </ul>
       </section>
     </div>
+  );
+}
+*/
+export default function SobreNosotrosPage() {
+  return (
+    <main className="min-h-screen px-8 py-12">
+      <h1 className="text-3xl font-bold mb-4">Sobre nosotros</h1>
+      <p className="text-slate-700 leading-relaxed">
+        Aquí va la historia de Alquila360, misión, visión, y por qué facilita
+        la gestión de alquileres para administradores, propietarios, inquilinos
+        y técnicos.
+      </p>
+    </main>
   );
 }
