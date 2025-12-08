@@ -5,6 +5,7 @@ import 'dotenv/config';
 
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { AppDataSource } from './data-source';
 
 // ENTIDADES
 import { User } from './entity/user.entity';
@@ -22,7 +23,7 @@ import { Multa } from './entity/multa.entity';
 import { Cuota } from './entity/cuota.entity';
 import { Pago } from './entity/pago.entity';
 
-// MÓDULOS (como ya los tienes)
+// MÓDULOS
 import { UserModule } from './user/user.module';
 import { PropiedadModule } from './propiedad/propiedad.module';
 import { TicketModule } from './ticket/ticket.module';
@@ -37,37 +38,23 @@ import { AuthModule } from './auth/auth.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT),
-      username: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-
-      // 🔹 REGISTRAMOS TODAS LAS ENTIDADES AQUÍ
-      entities: [
-        User,
-        Propietario,
-        Inquilino,
-        Tecnico,
-        Administrador,
-        Propiedad,
-        Ticket,
-        Garantia,
-        Contrato,
-        Reporte,
-        Evaluacion,
-        Multa,
-        Cuota,
-        Pago,
-      ],
-
-      // puedes quitar autoLoadEntities, ya no hace falta
-      // autoLoadEntities: true,
-      synchronize: true,
-      logging: false,
-    }),
+    TypeOrmModule.forRoot(AppDataSource.options),
+    TypeOrmModule.forFeature([
+      User,
+      Propietario,
+      Inquilino,
+      Tecnico,
+      Administrador,
+      Propiedad,
+      Ticket,
+      Garantia,
+      Contrato,
+      Reporte,
+      Evaluacion,
+      Multa,
+      Cuota,
+      Pago,
+    ]),
 
     UserModule,
     PropiedadModule,

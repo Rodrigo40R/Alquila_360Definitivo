@@ -1,8 +1,29 @@
 "use client";
 
-import { useState } from "react";
+import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import Image from "next/image";
+import { registerUser, Rol, TipoUsuarioBack } from "@/lib/auth";
+
+const ROLES: { id: Rol; label: string }[] = [
+  { id: "propietario", label: "Propietario" },
+  { id: "inquilino", label: "Inquilino" },
+  { id: "tecnico", label: "Técnico" },
+];
+
+function mapRolToTipoUsuario(rol: Rol): TipoUsuarioBack {
+  switch (rol) {
+    case "propietario":
+      return "PROPIETARIO";
+    case "inquilino":
+      return "INQUILINO";
+    case "tecnico":
+      return "TECNICO";
+    case "administrador":
+      return "ADMINISTRADOR";
+    default:
+      return "PROPIETARIO";
+  }
+}
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -12,48 +33,71 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [confirmar, setConfirmar] = useState("");
   const [acepto, setAcepto] = useState(false);
+  const [rol, setRol] = useState<Rol>("propietario");
 
-  const handleRegister = (e: React.FormEvent) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null); // 👈 mensaje bonito
+
+  async function handleRegister(e: FormEvent) {
     e.preventDefault();
+    setError(null);
+    setSuccess(null);
 
     if (!nombre || !correo || !password || !confirmar) {
-      alert("Completa todos los campos.");
+      setError("Completa todos los campos.");
       return;
     }
 
     if (password !== confirmar) {
-      alert("Las contraseñas no coinciden.");
+      setError("Las contraseñas no coinciden.");
       return;
     }
 
     if (!acepto) {
-      alert("Debes aceptar términos y condiciones.");
+      setError("Debes aceptar términos y condiciones.");
       return;
     }
 
-    alert("Cuenta creada con éxito");
-    router.push("/login");
-  };
+    setLoading(true);
+
+    try {
+      await registerUser({
+        nombre,
+        correo,
+        password,
+        tipo_usuario: mapRolToTipoUsuario(rol),
+      });
+
+      // 👇 Mensaje bonito en vez de alert
+      setSuccess("Cuenta creada con éxito. Redirigiendo al inicio de sesión...");
+
+      // 👇 Redirección automática en 2 segundos
+      setTimeout(() => {
+        router.push("/login");
+      }, 2000);
+
+      // Limpia errores
+      setError(null);
+
+    } catch (err: any) {
+      setSuccess(null);
+      setError(err?.message || "Error al crear la cuenta");
+    } finally {
+      setLoading(false);
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-[#0E1E25] flex items-center justify-center px-4 py-8">
-      <div className="w-full max-w-2xl bg-white rounded-2xl shadow-xl px-10 py-12">
-        
-        {/* LOGO + TEXTO CENTRADOS */}
-        <div className="flex flex-col items-center mb-6">
-          <Image
-            src="/logo-icon.png"
-            alt="Logo Alquila360"
-            width={48}
-            height={48}
-          />
-          <Image
-            src="/logo-text.png"
-            alt="Texto Alquila360"
-            width={170}
-            height={40}
-            className="mt-2"
-          />
+    <div className="flex justify-center items-center bg-[#0E1E25] min-h-screen p-6">
+      <div className="bg-white w-full max-w-2xl rounded-2xl shadow-xl px-10 py-12">
+
+        {/* LOGO */}
+        <div className="flex items-center justify-center mb-4">
+          <div className="w-12 h-12 bg-emerald-600 text-white rounded-full flex items-center justify-center text-xl font-bold">
+            A
+          </div>
+          <span className="ml-3 text-2xl font-bold text-gray-800">ALQUILA360</span>
         </div>
 
         <h2 className="text-2xl md:text-3xl font-bold text-gray-900 text-center">
@@ -63,7 +107,36 @@ export default function RegisterPage() {
           Únete a la plataforma y simplifica tu gestión de alquileres.
         </p>
 
-        <form onSubmit={handleRegister} className="space-y-4 mt-6">
+        {/* MENSAJE DE ÉXITO */}
+        {success && (
+          <p className="text-center text-green-600 bg-green-100 border border-green-300 rounded-lg p-2 mb-4">
+            {success}
+          </p>
+        )}
+
+        {/* MENSAJE DE ERROR */}
+        {error && (
+          <p className="text-center text-red-600 bg-red-100 border border-red-300 rounded-lg p-2 mb-4">
+            {error}
+          </p>
+        )}
+
+        {/* FORMULARIO */}
+        <form onSubmit={handleRegister} className="space-y-4">
+
+          {/* ROL */}
+          <select
+            className="w-full p-3 rounded-lg border"
+            value={rol}
+            onChange={(e) => setRol(e.target.value as Rol)}
+          >
+            {ROLES.map((r) => (
+              <option key={r.id} value={r.id}>
+                {r.label}
+              </option>
+            ))}
+          </select>
+
           <input
             type="text"
             placeholder="Nombre Completo"
@@ -118,9 +191,10 @@ export default function RegisterPage() {
 
           <button
             type="submit"
-            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-lg font-semibold transition"
+            disabled={loading}
+            className="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg text-lg font-semibold transition disabled:opacity-50"
           >
-            Registrarse
+            {loading ? "Creando cuenta..." : "Registrarse"}
           </button>
         </form>
 

@@ -13,12 +13,13 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/auth.guard';
+import { InquilinoDashboardDto } from './dto/inquilino-dashboard.dto';
 
 @Controller('users')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
-    /**
+  /**
    * Registro de usuario (público)
    * POST /users
    */
@@ -27,7 +28,7 @@ export class UserController {
     return this.userService.create(createUserDto);
   }
 
-    /**
+  /**
    * Listar todos los usuarios (protegido con JWT)
    * GET /users
    */
@@ -45,6 +46,18 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
+  }
+
+  /**
+   * Dashboard del inquilino (a partir del id de usuario)
+   * GET /users/:id/dashboard-inquilino
+   */
+  //@UseGuards(JwtAuthGuard)
+  @Get(':id/dashboard-inquilino')
+  getInquilinoDashboard(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<InquilinoDashboardDto> {
+    return this.userService.getInquilinoDashboard(id);
   }
 
   /**

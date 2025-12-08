@@ -1,158 +1,160 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import React from "react";
 
-export default function AdminMantenimientoPage() {
+import {
+  getTickets,
+  type TicketFront as Ticket,
+  type Prioridad,
+  type EstadoTicket,
+} from "../../services/ticket.services";
+
+function pillPrioridad(p: Prioridad) {
+  if (p === "Alta") return "bg-red-100 text-red-700 border border-red-200";
+  if (p === "Media")
+    return "bg-amber-100 text-amber-700 border border-amber-200";
+  return "bg-sky-100 text-sky-700 border border-sky-200";
+}
+
+function pillEstado(e: EstadoTicket) {
+  if (e === "Solicitado")
+    return "bg-slate-100 text-slate-700 border border-slate-200";
+  if (e === "En proceso")
+    return "bg-amber-100 text-amber-700 border border-amber-200";
+  return "bg-emerald-100 text-emerald-700 border border-emerald-200";
+}
+
+export default function AdminTicketsPage() {
   const router = useRouter();
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const tickets = [
-    {
-      id: "#305",
-      titulo: "Fuga de agua en cocina",
-      propiedad: "Depto - Av. América",
-      inquilino: "Julio Cesar",
-      prioridad: "Alta",
-      estado: "En proceso",
-      fecha: "24/11/2025",
-    },
-    {
-      id: "#412",
-      titulo: "Cambio de focos pasillo",
-      propiedad: "Casa - Tiquipaya",
-      inquilino: "María Gómez",
-      prioridad: "Media",
-      estado: "Abierto",
-      fecha: "22/11/2025",
-    },
-    {
-      id: "#287",
-      titulo: "Revisión de caldera",
-      propiedad: "Garzonier - Cala Cala",
-      inquilino: "Carlos López",
-      prioridad: "Baja",
-      estado: "Cerrado",
-      fecha: "15/11/2025",
-    },
-  ];
+  useEffect(() => {
+    async function cargarTickets() {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getTickets();
+        setTickets(data);
+      } catch (err) {
+        console.error(err);
+        setError("No se pudieron obtener los tickets.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarTickets();
+  }, []);
 
   return (
-    <div className="flex flex-col gap-6 p-8">
-      <div>
-        <h1 className="text-2xl font-semibold text-slate-900">
-          Mantenimiento (Tickets)
-        </h1>
-        <p className="text-sm text-slate-500">
-          Control centralizado de tickets de mantenimiento y su estado.
-        </p>
-      </div>
-
-      {/* tarjetas resumen */}
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
-        <div className="rounded-xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Tickets totales</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-900">4</p>
+    <div className="px-6 py-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900">
+            Mantenimiento (Tickets)
+          </h1>
+          <p className="text-sm text-slate-500">
+            Administra las solicitudes de mantenimiento de todas las
+            propiedades.
+          </p>
         </div>
-        <div className="rounded-xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Abiertos</p>
-          <p className="mt-2 text-3xl font-semibold text-emerald-600">1</p>
-        </div>
-        <div className="rounded-xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">En proceso</p>
-          <p className="mt-2 text-3xl font-semibold text-amber-600">1</p>
-        </div>
-        <div className="rounded-xl bg-white p-4 shadow-sm">
-          <p className="text-sm text-slate-500">Cerrados</p>
-          <p className="mt-2 text-3xl font-semibold text-slate-900">1</p>
-        </div>
-      </div>
-
-      {/* filtros + botón nuevo ticket */}
-      <div className="flex flex-col items-start justify-between gap-3 md:flex-row md:items-center">
-        <div className="inline-flex rounded-full bg-slate-100 p-1 text-sm font-medium text-slate-600">
-          <button className="rounded-full bg-white px-4 py-1 text-emerald-700 shadow-sm">
-            Todos
-          </button>
-          <button className="px-4 py-1">Abiertos</button>
-          <button className="px-4 py-1">En proceso</button>
-          <button className="px-4 py-1">Cerrados</button>
-          <button className="px-4 py-1">Sin asignar</button>
-        </div>
-
         <button
-          onClick={() => router.push("/admin/mantenimiento/nuevo-ticket")}
-          className="inline-flex items-center gap-2 rounded-full bg-emerald-600 px-5 py-2 text-sm font-semibold text-white shadow-md hover:bg-emerald-700"
+          type="button"
+          onClick={() => router.push("/admin/tickets/nuevo")}
+          className="inline-flex items-center gap-2 rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white shadow hover:bg-emerald-600"
         >
-          + Nuevo ticket
+          <span className="text-lg leading-none">＋</span>
+          Nuevo ticket
         </button>
       </div>
 
-      {/* tabla de tickets */}
-      <div className="overflow-hidden rounded-xl bg-white shadow-sm">
-        <table className="min-w-full divide-y divide-slate-200 text-sm">
-          <thead className="bg-slate-50">
-            <tr>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                #
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Título
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Propiedad
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Inquilino
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Prioridad
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Estado
-              </th>
-              <th className="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wide text-slate-500">
-                Fecha
-              </th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-slate-100">
-            {tickets.map((t) => (
-              <tr key={t.id} className="hover:bg-slate-50">
-                <td className="px-4 py-3 text-slate-700">{t.id}</td>
-                <td className="px-4 py-3 text-slate-900">{t.titulo}</td>
-                <td className="px-4 py-3 text-slate-700">{t.propiedad}</td>
-                <td className="px-4 py-3 text-slate-700">{t.inquilino}</td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      t.prioridad === "Alta"
-                        ? "bg-rose-50 text-rose-600"
-                        : t.prioridad === "Media"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-sky-50 text-sky-700"
-                    }`}
-                  >
-                    {t.prioridad}
-                  </span>
-                </td>
-                <td className="px-4 py-3">
-                  <span
-                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
-                      t.estado === "Abierto"
-                        ? "bg-emerald-50 text-emerald-700"
-                        : t.estado === "En proceso"
-                        ? "bg-amber-50 text-amber-700"
-                        : "bg-slate-100 text-slate-700"
-                    }`}
-                  >
-                    {t.estado}
-                  </span>
-                </td>
-                <td className="px-4 py-3 text-slate-700">{t.fecha}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+        <div className="border-b border-slate-100 px-6 py-3 flex items-center justify-between">
+          <p className="text-sm font-medium text-slate-700">
+            Tickets de mantenimiento
+          </p>
+          <p className="text-xs text-slate-400">
+            {tickets.length} tickets registrados
+          </p>
+        </div>
+
+        {loading && (
+          <div className="px-6 py-4 text-sm text-slate-500">
+            Cargando tickets...
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="px-6 py-4 text-sm text-red-600">{error}</div>
+        )}
+
+        {!loading && !error && (
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+                <tr>
+                  <th className="px-6 py-3 text-left">Código</th>
+                  <th className="px-6 py-3 text-left">Propiedad de</th>
+                  <th className="px-6 py-3 text-left">Tipo</th>
+                  <th className="px-6 py-3 text-left">Prioridad</th>
+                  <th className="px-6 py-3 text-left">Estado</th>
+                  <th className="px-6 py-3 text-left">Fecha apertura</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                {tickets.map((t) => (
+                  <tr key={t.id} className="hover:bg-slate-50/80">
+                    <td className="px-6 py-4 text-slate-800 font-semibold">
+                      {t.codigo}
+                    </td>
+                    <td className="px-6 py-4 text-slate-700">
+                      {/* Aquí usamos el nombre del inquilino */}
+                      Propiedad de {t.propiedad}
+                    </td>
+                    <td className="px-6 py-4 text-slate-700">{t.tipo}</td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={
+                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
+                          pillPrioridad(t.prioridad)
+                        }
+                      >
+                        {t.prioridad}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span
+                        className={
+                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
+                          pillEstado(t.estado)
+                        }
+                      >
+                        {t.estado}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 text-slate-600">
+                      {t.fechaApertura}
+                    </td>
+                  </tr>
+                ))}
+
+                {tickets.length === 0 && (
+                  <tr>
+                    <td
+                      colSpan={6}
+                      className="px-6 py-6 text-center text-sm text-slate-500"
+                    >
+                      No hay tickets registrados.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </div>
   );
