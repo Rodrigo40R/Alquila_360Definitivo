@@ -32,14 +32,14 @@ export default function AdminDashboardPage() {
       {/* MOROSIDAD VS PAGOS + ALERTAS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
         {/* Morosidad vs pagos */}
-        <div className="lg:col-span-2 rounded-2xl bg-white shadow-sm border border-dashed border-emerald-200 p-6 flex flex-col items-center justify-center">
-          <p className="text-sm font-semibold text-slate-700 mb-1">
+        <div className="lg:col-span-2 rounded-2xl bg-white shadow-sm border border-dashed border-emerald-200 p-6 transition-colors duration-200 hover:bg-black group">
+           <p className="text-sm font-semibold text-slate-700 mb-1 group-hover:text-white">
             Morosidad vs Pagos
           </p>
-          <p className="text-xs text-slate-500 mb-6">últimos 6 meses</p>
-          <p className="text-sm text-slate-400">
-            Gráfico Morosidad vs Pagos (placeholder)
-          </p>
+         <p className="text-xs text-slate-500 mb-6 group-hover:text-white">últimos 6 meses</p>
+        <p className="text-sm text-slate-400 group-hover:text-white">
+        Gráfico Morosidad vs Pagos (placeholder)
+        </p>
         </div>
 
         {/* Alertas */}
