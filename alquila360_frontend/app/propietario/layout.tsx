@@ -17,7 +17,7 @@ const menu = [
     <DashboardShell
       rol="Propietario"
       menu={menu}
-      colorSidebar="#003B66" // azul oscuro
+      colorSidebar="#1E4A4F" // boe
     >
       {children}
     </DashboardShell>

@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 type TicketEstado = "pendiente" | "en_proceso" | "resuelto";
 
@@ -16,7 +16,7 @@ interface Ticket {
   prioridad: "alta" | "media" | "baja";
 }
 
-// 🔹 Datos mock: solo frontend. El backend luego devolverá estos datos.
+// 🔹 Datos mock
 const MOCK_TICKETS: Ticket[] = [
   {
     id: 1,
@@ -80,6 +80,29 @@ const MOCK_TICKETS: Ticket[] = [
   },
 ];
 
+function mapEstadoToTab(estado: TicketEstado): string {
+  if (estado === "pendiente") return "pendientes";
+  if (estado === "en_proceso") return "en-proceso";
+  return "resueltos";
+}
+
+function estadoToLabel(estado: TicketEstado): string {
+  if (estado === "pendiente") return "Pendiente";
+  if (estado === "en_proceso") return "En proceso";
+  return "Resuelto";
+}
+
+function cardColorsByEstado(estado: TicketEstado) {
+  switch (estado) {
+    case "pendiente":
+      return "bg-red-600";
+    case "en_proceso":
+      return "bg-amber-500";
+    case "resuelto":
+      return "bg-emerald-600";
+  }
+}
+
 export default function TecnicoDashboardPage() {
   const ticketsPendientes = useMemo(
     () => MOCK_TICKETS.filter((t) => t.estado === "pendiente"),
@@ -90,8 +113,25 @@ export default function TecnicoDashboardPage() {
     []
   );
 
-  const ticketUrgente =
-    ticketsPendientes.find((t) => t.prioridad === "alta") ?? ticketsPendientes[0] ?? null;
+  // Ticket urgente / seleccionado por defecto
+  const ticketPorDefecto =
+    ticketsPendientes.find((t) => t.prioridad === "alta") ??
+    ticketsPendientes[0] ??
+    ticketsEnProceso[0] ??
+    MOCK_TICKETS[0] ??
+    null;
+
+  // Estado local: ticket seleccionado en la tabla
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(
+    ticketPorDefecto ? ticketPorDefecto.id : null
+  );
+
+  const selectedTicket =
+    MOCK_TICKETS.find((t) => t.id === selectedTicketId) ?? ticketPorDefecto;
+
+  const resumenCardColor = selectedTicket
+    ? cardColorsByEstado(selectedTicket.estado)
+    : "bg-slate-400";
 
   return (
     <div className="w-full h-full bg-slate-50">
@@ -106,50 +146,59 @@ export default function TecnicoDashboardPage() {
           </p>
         </header>
 
-        {/* Bloque superior: ticket urgente + métricas */}
+        {/* Bloque superior */}
         <section className="grid grid-cols-1 lg:grid-cols-[2fr,1fr,1fr] gap-6 items-stretch">
-          {/* Ticket MAS URGENTE */}
-          <div className="rounded-xl bg-red-600 text-white p-6 shadow-md flex flex-col justify-between min-h-[200px]">
+          {/* Ticket SELECCIONADO */}
+          <div
+            className={`rounded-xl ${resumenCardColor} text-white p-6 shadow-md flex flex-col justify-between min-h-[220px]`}
+          >
             <div className="space-y-2">
               <p className="text-sm font-semibold tracking-wide uppercase">
-                Ticket MAS URGENTE
+                Ticket seleccionado
               </p>
               <h2 className="text-2xl font-bold leading-snug">
-                {ticketUrgente ? ticketUrgente.problema : "Sin tickets urgentes"}
+                {selectedTicket ? selectedTicket.problema : "Sin tickets"}
               </h2>
-              {ticketUrgente && (
+              {selectedTicket && (
                 <>
                   <p className="text-sm mt-1">
-                    {ticketUrgente.direccion}
+                    {selectedTicket.direccion}
                     <br />
-                    {ticketUrgente.departamento}
+                    {selectedTicket.departamento}
                   </p>
-                  <p className="text-xs mt-1 text-red-100">
+                  <p className="text-xs mt-1 text-emerald-50/80">
                     Prioridad:{" "}
-                    {ticketUrgente.prioridad === "alta"
+                    {selectedTicket.prioridad === "alta"
                       ? "Alta"
-                      : ticketUrgente.prioridad === "media"
+                      : selectedTicket.prioridad === "media"
                       ? "Media"
-                      : "Baja"}
+                      : "Baja"}{" "}
+                    · Estado: {estadoToLabel(selectedTicket.estado)}
                   </p>
                 </>
               )}
             </div>
 
             <div className="mt-4">
-              <Link
-                href="/tecnico/tickets?tab=en-proceso"
-                className="inline-flex items-center justify-center px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-sm font-semibold shadow-sm"
-              >
-                {ticketUrgente ? "Iniciar tarea" : "Ver tickets"}
-              </Link>
+              {selectedTicket && (
+                <Link
+                  href={`/tecnico/tickets?tab=${mapEstadoToTab(
+                    selectedTicket.estado
+                  )}&ticketId=${selectedTicket.id}`}
+                  className="inline-flex items-center justify-center px-6 py-2 rounded-full bg-white text-slate-900 text-sm font-semibold shadow-sm hover:bg-slate-100"
+                >
+                  Ver detalle en Mantenimiento
+                </Link>
+              )}
             </div>
           </div>
 
           {/* Tarjeta: en proceso */}
           <div className="rounded-xl bg-slate-100 p-6 flex flex-col justify-between shadow-sm">
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-slate-800">Tickets en Proceso</p>
+              <p className="text-sm font-semibold text-slate-800">
+                Tickets en Proceso
+              </p>
             </div>
             <div className="mt-4">
               <p className="text-4xl font-semibold text-slate-900">
@@ -167,7 +216,9 @@ export default function TecnicoDashboardPage() {
           {/* Tarjeta: pendientes */}
           <div className="rounded-xl bg-slate-100 p-6 flex flex-col justify-between shadow-sm">
             <div className="space-y-1">
-              <p className="text-sm font-semibold text-slate-800">Tickets Pendientes</p>
+              <p className="text-sm font-semibold text-slate-800">
+                Tickets Pendientes
+              </p>
             </div>
             <div className="mt-4">
               <p className="text-4xl font-semibold text-slate-900">
@@ -183,14 +234,14 @@ export default function TecnicoDashboardPage() {
           </div>
         </section>
 
-        {/* Tabla compacta SOLO pendientes */}
+        {/* Tabla de asignados (solo UI, sin filtros) */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900">
-              Tickets pendientes
+              Tickets asignados
             </h2>
             <Link
-              href="/tecnico/tickets?tab=pendientes"
+              href="/tecnico/tickets"
               className="text-xs font-medium text-emerald-600 hover:underline"
             >
               Ir a vista completa de Mantenimiento
@@ -204,40 +255,45 @@ export default function TecnicoDashboardPage() {
                   <th className="px-6 py-3 font-semibold">Problema</th>
                   <th className="px-6 py-3 font-semibold">Fecha</th>
                   <th className="px-6 py-3 font-semibold">Dirección</th>
+                  <th className="px-6 py-3 font-semibold">Estado</th>
                   <th className="px-6 py-3 font-semibold">Detalle</th>
                 </tr>
               </thead>
               <tbody>
-                {ticketsPendientes.length === 0 && (
-                  <tr>
-                    <td
-                      colSpan={4}
-                      className="px-6 py-8 text-center text-slate-500"
+                {MOCK_TICKETS.map((ticket, idx) => {
+                  const isSelected = ticket.id === selectedTicket?.id;
+                  return (
+                    <tr
+                      key={ticket.id}
+                      onClick={() => setSelectedTicketId(ticket.id)}
+                      className={`border-t border-slate-100 cursor-pointer ${
+                        isSelected
+                          ? "bg-emerald-50"
+                          : idx % 2 === 0
+                          ? "bg-white"
+                          : "bg-slate-50"
+                      } hover:bg-emerald-50/70 transition`}
                     >
-                      No tienes tickets pendientes.
-                    </td>
-                  </tr>
-                )}
-
-                {ticketsPendientes.map((ticket, idx) => (
-                  <tr
-                    key={ticket.id}
-                    className={`border-t border-slate-100 ${
-                      idx % 2 === 0 ? "bg-white" : "bg-slate-50"
-                    }`}
-                  >
-                    <td className="px-6 py-3 text-slate-800">{ticket.problema}</td>
-                    <td className="px-6 py-3 text-slate-700">{ticket.fecha}</td>
-                    <td className="px-6 py-3 text-slate-700">
-                      {ticket.direccion}
-                    </td>
-                    <td className="px-6 py-3 text-slate-700">
-                      {ticket.detalle.length > 60
-                        ? ticket.detalle.slice(0, 60) + "..."
-                        : ticket.detalle}
-                    </td>
-                  </tr>
-                ))}
+                      <td className="px-6 py-3 text-slate-800">
+                        {ticket.problema}
+                      </td>
+                      <td className="px-6 py-3 text-slate-700">
+                        {ticket.fecha}
+                      </td>
+                      <td className="px-6 py-3 text-slate-700">
+                        {ticket.direccion}
+                      </td>
+                      <td className="px-6 py-3 text-slate-700">
+                        {estadoToLabel(ticket.estado)}
+                      </td>
+                      <td className="px-6 py-3 text-slate-700">
+                        {ticket.detalle.length > 80
+                          ? ticket.detalle.slice(0, 80) + "..."
+                          : ticket.detalle}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -246,4 +302,3 @@ export default function TecnicoDashboardPage() {
     </div>
   );
 }
-

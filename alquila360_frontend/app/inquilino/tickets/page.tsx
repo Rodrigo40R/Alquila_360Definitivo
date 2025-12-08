@@ -196,7 +196,7 @@ export default function InquilinoTicketsPage() {
             }}
             className="mb-4 w-full rounded-full bg-emerald-500 text-white text-xs font-semibold py-2 hover:bg-emerald-600"
           >
-            + CREAR NUEVO TICKET
+            NUEVOS TICKET'S
           </button>
 
           {/* Lista */}

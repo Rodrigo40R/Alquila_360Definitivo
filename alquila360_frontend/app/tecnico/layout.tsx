@@ -17,7 +17,7 @@ export default function TecnicoLayout({
     <DashboardShell
       rol="Técnico"
       menu={menu}
-      colorSidebar="#4F7942"
+      colorSidebar="#38761D"
     >
       {children}
     </DashboardShell>
