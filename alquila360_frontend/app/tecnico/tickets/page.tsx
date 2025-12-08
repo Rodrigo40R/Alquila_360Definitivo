@@ -16,7 +16,7 @@ interface Ticket {
   prioridad: "alta" | "media" | "baja";
 }
 
-// 🔹 Datos MOCK: solo frontend, luego el backend trae los reales
+// 🔹 Datos MOCK (idénticos a dashboard)
 const MOCK_TICKETS: Ticket[] = [
   {
     id: 1,
@@ -86,13 +86,32 @@ const TAB_CONFIG = [
   { id: "resueltos", label: "Resueltos", estado: "resuelto" as TicketEstado },
 ];
 
+function cardColorsByEstado(estado: TicketEstado) {
+  switch (estado) {
+    case "pendiente":
+      return "bg-red-600";
+    case "en_proceso":
+      return "bg-amber-500";
+    case "resuelto":
+      return "bg-emerald-600";
+  }
+}
+
+function estadoToLabel(estado: TicketEstado): string {
+  if (estado === "pendiente") return "Pendiente";
+  if (estado === "en_proceso") return "En proceso";
+  return "Resuelto";
+}
+
 export default function TecnicoTicketsPage() {
   const searchParams = useSearchParams();
   const tabFromUrl = searchParams.get("tab");
+  const ticketIdFromUrl = searchParams.get("ticketId");
 
   const [activeTab, setActiveTab] = useState<string>("pendientes");
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
 
-  // Leer tab inicial desde la URL (?tab=pendientes|en-proceso|resueltos)
+  // Leer tab desde URL
   useEffect(() => {
     if (
       tabFromUrl === "en-proceso" ||
@@ -102,6 +121,15 @@ export default function TecnicoTicketsPage() {
       setActiveTab(tabFromUrl);
     }
   }, [tabFromUrl]);
+
+  // Leer ticketId desde URL
+  useEffect(() => {
+    if (!ticketIdFromUrl) return;
+    const id = Number(ticketIdFromUrl);
+    if (!Number.isNaN(id)) {
+      setSelectedTicketId(id);
+    }
+  }, [ticketIdFromUrl]);
 
   const ticketsPendientes = useMemo(
     () => MOCK_TICKETS.filter((t) => t.estado === "pendiente"),
@@ -130,9 +158,32 @@ export default function TecnicoTicketsPage() {
     }
   }, [currentTabConfig.estado, ticketsPendientes, ticketsEnProceso, ticketsResueltos]);
 
-  // Ticket más urgente: primer pendiente de prioridad alta
-  const ticketUrgente =
-    ticketsPendientes.find((t) => t.prioridad === "alta") ?? ticketsPendientes[0] ?? null;
+  // Ticket seleccionado
+  const ticketSeleccionado: Ticket | null = useMemo(() => {
+    if (selectedTicketId != null) {
+      const byId = MOCK_TICKETS.find((t) => t.id === selectedTicketId);
+      if (byId) return byId;
+    }
+    // Si no hay id, tomamos el primero del tab actual
+    const lista =
+      currentTabConfig.estado === "pendiente"
+        ? ticketsPendientes
+        : currentTabConfig.estado === "en_proceso"
+        ? ticketsEnProceso
+        : ticketsResueltos;
+
+    return lista[0] ?? null;
+  }, [
+    selectedTicketId,
+    currentTabConfig.estado,
+    ticketsPendientes,
+    ticketsEnProceso,
+    ticketsResueltos,
+  ]);
+
+  const resumenCardColor = ticketSeleccionado
+    ? cardColorsByEstado(ticketSeleccionado.estado)
+    : "bg-slate-400";
 
   return (
     <div className="w-full h-full bg-slate-50">
@@ -147,43 +198,46 @@ export default function TecnicoTicketsPage() {
           </p>
         </header>
 
-        {/* Arriba: ticket urgente + tarjetas de conteo */}
+        {/* Tarjeta superior: ticket seleccionado */}
         <section className="grid grid-cols-1 lg:grid-cols-[2fr,1fr,1fr] gap-6 items-stretch">
-          {/* Ticket MAS URGENTE */}
-          <div className="rounded-xl bg-red-600 text-white p-6 shadow-md flex flex-col justify-between min-h-[200px]">
+          <div
+            className={`rounded-xl ${resumenCardColor} text-white p-6 shadow-md flex flex-col justify-between min-h-[220px]`}
+          >
             <div className="space-y-2">
               <p className="text-sm font-semibold tracking-wide uppercase">
-                Ticket MAS URGENTE
+                Ticket seleccionado
               </p>
               <h2 className="text-2xl font-bold leading-snug">
-                {ticketUrgente ? ticketUrgente.problema : "Sin tickets urgentes"}
+                {ticketSeleccionado
+                  ? ticketSeleccionado.problema
+                  : "Sin tickets seleccionados"}
               </h2>
-              {ticketUrgente && (
+              {ticketSeleccionado && (
                 <>
                   <p className="text-sm mt-1">
-                    {ticketUrgente.direccion}
+                    {ticketSeleccionado.direccion}
                     <br />
-                    {ticketUrgente.departamento}
+                    {ticketSeleccionado.departamento}
                   </p>
-                  <p className="text-xs mt-1 text-red-100">
+                  <p className="text-xs mt-1 text-emerald-50/80">
                     Prioridad:{" "}
-                    {ticketUrgente.prioridad === "alta"
+                    {ticketSeleccionado.prioridad === "alta"
                       ? "Alta"
-                      : ticketUrgente.prioridad === "media"
+                      : ticketSeleccionado.prioridad === "media"
                       ? "Media"
-                      : "Baja"}
+                      : "Baja"}{" "}
+                    · Estado: {estadoToLabel(ticketSeleccionado.estado)}
                   </p>
                 </>
               )}
             </div>
 
             <div className="mt-4">
-              <button
-                onClick={() => setActiveTab("en-proceso")}
-                className="px-4 py-2 rounded-full bg-emerald-500 hover:bg-emerald-600 text-sm font-semibold shadow-sm"
-              >
-                {ticketUrgente ? "Iniciar Tarea" : "Ver tickets"}
-              </button>
+              {ticketSeleccionado && (
+                <button className="px-4 py-2 rounded-full bg-white text-slate-900 text-sm font-semibold shadow-sm cursor-default">
+                  {estadoToLabel(ticketSeleccionado.estado)}
+                </button>
+              )}
             </div>
           </div>
 
@@ -257,33 +311,54 @@ export default function TecnicoTicketsPage() {
                   </tr>
                 )}
 
-                {ticketsFiltrados.map((ticket, idx) => (
-                  <tr
-                    key={ticket.id}
-                    className={`border-t border-emerald-100 ${
-                      idx % 2 === 0 ? "bg-white" : "bg-emerald-50/60"
-                    }`}
-                  >
-                    <td className="px-6 py-3 text-slate-800">{ticket.problema}</td>
-                    <td className="px-6 py-3 text-slate-700">{ticket.fecha}</td>
-                    <td className="px-6 py-3">
-                      {ticket.estado === "pendiente" && (
-                        <span className="text-red-500 font-medium">Pendiente</span>
-                      )}
-                      {ticket.estado === "en_proceso" && (
-                        <span className="text-amber-500 font-medium">En proceso</span>
-                      )}
-                      {ticket.estado === "resuelto" && (
-                        <span className="text-emerald-600 font-medium">Resuelto</span>
-                      )}
-                    </td>
-                    <td className="px-6 py-3 text-slate-700">
-                      {ticket.detalle.length > 70
-                        ? ticket.detalle.slice(0, 70) + "..."
-                        : ticket.detalle}
-                    </td>
-                  </tr>
-                ))}
+                {ticketsFiltrados.map((ticket, idx) => {
+                  const isSelected = ticketSeleccionado
+                    ? ticket.id === ticketSeleccionado.id
+                    : false;
+
+                  return (
+                    <tr
+                      key={ticket.id}
+                      onClick={() => setSelectedTicketId(ticket.id)}
+                      className={`border-t border-emerald-100 cursor-pointer ${
+                        isSelected
+                          ? "bg-emerald-100"
+                          : idx % 2 === 0
+                          ? "bg-white"
+                          : "bg-emerald-50/60"
+                      } hover:bg-emerald-100/80 transition`}
+                    >
+                      <td className="px-6 py-3 text-slate-800">
+                        {ticket.problema}
+                      </td>
+                      <td className="px-6 py-3 text-slate-700">
+                        {ticket.fecha}
+                      </td>
+                      <td className="px-6 py-3">
+                        {ticket.estado === "pendiente" && (
+                          <span className="text-red-500 font-medium">
+                            Pendiente
+                          </span>
+                        )}
+                        {ticket.estado === "en_proceso" && (
+                          <span className="text-amber-500 font-medium">
+                            En proceso
+                          </span>
+                        )}
+                        {ticket.estado === "resuelto" && (
+                          <span className="text-emerald-600 font-medium">
+                            Resuelto
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-6 py-3 text-slate-700">
+                        {ticket.detalle.length > 70
+                          ? ticket.detalle.slice(0, 70) + "..."
+                          : ticket.detalle}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -292,3 +367,4 @@ export default function TecnicoTicketsPage() {
     </div>
   );
 }
+
