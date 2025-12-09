@@ -1,84 +1,17 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { getCurrentUser } from "@/lib/auth";
+import {
+  getTicketsByTecnico,
+  TicketTecnicoFront,
+  TicketEstadoTecnico,
+} from "@/app/services/ticket.services";
 
-type TicketEstado = "pendiente" | "en_proceso" | "resuelto";
-
-interface Ticket {
-  id: number;
-  problema: string;
-  fecha: string;
-  estado: TicketEstado;
-  detalle: string;
-  direccion: string;
-  departamento: string;
-  prioridad: "alta" | "media" | "baja";
-}
-
-// 🔹 Datos mock
-const MOCK_TICKETS: Ticket[] = [
-  {
-    id: 1,
-    problema: "Fuga de gas",
-    fecha: "12/02/2025",
-    estado: "pendiente",
-    detalle: "La fuga se debió a una rotura en la cañería del lavadero.",
-    direccion: "Avenida Central #123, Ap 1423",
-    departamento: "Dpto 1423",
-    prioridad: "alta",
-  },
-  {
-    id: 2,
-    problema: "Fuga de gas",
-    fecha: "12/02/2025",
-    estado: "pendiente",
-    detalle: "Fuga en la cocina principal.",
-    direccion: "Avenida Central #123, Ap 1203",
-    departamento: "Dpto 1203",
-    prioridad: "alta",
-  },
-  {
-    id: 3,
-    problema: "Fuga de gas",
-    fecha: "12/02/2025",
-    estado: "en_proceso",
-    detalle: "Se está verificando el regulador.",
-    direccion: "Avenida Central #88",
-    departamento: "Dpto 4B",
-    prioridad: "alta",
-  },
-  {
-    id: 4,
-    problema: "Fuga de gas",
-    fecha: "12/02/2025",
-    estado: "en_proceso",
-    detalle: "Revisión de mangueras internas.",
-    direccion: "Av. Aroma #55",
-    departamento: "Local 3",
-    prioridad: "media",
-  },
-  {
-    id: 5,
-    problema: "Fuga de gas",
-    fecha: "12/02/2025",
-    estado: "resuelto",
-    detalle: "Cambio completo de la tubería.",
-    direccion: "Calle Bolivia #33",
-    departamento: "Dpto 2A",
-    prioridad: "alta",
-  },
-  {
-    id: 6,
-    problema: "Fuga de gas",
-    fecha: "12/02/2025",
-    estado: "resuelto",
-    detalle: "Sellado de uniones.",
-    direccion: "Avenida Central #123",
-    departamento: "Dpto 102",
-    prioridad: "media",
-  },
-];
+// Alias para que tu código siga funcionando igual
+type TicketEstado = TicketEstadoTecnico;
+interface Ticket extends TicketTecnicoFront {}
 
 function mapEstadoToTab(estado: TicketEstado): string {
   if (estado === "pendiente") return "pendientes";
@@ -104,35 +37,86 @@ function cardColorsByEstado(estado: TicketEstado) {
 }
 
 export default function TecnicoDashboardPage() {
+  const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // 🟢 Cargar desde backend
+  useEffect(() => {
+  const user = getCurrentUser();
+
+  if (!user || user.id == null) {
+    setError("No se encontró la sesión de técnico.");
+    setLoading(false);
+    return;
+  }
+
+  const load = async () => {
+    try {
+      // 👇 aquí el cambio
+      const data = await getTicketsByTecnico(user.id!);
+      setTickets(data);
+
+      const ticketsPendientes = data.filter((t) => t.estado === "pendiente");
+      const ticketsEnProceso = data.filter(
+        (t) => t.estado === "en_proceso"
+      );
+
+      const ticketPorDefecto =
+        ticketsPendientes.find((t) => t.prioridad === "alta") ??
+        ticketsPendientes[0] ??
+        ticketsEnProceso[0] ??
+        data[0] ??
+        null;
+
+      setSelectedTicketId(ticketPorDefecto ? ticketPorDefecto.id : null);
+    } catch (err: any) {
+      setError(err?.message ?? "Error al cargar tickets");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  load();
+  }, []);
+
+  // 🔵 Derivados del estado
   const ticketsPendientes = useMemo(
-    () => MOCK_TICKETS.filter((t) => t.estado === "pendiente"),
-    []
+    () => tickets.filter((t) => t.estado === "pendiente"),
+    [tickets]
   );
+
   const ticketsEnProceso = useMemo(
-    () => MOCK_TICKETS.filter((t) => t.estado === "en_proceso"),
-    []
-  );
-
-  // Ticket urgente / seleccionado por defecto
-  const ticketPorDefecto =
-    ticketsPendientes.find((t) => t.prioridad === "alta") ??
-    ticketsPendientes[0] ??
-    ticketsEnProceso[0] ??
-    MOCK_TICKETS[0] ??
-    null;
-
-  // Estado local: ticket seleccionado en la tabla
-  const [selectedTicketId, setSelectedTicketId] = useState<number | null>(
-    ticketPorDefecto ? ticketPorDefecto.id : null
+    () => tickets.filter((t) => t.estado === "en_proceso"),
+    [tickets]
   );
 
   const selectedTicket =
-    MOCK_TICKETS.find((t) => t.id === selectedTicketId) ?? ticketPorDefecto;
+    tickets.find((t) => t.id === selectedTicketId) ?? null;
 
   const resumenCardColor = selectedTicket
     ? cardColorsByEstado(selectedTicket.estado)
     : "bg-slate-400";
 
+  // ============== Estados de carga y error ==============
+  if (loading) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-50">
+        <p className="text-sm text-slate-600">Cargando tickets...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="w-full h-full flex items-center justify-center bg-slate-50">
+        <p className="text-sm text-red-600">{error}</p>
+      </div>
+    );
+  }
+
+  // =================== UI PRINCIPAL =====================
   return (
     <div className="w-full h-full bg-slate-50">
       <div className="max-w-6xl mx-auto py-8 px-6 space-y-8">
@@ -234,7 +218,7 @@ export default function TecnicoDashboardPage() {
           </div>
         </section>
 
-        {/* Tabla de asignados (solo UI, sin filtros) */}
+        {/* Tabla de asignados */}
         <section className="space-y-3">
           <div className="flex items-center justify-between">
             <h2 className="text-sm font-semibold text-slate-900">
@@ -260,7 +244,7 @@ export default function TecnicoDashboardPage() {
                 </tr>
               </thead>
               <tbody>
-                {MOCK_TICKETS.map((ticket, idx) => {
+                {tickets.map((ticket, idx) => {
                   const isSelected = ticket.id === selectedTicket?.id;
                   return (
                     <tr
@@ -294,6 +278,14 @@ export default function TecnicoDashboardPage() {
                     </tr>
                   );
                 })}
+
+                {tickets.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-4 text-center text-slate-500">
+                      No tienes tickets asignados.
+                    </td>
+                  </tr>
+                )}
               </tbody>
             </table>
           </div>

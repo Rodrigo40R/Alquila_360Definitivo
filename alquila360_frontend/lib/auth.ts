@@ -1,7 +1,13 @@
 // src/lib/auth.ts
 
-// Tipo de rol que usas en el frontend
 export type Rol = "administrador" | "propietario" | "inquilino" | "tecnico";
+
+// Tipo de rol que espera el backend
+export type TipoUsuarioBack =
+  | "ADMINISTRADOR"
+  | "PROPIETARIO"
+  | "INQUILINO"
+  | "TECNICO";
 
 const SESSION_KEY = "alquila360_session";
 
@@ -12,11 +18,11 @@ export interface SessionStored {
 }
 
 export interface CurrentUser {
-  id: number | null;     // id del usuario (extraído del JWT)
+  id: number | null; // id del usuario (extraído del JWT)
   rol: Rol;
   correo: string;
   token: string;
-  payload?: any;         // payload completo del JWT (para debug)
+  payload?: any; // payload completo del JWT (para debug)
 }
 
 /**
@@ -87,14 +93,12 @@ export function getCurrentUser(): CurrentUser | null {
 
   const payload = parseJwt(session.token);
 
-  // Aquí intentamos varios nombres por si cambia en tu backend
   const id: number | null =
     (payload?.sub as number | undefined) ??
     (payload?.id as number | undefined) ??
     (payload?.userId as number | undefined) ??
     null;
 
-  // Para que puedas ver qué trae el token
   if (typeof window !== "undefined") {
     console.log("JWT payload (auth.ts):", payload);
   }
@@ -106,4 +110,43 @@ export function getCurrentUser(): CurrentUser | null {
     token: session.token,
     payload,
   };
+}
+
+/**
+ * REGISTRO DE USUARIO EN EL BACKEND
+ * Esta es la función que usa tu página RegisterPage.
+ */
+export async function registerUser(input: {
+  nombre: string;
+  correo: string;
+  password: string;
+  tipo_usuario: TipoUsuarioBack;
+}): Promise<void> {
+  // Ajusta la URL a la de tu backend
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/users`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(input),
+    }
+  );
+
+  if (!res.ok) {
+    // Intentamos leer el error del backend
+    let message = "Error al registrar usuario";
+    try {
+      const data = await res.json();
+      message = data.detail || data.message || message;
+    } catch {
+      // si no hay JSON, nos quedamos con el mensaje genérico
+    }
+    throw new Error(message);
+  }
+
+  // Si quieres puedes devolver algo (p.ej. el usuario creado)
+  // const data = await res.json();
+  // return data;
 }

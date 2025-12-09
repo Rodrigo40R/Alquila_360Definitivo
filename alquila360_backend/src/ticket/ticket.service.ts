@@ -19,6 +19,14 @@ import type { UserRepositoryPort } from '../user/ports/user.repo';
 import { Inquilino } from '../entity/inquilino.entity';
 import { Tecnico } from '../entity/tecnico.entity';
 
+// 👉 DTOs del dashboard de técnico
+import {
+  TecnicoDashboardDto,
+  TicketResumenTecnicoDto,
+  TicketEstadoFront,
+  TicketPrioridadFront,
+} from './dto/tecnico-dashboard.dto';
+
 @Injectable()
 export class TicketService {
   constructor(
@@ -149,5 +157,105 @@ export class TicketService {
     const ticket = await this.findOne(id);
     ticket.actualizarEstado(estado, subestado);
     return this.ticketRepo.update(id, ticket);
+  }
+
+  // ---------------------------------------------------------
+  // 🔥 NUEVA LÓGICA: DASHBOARD DEL TÉCNICO
+  // ---------------------------------------------------------
+
+  /** Normaliza el estado de la BD a los valores esperados por el front */
+  private mapEstadoBackToFront(estado: string): TicketEstadoFront {
+    const normalized = (estado || '').toUpperCase();
+    if (normalized === 'PENDIENTE') return 'pendiente';
+    if (normalized === 'EN_PROCESO') return 'en_proceso';
+    // cualquier otro lo tratamos como resuelto
+    return 'resuelto';
+  }
+
+  /** Normaliza la prioridad de la BD a los valores esperados por el front */
+  private mapPrioridadBackToFront(prioridad: string): TicketPrioridadFront {
+    const normalized = (prioridad || '').toUpperCase();
+    if (normalized === 'ALTA') return 'alta';
+    if (normalized === 'MEDIA') return 'media';
+    return 'baja';
+  }
+
+  /** Formatea una fecha a dd/MM/yyyy (si viene como Date o string ISO) */
+  private formatFecha(fechaRaw: any): string {
+    if (!fechaRaw) return '';
+
+    let d: Date;
+    if (fechaRaw instanceof Date) {
+      d = fechaRaw;
+    } else {
+      const parsed = new Date(fechaRaw);
+      if (isNaN(parsed.getTime())) return String(fechaRaw);
+      d = parsed;
+    }
+
+    const dd = String(d.getDate()).padStart(2, '0');
+    const mm = String(d.getMonth() + 1).padStart(2, '0');
+    const yyyy = d.getFullYear();
+    return `${dd}/${mm}/${yyyy}`;
+  }
+
+  /**
+   * Dashboard de técnico:
+   * - tickets asignados al técnico
+   * - ticket seleccionado por defecto
+   * - contadores de pendientes y en proceso
+   */
+  async getDashboardTecnico(idTecnico: number): Promise<TecnicoDashboardDto> {
+    // Reutilizamos la lógica de validación y búsqueda que ya tienes
+    const tickets = await this.findByTecnico(idTecnico);
+
+    const ticketsAsignados: TicketResumenTecnicoDto[] = tickets.map((t) => {
+      // Sacamos fecha (ajusta el nombre de la columna según tu entidad real)
+      const fechaRaw =
+        (t as any).fecha_creacion ?? (t as any).fecha ?? null;
+      const fecha = this.formatFecha(fechaRaw);
+
+      // Dirección y departamento desde el inquilino
+      const inq: any = t.inquilino || {};
+      const direccion = inq.direccion ?? '';
+      const departamento = inq.departamento ?? '';
+
+      const estadoFront = this.mapEstadoBackToFront(t.estado);
+      const prioridadFront = this.mapPrioridadBackToFront(t.prioridad);
+
+      return {
+        id: t.id_ticket,
+        problema: t.descripcion,
+        fecha,
+        estado: estadoFront,
+        detalle: t.descripcion,
+        direccion,
+        departamento,
+        prioridad: prioridadFront,
+      };
+    });
+
+    const ticketsPendientes = ticketsAsignados.filter(
+      (t) => t.estado === 'pendiente',
+    );
+    const ticketsEnProceso = ticketsAsignados.filter(
+      (t) => t.estado === 'en_proceso',
+    );
+
+    // Misma lógica que tu front: primero pendiente + alta prioridad,
+    // luego cualquier pendiente, luego en proceso, luego el primero
+    const ticketSeleccionado =
+      ticketsPendientes.find((t) => t.prioridad === 'alta') ??
+      ticketsPendientes[0] ??
+      ticketsEnProceso[0] ??
+      ticketsAsignados[0] ??
+      null;
+
+    return {
+      ticketSeleccionado,
+      ticketsAsignados,
+      ticketsEnProceso: ticketsEnProceso.length,
+      ticketsPendientes: ticketsPendientes.length,
+    };
   }
 }
