@@ -15,7 +15,7 @@ export interface TicketBack {
     apellido?: string;
   };
 
-  // 👇 añadimos estos opcionales para el dashboard de técnico
+  // Estos pueden existir o no en el back; no los usamos en el dashboard de técnico
   direccion?: string;
   departamento?: string;
   fecha_creacion?: string;
@@ -27,8 +27,8 @@ export interface TicketBack {
 export interface TicketFront {
   id: number;
   codigo: string;
-  propiedad: string;    // "Propiedad de ..."
-  tipo: string;         // descripción
+  propiedad: string; // "Propiedad de ..."
+  tipo: string; // descripción
   prioridad: Prioridad;
   estado: EstadoTicket;
   fechaApertura: string;
@@ -77,20 +77,17 @@ export const createTicket = async (data: {
 };
 
 //
-// ------------- NUEVO: servicio específico para el DASHBOARD DE TÉCNICO ---------
+// ------------- SERVICIO ESPECÍFICO PARA EL DASHBOARD DE TÉCNICO ---------
 //
 
 export type TicketEstadoTecnico = "pendiente" | "en_proceso" | "resuelto";
 
+// 👉 Solo lo que usa tu dashboard: problema(descripcion), prioridad, estado
 export interface TicketTecnicoFront {
   id: number;
-  problema: string;
-  fecha: string;
-  estado: TicketEstadoTecnico;
-  detalle: string;
-  direccion: string;
-  departamento: string;
+  descripcion: string;
   prioridad: "alta" | "media" | "baja";
+  estado: TicketEstadoTecnico;
 }
 
 function normalizarEstado(estado: string): TicketEstadoTecnico {
@@ -107,26 +104,13 @@ function normalizarPrioridad(p: string): "alta" | "media" | "baja" {
   return "baja";
 }
 
-function formatearFecha(raw?: string): string {
-  if (!raw) return "";
-  const d = new Date(raw);
-  if (isNaN(d.getTime())) return raw;
-  const dd = String(d.getDate()).padStart(2, "0");
-  const mm = String(d.getMonth() + 1).padStart(2, "0");
-  const yyyy = d.getFullYear();
-  return `${dd}/${mm}/${yyyy}`;
-}
-
+// Mapea el ticket del back a lo que necesita el dashboard de técnico
 const mapTicketBackToTecnico = (t: TicketBack): TicketTecnicoFront => {
   return {
     id: t.id_ticket,
-    problema: t.descripcion,
-    fecha: formatearFecha(t.fecha_creacion || t.fecha_apertura),
-    estado: normalizarEstado(t.estado),
-    detalle: t.descripcion,
-    direccion: t.direccion ?? "",
-    departamento: t.departamento ?? "",
+    descripcion: t.descripcion,
     prioridad: normalizarPrioridad(t.prioridad),
+    estado: normalizarEstado(t.estado),
   };
 };
 

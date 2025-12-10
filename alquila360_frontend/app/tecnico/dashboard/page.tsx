@@ -44,41 +44,40 @@ export default function TecnicoDashboardPage() {
 
   // 🟢 Cargar desde backend
   useEffect(() => {
-  const user = getCurrentUser();
+    const user = getCurrentUser();
 
-  if (!user || user.id == null) {
-    setError("No se encontró la sesión de técnico.");
-    setLoading(false);
-    return;
-  }
-
-  const load = async () => {
-    try {
-      // 👇 aquí el cambio
-      const data = await getTicketsByTecnico(user.id!);
-      setTickets(data);
-
-      const ticketsPendientes = data.filter((t) => t.estado === "pendiente");
-      const ticketsEnProceso = data.filter(
-        (t) => t.estado === "en_proceso"
-      );
-
-      const ticketPorDefecto =
-        ticketsPendientes.find((t) => t.prioridad === "alta") ??
-        ticketsPendientes[0] ??
-        ticketsEnProceso[0] ??
-        data[0] ??
-        null;
-
-      setSelectedTicketId(ticketPorDefecto ? ticketPorDefecto.id : null);
-    } catch (err: any) {
-      setError(err?.message ?? "Error al cargar tickets");
-    } finally {
+    if (!user || user.id == null) {
+      setError("No se encontró la sesión de técnico.");
       setLoading(false);
+      return;
     }
-  };
 
-  load();
+    const load = async () => {
+      try {
+        const data = await getTicketsByTecnico(user.id!);
+        setTickets(data);
+
+        const ticketsPendientes = data.filter((t) => t.estado === "pendiente");
+        const ticketsEnProceso = data.filter(
+          (t) => t.estado === "en_proceso"
+        );
+
+        const ticketPorDefecto =
+          ticketsPendientes.find((t) => t.prioridad === "alta") ??
+          ticketsPendientes[0] ??
+          ticketsEnProceso[0] ??
+          data[0] ??
+          null;
+
+        setSelectedTicketId(ticketPorDefecto ? ticketPorDefecto.id : null);
+      } catch (err: any) {
+        setError(err?.message ?? "Error al cargar tickets");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    load();
   }, []);
 
   // 🔵 Derivados del estado
@@ -141,25 +140,19 @@ export default function TecnicoDashboardPage() {
                 Ticket seleccionado
               </p>
               <h2 className="text-2xl font-bold leading-snug">
-                {selectedTicket ? selectedTicket.problema : "Sin tickets"}
+                {selectedTicket ? selectedTicket.descripcion : "Sin tickets"}
               </h2>
+
               {selectedTicket && (
-                <>
-                  <p className="text-sm mt-1">
-                    {selectedTicket.direccion}
-                    <br />
-                    {selectedTicket.departamento}
-                  </p>
-                  <p className="text-xs mt-1 text-emerald-50/80">
-                    Prioridad:{" "}
-                    {selectedTicket.prioridad === "alta"
-                      ? "Alta"
-                      : selectedTicket.prioridad === "media"
-                      ? "Media"
-                      : "Baja"}{" "}
-                    · Estado: {estadoToLabel(selectedTicket.estado)}
-                  </p>
-                </>
+                <p className="text-xs mt-1 text-emerald-50/80">
+                  Prioridad:{" "}
+                  {selectedTicket.prioridad === "alta"
+                    ? "Alta"
+                    : selectedTicket.prioridad === "media"
+                    ? "Media"
+                    : "Baja"}{" "}
+                  · Estado: {estadoToLabel(selectedTicket.estado)}
+                </p>
               )}
             </div>
 
@@ -237,10 +230,8 @@ export default function TecnicoDashboardPage() {
               <thead className="bg-slate-50">
                 <tr className="text-left text-slate-700">
                   <th className="px-6 py-3 font-semibold">Problema</th>
-                  <th className="px-6 py-3 font-semibold">Fecha</th>
-                  <th className="px-6 py-3 font-semibold">Dirección</th>
+                  <th className="px-6 py-3 font-semibold">Prioridad</th>
                   <th className="px-6 py-3 font-semibold">Estado</th>
-                  <th className="px-6 py-3 font-semibold">Detalle</th>
                 </tr>
               </thead>
               <tbody>
@@ -259,21 +250,17 @@ export default function TecnicoDashboardPage() {
                       } hover:bg-emerald-50/70 transition`}
                     >
                       <td className="px-6 py-3 text-slate-800">
-                        {ticket.problema}
+                        {ticket.descripcion}
                       </td>
                       <td className="px-6 py-3 text-slate-700">
-                        {ticket.fecha}
-                      </td>
-                      <td className="px-6 py-3 text-slate-700">
-                        {ticket.direccion}
+                        {ticket.prioridad === "alta"
+                          ? "Alta"
+                          : ticket.prioridad === "media"
+                          ? "Media"
+                          : "Baja"}
                       </td>
                       <td className="px-6 py-3 text-slate-700">
                         {estadoToLabel(ticket.estado)}
-                      </td>
-                      <td className="px-6 py-3 text-slate-700">
-                        {ticket.detalle.length > 80
-                          ? ticket.detalle.slice(0, 80) + "..."
-                          : ticket.detalle}
                       </td>
                     </tr>
                   );
@@ -281,7 +268,10 @@ export default function TecnicoDashboardPage() {
 
                 {tickets.length === 0 && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-4 text-center text-slate-500">
+                    <td
+                      colSpan={3}
+                      className="px-6 py-4 text-center text-slate-500"
+                    >
                       No tienes tickets asignados.
                     </td>
                   </tr>
