@@ -1,56 +1,43 @@
 "use client";
 
-import { useState } from "react";
-
-type Usuario = {
-  id: number;
-  nombre: string;
-  rol: "Inquilino" | "Propietario" | "Técnico";
-  email: string;
-  propiedad: string;
-  estado: "Activo" | "Inactivo";
-};
-
-const USUARIOS: Usuario[] = [
-  {
-    id: 1,
-    nombre: "Carlos López",
-    rol: "Inquilino",
-    email: "carlos@example.com",
-    propiedad: "Edificio Central 101",
-    estado: "Activo",
-  },
-  {
-    id: 2,
-    nombre: "María Gómez",
-    rol: "Propietario",
-    email: "maria@example.com",
-    propiedad: "Condominio Vista Verde",
-    estado: "Activo",
-  },
-  {
-    id: 3,
-    nombre: "Pedro Ríos",
-    rol: "Técnico",
-    email: "pedro@example.com",
-    propiedad: "—",
-    estado: "Activo",
-  },
-];
+import { useEffect, useState } from "react";
+import Link from "next/link";
+import Button from "@/components/ui/Button";
+import { getUsers, type User } from "@/app/services/user.services";
 
 const FILTROS = ["Todos", "Inquilinos", "Propietarios", "Técnicos"] as const;
 type Filtro = (typeof FILTROS)[number];
 
 export default function UsuariosAdminPage() {
   const [filtro, setFiltro] = useState<Filtro>("Todos");
+  const [usuarios, setUsuarios] = useState<User[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const usuariosFiltrados = USUARIOS.filter((u) => {
+  const usuariosFiltrados = usuarios.filter((u) => {
     if (filtro === "Todos") return true;
-    if (filtro === "Inquilinos") return u.rol === "Inquilino";
-    if (filtro === "Propietarios") return u.rol === "Propietario";
-    if (filtro === "Técnicos") return u.rol === "Técnico";
+    if (filtro === "Inquilinos") return u.tipo_usuario === "INQUILINO";
+    if (filtro === "Propietarios") return u.tipo_usuario === "PROPIETARIO";
+    if (filtro === "Técnicos") return u.tipo_usuario=== "TECNICO";
     return true;
   });
+
+  useEffect(() => {
+      async function cargarUsuarios() {
+        try {
+          setLoading(true);
+          const data = await getUsers();
+          setUsuarios(data);
+        } catch (err: any) {
+          console.error(err);
+          setError("No se pudieron obtener los usuarios.");
+        } finally {
+          setLoading(false);
+        }
+      }
+
+      cargarUsuarios();
+    }, []);
 
   return (
     <div className="space-y-8">
@@ -103,35 +90,32 @@ export default function UsuariosAdminPage() {
               <th className="px-6 py-3">Correo</th>
               <th className="px-6 py-3">Rol principal</th>
               <th className="px-6 py-3">Estado</th>
-              <th className="px-6 py-3">Propiedad</th>
             </tr>
           </thead>
 
           <tbody>
             {usuariosFiltrados.map((u, index) => (
               <tr
-                key={u.id}
+                key={u.id_usuario}
                 className={index % 2 === 0 ? "bg-white" : "bg-slate-50/50"}
               >
                 <td className="px-6 py-3 font-medium text-slate-900">{u.nombre}</td>
 
-                <td className="px-6 py-3 text-slate-600">{u.email}</td>
+                <td className="px-6 py-3 text-slate-600">{u.correo}</td>
 
-                <td className="px-6 py-3 text-slate-700">{u.rol}</td>
+                <td className="px-6 py-3 text-slate-700">{u.tipo_usuario}</td>
 
                 <td className="px-6 py-3">
                   <span
                     className={`inline-block rounded-full px-3 py-1 text-xs font-semibold ${
-                      u.estado === "Activo"
+                      u.estado_cuenta === "Activo"
                         ? "bg-emerald-50 text-emerald-700"
                         : "bg-slate-200 text-slate-600"
                     }`}
                   >
-                    {u.estado}
+                    {u.estado_cuenta}
                   </span>
                 </td>
-
-                <td className="px-6 py-3 text-slate-700">{u.propiedad}</td>
               </tr>
             ))}
           </tbody>

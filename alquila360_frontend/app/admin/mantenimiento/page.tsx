@@ -101,7 +101,6 @@ export default function AdminTicketsPage() {
                   <th className="px-6 py-3 text-left">Tipo</th>
                   <th className="px-6 py-3 text-left">Prioridad</th>
                   <th className="px-6 py-3 text-left">Estado</th>
-                  <th className="px-6 py-3 text-left">Fecha apertura</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -134,9 +133,6 @@ export default function AdminTicketsPage() {
                       >
                         {t.estado}
                       </span>
-                    </td>
-                    <td className="px-6 py-4 text-slate-600">
-                      {t.fechaApertura}
                     </td>
                   </tr>
                 ))}
