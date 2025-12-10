@@ -2,13 +2,19 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { InquilinoDashboardDto } from './dto/inquilino-dashboard.dto';
+import { InquilinoDashboardDto, CuotaDto, MultaDto } from './dto/inquilino-dashboard.dto';
 
-// 👇 Token de inyección del repositorio
+// 👇 Tokens de inyección de repositorios
 import { USER_REPOSITORY } from './ports/user.repo';
+import { CONTRATO_REPOSITORY } from '../contrato/ports/contrato.repo';
+import { CUOTA_REPOSITORY } from '../cuota/ports/cuota.repo';
+import { MULTA_REPOSITORY } from '../multa/ports/multa.repo';
 
-// 👇 Solo es tipo, para TypeScript
+// 👇 Solo tipos para TypeScript
 import type { UserRepositoryPort } from './ports/user.repo';
+import type { ContratoRepositoryPort } from '../contrato/ports/contrato.repo';
+import type { CuotaRepositoryPort } from '../cuota/ports/cuota.repo';
+import type { MultaRepositoryPort } from '../multa/ports/multa.repo';
 
 import { User } from '../entity/user.entity';
 
@@ -17,6 +23,12 @@ export class UserService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepo: UserRepositoryPort,
+    @Inject(CONTRATO_REPOSITORY)
+    private readonly contratoRepo: ContratoRepositoryPort,
+    @Inject(CUOTA_REPOSITORY)
+    private readonly cuotaRepo: CuotaRepositoryPort,
+    @Inject(MULTA_REPOSITORY)
+    private readonly multaRepo: MultaRepositoryPort,
   ) {}
 
   async create(createUserDto: CreateUserDto): Promise<User> {
@@ -57,53 +69,98 @@ export class UserService {
 
   /**
    * Datos del dashboard del inquilino a partir del id de usuario.
+   * 
+   * Retorna un array con 2 cuotas:
+   * [0] = cuota vencida más reciente (con multa si aplica)
+   * [1] = próxima cuota a vencer
    */
   async getInquilinoDashboard(userId: number): Promise<InquilinoDashboardDto> {
-    // 1. Buscar usuario usando el repositorio inyectado
+    // 1. Validar que el usuario existe
     const user = await this.userRepo.findOne(userId);
-
     if (!user) {
       throw new NotFoundException(`Usuario con id ${userId} no encontrado`);
     }
 
-    // (OPCIONAL) validar que sea inquilino según tu modelo
-    // if (user.tipo_usuario !== 'INQUILINO') {
-    //   throw new ForbiddenException('El usuario no es un inquilino');
-    // }
+    // 2. Buscar contratos del inquilino
+    const contratos = await this.contratoRepo.findByInquilino(userId);
+    if (contratos.length === 0) {
+      // Si no hay contratos, devolver array vacío
+      return {
+        cuotas: [null, null],
+        ticketsActivos: 0,
+      };
+    }
 
-    // 2. TODO: aquí deberías consultar contratos, cuotas/pagos, tickets, etc.
-    //    De momento dejamos datos mock para que el endpoint funcione
-    //    y puedas conectar el frontend y defender la idea.
+    // 3. Usar el primer contrato activo (o el más reciente)
+    const contrato = contratos[0];
 
-    const proximoPago = '2026-02-12'; // TODO: calcular desde la tabla cuotas
-    const montoMensual = 350;         // TODO: sacar del contrato activo
-    const ticketsActivos = 2;         // TODO: contar tickets con estado ABIERTO
+    // 4. Obtener todas las cuotas del contrato
+    const cuotas = await this.cuotaRepo.findByContrato(contrato.id_contrato);
 
-    const ultimosPagos = [
-      {
-        monto: 350,
-        fecha: new Date().toISOString(),
-        estado: 'PAGADO',
-      },
-      {
-        monto: 350,
-        fecha: new Date('2025-10-27').toISOString(),
-        estado: 'PAGADO',
-      },
-      {
-        monto: 350,
-        fecha: new Date('2025-09-27').toISOString(),
-        estado: 'PAGADO',
-      },
-    ];
+    // 5. Ordenar cuotas por fecha de vencimiento
+    const cuotasOrdenadas = cuotas.sort(
+      (a, b) => new Date(a.fecha_vencimiento).getTime() - new Date(b.fecha_vencimiento).getTime()
+    );
 
-    const dto: InquilinoDashboardDto = {
-      proximoPago,
-      montoMensual,
+    const hoy = new Date();
+
+    // 6. Filtrar: cuota próxima (vence en el futuro) y cuota vencida (vencio en el pasado)
+    const proximaCuota = cuotasOrdenadas.find(
+      (c) => new Date(c.fecha_vencimiento) >= hoy
+    );
+    const cuotasVencidas = cuotasOrdenadas.filter(
+      (c) => new Date(c.fecha_vencimiento) < hoy
+    );
+    const cuotaVencidaReciente = cuotasVencidas.length > 0 
+      ? cuotasVencidas[cuotasVencidas.length - 1] // la más vencida recientemente
+      : null;
+
+    // 7. Convertir a DTOs, buscando multas si aplica
+    const cuotaVencidaDto = cuotaVencidaReciente
+      ? await this.mapearCuotaADto(cuotaVencidaReciente, contrato.monto_mensual)
+      : null;
+
+    const proximaCuotaDto = proximaCuota
+      ? await this.mapearCuotaADto(proximaCuota, contrato.monto_mensual)
+      : null;
+
+    // 8. TODO: obtener cantidad de tickets activos del inquilino
+    const ticketsActivos = 0; // placeholder
+
+    return {
+      cuotas: [cuotaVencidaDto, proximaCuotaDto],
       ticketsActivos,
-      ultimosPagos,
     };
+  }
 
-    return dto;
+  /**
+   * Mapea una Cuota a CuotaDto, incluyendo multa si existe
+   */
+  private async mapearCuotaADto(cuota: any, alquilerPropiedad: number): Promise<CuotaDto> {
+    // Buscar multa asociada a esta cuota
+    let multa: MultaDto | null = null;
+
+    const multas = await this.multaRepo.findByContrato((cuota.contrato as any)?.id_contrato || 0);
+    const multaAsociada = multas.find((m) => (m.cuota as any)?.id_cuota === cuota.id_cuota);
+
+    if (multaAsociada) {
+      multa = {
+        id_multa: multaAsociada.id_multa,
+        tipo: multaAsociada.tipo,
+        monto: Number(multaAsociada.monto),
+        fecha: multaAsociada.fecha.toString(),
+        estado: multaAsociada.estado,
+        descripcion: multaAsociada.descripcion,
+      };
+    }
+
+    return {
+      id_cuota: cuota.id_cuota,
+      monto: Number(cuota.monto),
+      fecha_vencimiento: cuota.fecha_vencimiento.toString(),
+      estado: cuota.estado,
+      alquilerPropiedad,
+      multa,
+    };
   }
 }

@@ -13,6 +13,7 @@ import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from '../auth/auth.guard';
+import { CurrentUser } from '../common/current-user.decorator';
 import { InquilinoDashboardDto } from './dto/inquilino-dashboard.dto';
 
 @Controller('users')
@@ -39,6 +40,19 @@ export class UserController {
   }
 
   /**
+   * Dashboard del inquilino (obtiene el ID del token JWT)
+   * GET /users/dashboard-inquilino
+   * NOTA: Esta ruta DEBE estar antes de GET /users/:id
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('dashboard-inquilino')
+  getInquilinoDashboard(
+    @CurrentUser('id_usuario') userId: number,
+  ): Promise<InquilinoDashboardDto> {
+    return this.userService.getInquilinoDashboard(userId);
+  }
+
+  /**
    * Obtener un usuario por ID (protegido)
    * GET /users/:id
    */
@@ -46,18 +60,6 @@ export class UserController {
   @Get(':id')
   findOne(@Param('id', ParseIntPipe) id: number) {
     return this.userService.findOne(id);
-  }
-
-  /**
-   * Dashboard del inquilino (a partir del id de usuario)
-   * GET /users/:id/dashboard-inquilino
-   */
-  //@UseGuards(JwtAuthGuard)
-  @Get(':id/dashboard-inquilino')
-  getInquilinoDashboard(
-    @Param('id', ParseIntPipe) id: number,
-  ): Promise<InquilinoDashboardDto> {
-    return this.userService.getInquilinoDashboard(id);
   }
 
   /**
