@@ -159,10 +159,6 @@ export class TicketService {
     return this.ticketRepo.update(id, ticket);
   }
 
-  // ---------------------------------------------------------
-  // 🔥 NUEVA LÓGICA: DASHBOARD DEL TÉCNICO
-  // ---------------------------------------------------------
-
   /** Normaliza el estado de la BD a los valores esperados por el front */
   private mapEstadoBackToFront(estado: string): TicketEstadoFront {
     const normalized = (estado || '').toUpperCase();
