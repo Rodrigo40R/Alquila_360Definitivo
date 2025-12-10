@@ -1,45 +1,20 @@
 "use client";
 
-<<<<<<< HEAD
-export default function UserPage() {
-  return (
-    <div className="space-y-6 max-w-xl">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-900">
-          Perfil de usuario
-        </h1>
-        <p className="text-sm text-slate-600">
-          Información general del usuario en la plataforma.
-        </p>
-      </div>
-
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm space-y-4">
-        <div className="flex flex-col items-center gap-3">
-          <div className="h-16 w-16 rounded-full bg-slate-100 flex items-center justify-center text-xl font-semibold text-slate-500">
-            U
-          </div>
-          <div className="text-center space-y-1">
-            <p className="text-base font-semibold text-slate-900">
-              Usuario de ejemplo
-            </p>
-            <p className="text-sm text-slate-600">Rol: Administrador</p>
-=======
 import { useState, FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
-import Button from "@/components/ui/Button";
-import { loginUser } from "@/lib/auth"; // lo seguimos usando para guardar sesión simulada
-import { login, RolFront, TipoUsuarioBack } from "../services/auth.services";
+import { loginUser, Rol, TipoUsuarioBack } from "@/lib/auth";
+import { login } from "../services/auth.services";
 
 // Definimos los roles con el tipo correcto
-const ROLES: { id: RolFront; label: string }[] = [
+const ROLES: { id: Rol; label: string }[] = [
   { id: "propietario", label: "Propietario" },
   { id: "inquilino", label: "Inquilino" },
   { id: "tecnico", label: "Técnico" },
 ];
 
 // Mapeo rol del front -> tipo_usuario que espera el backend
-function mapRolToTipoUsuario(rol: RolFront): TipoUsuarioBack {
+function mapRolToTipoUsuario(rol: Rol): TipoUsuarioBack {
   switch (rol) {
     case "administrador":
       return "ADMINISTRADOR";
@@ -53,7 +28,7 @@ function mapRolToTipoUsuario(rol: RolFront): TipoUsuarioBack {
 }
 
 export default function LoginPage() {
-  const [rol, setRol] = useState<RolFront>("propietario");
+  const [rol, setRol] = useState<Rol>("propietario");
   const [correo, setCorreo] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
@@ -83,11 +58,8 @@ export default function LoginPage() {
 
       console.log("⬅️ Backend respondió:", { access_token, user });
 
-      // (Opcional) guarda el token
-      // localStorage.setItem("token", access_token);
-
-      // Mantienes tu sesión simulada por ahora
-      loginUser(rol, correo);
+      // Guarda la sesión con el token del backend
+      loginUser(rol, correo, access_token);
 
       // Redirecciona según rol
       const destino =
@@ -135,23 +107,8 @@ export default function LoginPage() {
               className="w-full rounded-xl border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-50 placeholder:text-slate-500 focus:border-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-400"
               placeholder="tucorreo@ejemplo.com"
             />
->>>>>>> master
           </div>
 
-<<<<<<< HEAD
-        <div className="pt-2 space-y-2 text-sm">
-          <div className="flex justify-between">
-            <span className="text-slate-500">Correo:</span>
-            <span className="text-slate-800">usuario@example.com</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-slate-500">Estado:</span>
-            <span className="text-emerald-700 font-semibold">Activo</span>
-          </div>
-        </div>
-      </div>
-    </div>
-=======
           {/* PASSWORD */}
           <div className="space-y-1">
             <label className="text-xs font-medium text-slate-200">
@@ -196,9 +153,13 @@ export default function LoginPage() {
           )}
 
           {/* BOTÓN SUBMIT */}
-          <Button type="submit" size="md" className="w-full mt-2" disabled={loading}>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full mt-2 rounded-xl bg-emerald-600 px-4 py-2 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
             {loading ? "Entrando..." : "Entrar"}
-          </Button>
+          </button>
         </form>
 
         {/* FOOTER */}
@@ -213,6 +174,5 @@ export default function LoginPage() {
         </p>
       </div>
     </main>
->>>>>>> master
   );
 }
