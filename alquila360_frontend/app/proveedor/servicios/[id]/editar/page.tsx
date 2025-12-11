@@ -12,7 +12,7 @@ export default function EditarServicioProveedor() {
         <Input label="Nombre" defaultValue="Plomería" />
         <Input label="Descripción" defaultValue="Reparación de fugas…" />
 
-        <Button type="submit">Guardar cambios</Button>
+        {/* <Button type="submit">Guardar cambios</Button> */}
       </div>
     </div>
   );

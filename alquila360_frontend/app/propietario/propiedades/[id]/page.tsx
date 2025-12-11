@@ -1,13 +1,13 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { getCurrentUser } from "@/lib/auth";
 
 type PageProps = {
-  params: {
+  params: Promise<{
     id: string;
-  };
+  }>;
 };
 
 type DetallePropiedad = {
@@ -23,7 +23,7 @@ type DetallePropiedad = {
 
 export default function DetallePropiedadPage({ params }: PageProps) {
   const router = useRouter();
-  const idPropiedad = params.id;
+  const { id: idPropiedad } = use(params);
 
   const [propiedad, setPropiedad] = useState<DetallePropiedad | null>(null);
   const [loading, setLoading] = useState(true);

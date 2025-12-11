@@ -5,6 +5,7 @@ import { useEffect, useMemo, useState } from "react";
 import { getCurrentUser } from "@/lib/auth";
 import {
   getTicketsByTecnico,
+  resolverTicket,
   TicketTecnicoFront,
   TicketEstadoTecnico,
 } from "@/app/services/ticket.services";
@@ -41,6 +42,7 @@ export default function TecnicoDashboardPage() {
   const [selectedTicketId, setSelectedTicketId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [resolviendo, setResolviendo] = useState(false);
 
   // 🟢 Cargar desde backend
   useEffect(() => {
@@ -79,6 +81,42 @@ export default function TecnicoDashboardPage() {
 
     load();
   }, []);
+
+  // 🟢 Marcar ticket como resuelto
+  const handleResolverTicket = async (ticketId: number) => {
+    if (resolviendo) return;
+
+    const confirmar = window.confirm(
+      "¿Estás seguro de marcar este ticket como Resuelto?"
+    );
+    if (!confirmar) return;
+
+    setResolviendo(true);
+    try {
+      await resolverTicket(ticketId);
+      
+      // Actualizar estado local
+      setTickets((prev) =>
+        prev.map((t) =>
+          t.id === ticketId ? { ...t, estado: "resuelto" as TicketEstadoTecnico } : t
+        )
+      );
+
+      // Si era el ticket seleccionado, deseleccionar
+      if (selectedTicketId === ticketId) {
+        const siguienteTicket = tickets.find(
+          (t) => t.id !== ticketId && t.estado !== "resuelto"
+        );
+        setSelectedTicketId(siguienteTicket?.id ?? null);
+      }
+
+      alert("Ticket marcado como Resuelto exitosamente");
+    } catch (err: any) {
+      alert(err?.message ?? "Error al resolver el ticket");
+    } finally {
+      setResolviendo(false);
+    }
+  };
 
   // 🔵 Derivados del estado
   const ticketsPendientes = useMemo(
@@ -232,11 +270,14 @@ export default function TecnicoDashboardPage() {
                   <th className="px-6 py-3 font-semibold">Problema</th>
                   <th className="px-6 py-3 font-semibold">Prioridad</th>
                   <th className="px-6 py-3 font-semibold">Estado</th>
+                  <th className="px-6 py-3 font-semibold">Acciones</th>
                 </tr>
               </thead>
               <tbody>
                 {tickets.map((ticket, idx) => {
                   const isSelected = ticket.id === selectedTicket?.id;
+                  const puedeResolver = ticket.estado !== "resuelto";
+                  
                   return (
                     <tr
                       key={ticket.id}
@@ -262,6 +303,24 @@ export default function TecnicoDashboardPage() {
                       <td className="px-6 py-3 text-slate-700">
                         {estadoToLabel(ticket.estado)}
                       </td>
+                      <td className="px-6 py-3">
+                        {puedeResolver ? (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleResolverTicket(ticket.id);
+                            }}
+                            disabled={resolviendo}
+                            className="px-3 py-1 text-xs font-medium text-white bg-emerald-600 rounded-md hover:bg-emerald-700 disabled:bg-slate-400 disabled:cursor-not-allowed transition"
+                          >
+                            {resolviendo ? "..." : "Resolver"}
+                          </button>
+                        ) : (
+                          <span className="text-xs text-slate-500">
+                            Resuelto
+                          </span>
+                        )}
+                      </td>
                     </tr>
                   );
                 })}
@@ -269,7 +328,7 @@ export default function TecnicoDashboardPage() {
                 {tickets.length === 0 && (
                   <tr>
                     <td
-                      colSpan={3}
+                      colSpan={4}
                       className="px-6 py-4 text-center text-slate-500"
                     >
                       No tienes tickets asignados.

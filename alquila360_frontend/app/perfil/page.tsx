@@ -14,7 +14,7 @@ export default function EditarPerfilPage() {
         <Input label="Contraseña" type="password" />
         <Input label="Teléfono" defaultValue="+591 72000000" />
 
-        <Button type="submit">Guardar cambios</Button>
+        {/* <Button type="submit">Guardar cambios</Button> */}
       </div>
     </div>
   );

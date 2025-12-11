@@ -15,6 +15,8 @@ interface LoginInput {
 const BASE_URL =
   process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
 
+console.log("API URL:", BASE_URL);
+
 export async function login(data: LoginInput) {
   // 👇 AJUSTA *UNA* DE ESTAS DOS LÍNEAS SEGÚN tu main.ts
 

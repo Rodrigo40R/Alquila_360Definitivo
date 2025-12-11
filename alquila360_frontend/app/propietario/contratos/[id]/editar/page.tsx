@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, use } from "react";
 import { getCurrentUser } from "@/lib/auth";
 
-export default function EditarContratoPage({ params }: { params: { id: string } }) {
+export default function EditarContratoPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const idContrato = params.id;
+  const { id: idContrato } = use(params);
 
   // Estados simples
   const [loading, setLoading] = useState(true);

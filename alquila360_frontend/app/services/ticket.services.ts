@@ -1,5 +1,7 @@
+
 // app/services/ticket.services.ts
 import { instance } from "../utils/axios.util";
+import { getStoredSession } from "@/lib/auth";
 
 export type Prioridad = "Alta" | "Media" | "Baja" | string;
 export type EstadoTicket = string;
@@ -14,6 +16,11 @@ export interface TicketBack {
     nombre?: string;
     apellido?: string;
   };
+  tecnico?: {
+    id_usuario?: number;
+    nombre?: string;
+    apellido?: string;
+  } | null;
 
   // Estos pueden existir o no en el back; no los usamos en el dashboard de técnico
   direccion?: string;
@@ -32,6 +39,7 @@ export interface TicketFront {
   prioridad: Prioridad;
   estado: EstadoTicket;
   fechaApertura: string;
+  tieneTecnico: boolean; // indica si ya tiene técnico asignado
 }
 
 const BASE_PATH = "/tickets"; // coincide con @Controller('tickets')
@@ -50,6 +58,7 @@ const mapTicketBackToFront = (t: TicketBack): TicketFront => {
     prioridad: t.prioridad,
     estado: t.estado,
     fechaApertura: "",
+    tieneTecnico: !!(t.tecnico?.id_usuario),
   };
 };
 
@@ -91,16 +100,19 @@ export interface TicketTecnicoFront {
 }
 
 function normalizarEstado(estado: string): TicketEstadoTecnico {
-  const e = (estado || "").toUpperCase();
-  if (e === "PENDIENTE") return "pendiente";
-  if (e === "EN_PROCESO") return "en_proceso";
-  return "resuelto";
+  const e = (estado || "").toLowerCase().trim();
+  if (e === "pendiente") return "pendiente";
+  if (e === "en proceso" || e === "en_proceso") return "en_proceso";
+  if (e === "resuelto") return "resuelto";
+  // Por defecto, si es algo raro, mapeamos según la lógica
+  return "pendiente";
 }
 
 function normalizarPrioridad(p: string): "alta" | "media" | "baja" {
-  const x = (p || "").toUpperCase();
-  if (x === "ALTA") return "alta";
-  if (x === "MEDIA") return "media";
+  const x = (p || "").toLowerCase().trim();
+  if (x === "alta") return "alta";
+  if (x === "media") return "media";
+  if (x === "baja") return "baja";
   return "baja";
 }
 
@@ -125,4 +137,83 @@ export const getTicketsByTecnico = async (
     `${BASE_PATH}/tecnico/${idTecnico}`
   );
   return response.data.map(mapTicketBackToTecnico);
+};
+
+/**
+ * Actualiza el estado de un ticket a "Resuelto"
+ * @param ticketId - ID del ticket a actualizar
+ */
+export const resolverTicket = async (ticketId: number): Promise<void> => {
+  await instance.patch(`${BASE_PATH}/${ticketId}`, {
+    estado: "Resuelto",
+  });
+};
+
+//
+// ------------- SERVICIO PARA TICKETS DEL INQUILINO AUTENTICADO ---------
+//
+
+export type EstadoTicketInquilino = "Pendiente" | "En proceso" | "Resuelto";
+
+/**
+ * Estructura de ticket para la página del inquilino
+ */
+export interface TicketInquilino {
+  id: number;
+  titulo: string;
+  fecha: string;
+  estado: EstadoTicketInquilino;
+  descripcion: string;
+}
+
+/**
+ * Obtiene los tickets del inquilino autenticado (desde JWT)
+ * Incluye el token Bearer automáticamente
+ */
+export const getMisTickets = async (): Promise<TicketInquilino[]> => {
+  const session = getStoredSession();
+  const token = session?.token;
+
+  if (!token) {
+    throw new Error("No hay sesión activa");
+  }
+
+  const response = await instance.get<TicketInquilino[]>(
+    `${BASE_PATH}/mis-tickets`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * Crea un ticket desde el inquilino autenticado (JWT)
+ * El id_inquilino se obtiene del token
+ */
+export const createMiTicket = async (data: {
+  descripcion: string;
+  prioridad: string;
+}): Promise<TicketInquilino> => {
+  const session = getStoredSession();
+  const token = session?.token;
+
+  if (!token) {
+    throw new Error("No hay sesión activa");
+  }
+
+  const response = await instance.post<TicketInquilino>(
+    `${BASE_PATH}/mis-tickets`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
 };
