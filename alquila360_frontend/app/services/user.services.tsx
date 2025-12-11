@@ -44,17 +44,27 @@ export const deleteUser = async (id: number) => {
 
 /* 🔹 NUEVO: tipos y service para el dashboard del inquilino */
 
-export interface UltimoPago {
+export interface MultaDto {
+  id_multa: number;
+  tipo: string;
   monto: number;
-  fecha: string;   // ISO string
-  estado: string;  // "PAGADO", etc.
+  fecha: string;
+  estado: string;
+  descripcion: string;
+}
+
+export interface CuotaDto {
+  id_cuota: number;
+  monto: number;
+  fecha_vencimiento: string;
+  estado: string;
+  alquilerPropiedad: number;
+  multa: MultaDto | null;
 }
 
 export interface DashboardInquilino {
-  proximoPago: string;      // ISO string
-  montoMensual: number;
+  cuotas: [CuotaDto | null, CuotaDto | null]; // [cuotaVencida, proximaCuota]
   ticketsActivos: number;
-  ultimosPagos: UltimoPago[];
 }
 
 /**
@@ -66,6 +76,22 @@ export const getInquilinoDashboard = async (
 ): Promise<DashboardInquilino> => {
   const response = await instance.get<DashboardInquilino>(
     `${BASE_PATH}/${idUsuario}/dashboard-inquilino`
+  );
+  return response.data;
+};
+
+/**
+ * Obtiene el historial de todos los pagos realizados del inquilino.
+ * Pega a: GET /users/historial-pagos
+ */
+export interface PagoHistorialDto extends CuotaDto {
+  id_contrato: number;
+  fecha_pago: string;
+}
+
+export const getHistorialPagos = async (): Promise<PagoHistorialDto[]> => {
+  const response = await instance.get<PagoHistorialDto[]>(
+    `${BASE_PATH}/historial-pagos`
   );
   return response.data;
 };
