@@ -8,6 +8,7 @@ import {
 
 import { CreateTicketDto } from './dto/create-ticket.dto';
 import { UpdateTicketDto } from './dto/update-ticket.dto';
+import { CreateTicketAuthDto } from './dto/create-ticket-auth.dto';
 import { Ticket } from '../entity/ticket.entity';
 
 import { TICKET_REPOSITORY } from './ports/ticket.repo';
@@ -26,6 +27,9 @@ import {
   TicketEstadoFront,
   TicketPrioridadFront,
 } from './dto/tecnico-dashboard.dto';
+
+// 👉 DTO para tickets del inquilino
+import { TicketInquilinoDto } from './dto/inquilino-tickets.dto';
 
 @Injectable()
 export class TicketService {
@@ -252,6 +256,128 @@ export class TicketService {
       ticketsAsignados,
       ticketsEnProceso: ticketsEnProceso.length,
       ticketsPendientes: ticketsPendientes.length,
+    };
+  }
+
+  /**
+   * Mapea un estado de la BD a lo que espera el frontend del inquilino
+   */
+  private mapEstadoInquilino(estado: string): 'Pendiente' | 'En proceso' | 'Resuelto' {
+    const normalized = (estado || '').toUpperCase();
+    if (normalized === 'PENDIENTE' || normalized === 'SOLICITADO') {
+      return 'Pendiente';
+    }
+    if (normalized === 'EN_PROCESO' || normalized === 'EN PROCESO') {
+      return 'En proceso';
+    }
+    return 'Resuelto';
+  }
+
+  /**
+   * Formatea una fecha a formato legible (ej: "17 de Enero de 2024")
+   */
+  private formatFechaInquilino(fechaRaw: any): string {
+    if (!fechaRaw) return new Date().toLocaleDateString('es-BO', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+
+    let d: Date;
+    if (fechaRaw instanceof Date) {
+      d = fechaRaw;
+    } else {
+      const parsed = new Date(fechaRaw);
+      if (isNaN(parsed.getTime())) {
+        return new Date().toLocaleDateString('es-BO', {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        });
+      }
+      d = parsed;
+    }
+
+    return d.toLocaleDateString('es-BO', {
+      day: 'numeric',
+      month: 'long',
+      year: 'numeric',
+    });
+  }
+
+  /**
+   * Obtiene los tickets del inquilino autenticado (desde JWT)
+   * Mapea al formato que espera el frontend
+   */
+  async findTicketsByInquilinoAuth(idUsuario: number): Promise<TicketInquilinoDto[]> {
+    // Validar que el usuario sea inquilino
+    const user = await this.userRepo.findOne(idUsuario);
+    if (!user || user.tipo_usuario !== 'INQUILINO') {
+      throw new NotFoundException(
+        `Usuario con id ${idUsuario} no es un inquilino`,
+      );
+    }
+
+    // Obtener tickets del inquilino
+    const tickets = await this.ticketRepo.findByInquilino(idUsuario);
+
+    // Mapear al formato del frontend
+    return tickets.map((t) => {
+      const fechaRaw = (t as any).fecha_creacion ?? (t as any).fecha ?? null;
+      
+      return {
+        id: t.id_ticket,
+        titulo: t.descripcion,
+        fecha: this.formatFechaInquilino(fechaRaw),
+        estado: this.mapEstadoInquilino(t.estado),
+        descripcion: t.descripcion,
+      };
+    });
+  }
+
+  /**
+   * Crea un ticket desde un inquilino autenticado (JWT)
+   * El id_inquilino se obtiene del token
+   */
+  async createTicketAuth(
+    idUsuario: number,
+    dto: CreateTicketAuthDto,
+  ): Promise<TicketInquilinoDto> {
+    // Validar que el usuario sea inquilino
+    const inquilinoUser = await this.userRepo.findOne(idUsuario);
+    if (!inquilinoUser) {
+      throw new NotFoundException(`Usuario con id ${idUsuario} no encontrado`);
+    }
+    if (inquilinoUser.tipo_usuario !== 'INQUILINO') {
+      throw new BadRequestException(
+        `El usuario ${idUsuario} no es un INQUILINO`,
+      );
+    }
+    const inquilino = inquilinoUser as Inquilino;
+
+    // Crear el ticket
+    const ticket = new Ticket();
+    ticket.descripcion = dto.descripcion;
+    ticket.prioridad = dto.prioridad;
+    ticket.estado = 'Pendiente';
+    ticket.subestado = 'Pendiente';
+    ticket.inquilino = inquilino;
+    ticket.tecnico = null;
+
+    const ticketCreado = await this.ticketRepo.create(ticket);
+
+    // Mapear al formato del frontend
+    const fechaRaw =
+      (ticketCreado as any).fecha_creacion ??
+      (ticketCreado as any).fecha ??
+      null;
+
+    return {
+      id: ticketCreado.id_ticket,
+      titulo: ticketCreado.descripcion,
+      fecha: this.formatFechaInquilino(fechaRaw),
+      estado: this.mapEstadoInquilino(ticketCreado.estado),
+      descripcion: ticketCreado.descripcion,
     };
   }
 }
