@@ -7,8 +7,7 @@ import { getCurrentUser } from "@/lib/auth";
 export default function NuevoContratoPropietario() {
   const router = useRouter();
 
-  // Estados
-  const [idPropiedad, setIdPropiedad] = useState("");
+  // Estados del formulario
   const [idInquilino, setIdInquilino] = useState("");
   const [monto, setMonto] = useState("");
   const [inicio, setInicio] = useState("");
@@ -22,17 +21,14 @@ export default function NuevoContratoPropietario() {
   // Obtener sesión
   useEffect(() => {
     const user = getCurrentUser();
-    
-    // 🚩 CORRECCIÓN 1: Usar "propietario" en minúsculas para la comparación de rol.
+
     if (!user || user.rol !== "propietario" || !user.id) {
       router.push("/login");
       return;
     }
-    
+
     setToken(user.token);
-    // 🚩 CORRECCIÓN 2: Usamos la propiedad 'id' directamente del objeto CurrentUser.
     setIdPropietario(user.id);
-    
   }, [router]);
 
   const handleSubmit = async (e: FormEvent) => {
@@ -40,48 +36,61 @@ export default function NuevoContratoPropietario() {
     setError(null);
 
     // Validaciones simples
-    if (!idPropiedad || !idInquilino || !monto || !inicio || !fin) {
+    if (!idInquilino || !monto || !inicio || !fin) {
       setError("Todos los campos son obligatorios.");
       return;
     }
-    
+
     if (!idPropietario) {
-        setError("Error de autenticación. Por favor, reinicia la sesión.");
-        return;
+      setError("Error de autenticación. Por favor, reinicia la sesión.");
+      return;
     }
 
     try {
       setSaving(true);
-      const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+      const baseUrl =
+        process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001";
+
+      const body = {
+        // Coincide con tu CreateContratoDto y entidad
+        fecha_inicio: inicio,
+        fecha_fin: fin,
+        monto_mensual: Number(monto),
+        estado: "VIGENTE",
+        id_propietario: idPropietario,
+        id_inquilino: Number(idInquilino),
+        // id_garantia: opcional si luego lo agregas al formulario
+      };
 
       const res = await fetch(`${baseUrl}/contrato`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({
-          id_propiedad: Number(idPropiedad),
-          id_inquilino: Number(idInquilino),
-          id_propietario: idPropietario, 
-          monto_mensual: Number(monto),
-          fecha_inicio: inicio,
-          fecha_fin: fin,
-          estado: "VIGENTE"
-        })
+        body: JSON.stringify(body),
       });
 
+      const raw = await res.text();
+
       if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.message || "Error al crear el contrato");
+        // Intentamos parsear el error del backend si es JSON
+        try {
+          const errJson = JSON.parse(raw);
+          throw new Error(errJson.message || "Error al crear el contrato");
+        } catch {
+          throw new Error(raw || "Error al crear el contrato");
+        }
       }
 
       router.push("/propietario/contratos");
       router.refresh();
-
     } catch (err: any) {
       console.error(err);
-      setError(err.message || "No se pudo guardar el contrato. Verifica los IDs.");
+      setError(
+        err.message ||
+          "No se pudo guardar el contrato. Verifica el ID de inquilino."
+      );
     } finally {
       setSaving(false);
     }
@@ -91,7 +100,9 @@ export default function NuevoContratoPropietario() {
     <div className="space-y-6 max-w-xl p-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Nuevo contrato</h1>
-        <p className="text-sm text-slate-500">Crea una nueva relación de alquiler.</p>
+        <p className="text-sm text-slate-500">
+          Crea una nueva relación de alquiler.
+        </p>
       </div>
 
       {error && (
@@ -100,35 +111,22 @@ export default function NuevoContratoPropietario() {
         </div>
       )}
 
-      <form onSubmit={handleSubmit} className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              ID Propiedad
-            </label>
-            <input
-              type="number"
-              value={idPropiedad}
-              onChange={(e) => setIdPropiedad(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Ej. 10"
-              required
-            />
-          </div>
-          <div>
-            <label className="block text-sm font-medium text-slate-700 mb-1">
-              ID Inquilino
-            </label>
-            <input
-              type="number"
-              value={idInquilino}
-              onChange={(e) => setIdInquilino(e.target.value)}
-              className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
-              placeholder="Ej. 5"
-              required
-            />
-          </div>
+      <form
+        onSubmit={handleSubmit}
+        className="space-y-4 rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+      >
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1">
+            ID Inquilino
+          </label>
+          <input
+            type="number"
+            value={idInquilino}
+            onChange={(e) => setIdInquilino(e.target.value)}
+            className="w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500"
+            placeholder="Ej. 5"
+            required
+          />
         </div>
 
         <div>

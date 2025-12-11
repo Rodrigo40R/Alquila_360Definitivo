@@ -1,16 +1,17 @@
+// src/services/contratosService.ts (o la ruta que uses)
+
 export type EstadoContrato = "Activa" | "Por vencer" | "Finalizada";
 
 export type Contrato = {
   id: number;
   numero: string;
   inquilino: string;
-  propietario: string; 
+  propietario: string;
   inicio: string;
   fin: string;
   monto_mensual: number;
   estado: EstadoContrato;
 };
-
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
@@ -27,10 +28,7 @@ function mapEstadoBackToFront(estadoBack: string): EstadoContrato {
     return "Activa";
   }
 
-  if (
-    normalizado === "POR_VENCER" ||
-    normalizado === "POR VENCER"
-  ) {
+  if (normalizado === "POR_VENCER" || normalizado === "POR VENCER") {
     return "Por vencer";
   }
 
@@ -38,6 +36,7 @@ function mapEstadoBackToFront(estadoBack: string): EstadoContrato {
   return "Finalizada";
 }
 
+// 🔹 Mapeo de contrato tal como viene del backend -> modelo del front
 function mapContratoFromBackToFront(c: any): Contrato {
   return {
     id: c.id_contrato ?? c.id ?? 0,
@@ -57,14 +56,55 @@ function mapContratoFromBackToFront(c: any): Contrato {
   };
 }
 
-export async function getContratos(): Promise<Contrato[]> {
+// 🔹 Obtener TODOS los contratos (ej: para admin)
+export async function getContratos(token?: string): Promise<Contrato[]> {
   const url = `${API_URL}/contrato`;
 
-  const res = await fetch(url, { cache: "no-store" });
+  const headers: HeadersInit = {
+    "Content-Type": "application/json",
+  };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers,
+    cache: "no-store",
+  });
+
   const text = await res.text();
 
   if (!res.ok) {
     throw new Error(`Error al obtener contratos: ${res.status} - ${text}`);
+  }
+
+  const data = JSON.parse(text);
+  return Array.isArray(data) ? data.map(mapContratoFromBackToFront) : [];
+}
+
+// 🔹 Obtener contratos SOLO del propietario logueado
+export async function getContratosByPropietario(
+  idPropietario: number,
+  token: string
+): Promise<Contrato[]> {
+  const url = `${API_URL}/contrato/propietario/${idPropietario}`;
+
+  const res = await fetch(url, {
+    method: "GET",
+    headers: {
+      "Authorization": `Bearer ${token}`,
+      "Content-Type": "application/json",
+    },
+    cache: "no-store",
+  });
+
+  const text = await res.text();
+
+  if (!res.ok) {
+    throw new Error(
+      `Error al obtener contratos del propietario: ${res.status} - ${text}`
+    );
   }
 
   const data = JSON.parse(text);
@@ -81,10 +121,15 @@ export type CrearContratoDto = {
   id_inquilino: number;
 };
 
-export async function crearContrato(dto: CrearContratoDto): Promise<void> {
+export async function crearContrato(dto: CrearContratoDto, token?: string): Promise<void> {
+  const headers: HeadersInit = { "Content-Type": "application/json" };
+  if (token) {
+    headers["Authorization"] = `Bearer ${token}`;
+  }
+
   const res = await fetch(`${API_URL}/contrato`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers,
     body: JSON.stringify(dto),
   });
 
