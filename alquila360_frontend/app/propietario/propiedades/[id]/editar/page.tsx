@@ -1,12 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useState, use } from "react";
 import { getCurrentUser } from "@/lib/auth";
 
-export default function EditarPropiedadPage({ params }: { params: { id: string } }) {
+export default function EditarPropiedadPage({ params }: { params: Promise<{ id: string }> }) {
   const router = useRouter();
-  const idPropiedad = params.id;
+  const { id: idPropiedad } = use(params);
 
   // Estados
   const [loading, setLoading] = useState(true);

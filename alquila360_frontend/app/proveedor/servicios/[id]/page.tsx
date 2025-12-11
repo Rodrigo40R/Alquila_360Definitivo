@@ -26,10 +26,10 @@ export default function VerServicioProveedor() {
       <div className="space-y-3">
         <p className="font-semibold">Actualizar estado:</p>
 
-        <div className="flex gap-3">
+        {/* <div className="flex gap-3">
           <Button variant="primary">Marcar en progreso</Button>
           <Button variant="primary">Marcar completado</Button>
-        </div>
+        </div> */}
       </div>
     </div>
   );

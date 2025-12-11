@@ -2,7 +2,6 @@
 
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { getUser } from "@/lib/auth";
 
 export default function ProtectedRoute({
   allowedRole,
@@ -13,18 +12,18 @@ export default function ProtectedRoute({
 }) {
   const router = useRouter();
 
-  useEffect(() => {
-    const user = getUser();
+  // useEffect(() => {
+  //   const user = getUser();
 
-    if (!user) {
-      router.push("/login");
-      return;
-    }
+  //   if (!user) {
+  //     router.push("/login");
+  //     return;
+  //   }
 
-    if (user.rol !== allowedRole) {
-      router.push("/login");
-    }
-  }, []);
+  //   if (user.rol !== allowedRole) {
+  //     router.push("/login");
+  //   }
+  // }, []);
 
   return <>{children}</>;
 }

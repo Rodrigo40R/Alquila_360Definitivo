@@ -39,11 +39,11 @@ export default function DetallePropiedadCliente() {
         <p className="text-sm text-slate-500">Baños: {propiedad.banos}</p>
       </div>
 
-      <a href="/cliente/propiedad/1/reservar">
+      {/* <a href="/cliente/propiedad/1/reservar">
         <Button variant="primary" className="w-full text-lg">
           Reservar esta propiedad
         </Button>
-      </a>
+      </a> */}
     </div>
   );
 }

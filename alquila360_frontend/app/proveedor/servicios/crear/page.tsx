@@ -12,7 +12,7 @@ export default function CrearServicioPage() {
         <Input label="Nombre del servicio" placeholder="Plomería" />
         <Input label="Descripción" placeholder="Reparación de fugas…" />
 
-        <Button type="submit">Registrar servicio</Button>
+        {/* <Button type="submit">Registrar servicio</Button> */}
       </div>
     </div>
   );

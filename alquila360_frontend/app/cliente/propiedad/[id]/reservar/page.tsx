@@ -27,9 +27,9 @@ export default function ReservarPropiedadPage() {
         <Input label="Número de teléfono" value={telefono} onChange={(e) => setTelefono(e.target.value)} />
         <Input type="date" label="Fecha deseada" value={fecha} onChange={(e) => setFecha(e.target.value)} />
 
-        <Button onClick={enviar} variant="primary" className="w-full">
+        {/* <Button onClick={enviar} variant="primary" className="w-full">
           Enviar solicitud
-        </Button>
+        </Button> */}
       </div>
     </div>
   );
