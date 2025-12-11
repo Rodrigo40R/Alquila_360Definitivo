@@ -16,6 +16,11 @@ export interface TicketBack {
     nombre?: string;
     apellido?: string;
   };
+  tecnico?: {
+    id_usuario?: number;
+    nombre?: string;
+    apellido?: string;
+  } | null;
 
   // Estos pueden existir o no en el back; no los usamos en el dashboard de técnico
   direccion?: string;
@@ -34,6 +39,7 @@ export interface TicketFront {
   prioridad: Prioridad;
   estado: EstadoTicket;
   fechaApertura: string;
+  tieneTecnico: boolean; // indica si ya tiene técnico asignado
 }
 
 const BASE_PATH = "/tickets"; // coincide con @Controller('tickets')
@@ -52,6 +58,7 @@ const mapTicketBackToFront = (t: TicketBack): TicketFront => {
     prioridad: t.prioridad,
     estado: t.estado,
     fechaApertura: "",
+    tieneTecnico: !!(t.tecnico?.id_usuario),
   };
 };
 
