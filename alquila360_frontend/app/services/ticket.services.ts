@@ -100,16 +100,19 @@ export interface TicketTecnicoFront {
 }
 
 function normalizarEstado(estado: string): TicketEstadoTecnico {
-  const e = (estado || "").toUpperCase();
-  if (e === "PENDIENTE") return "pendiente";
-  if (e === "EN_PROCESO") return "en_proceso";
-  return "resuelto";
+  const e = (estado || "").toLowerCase().trim();
+  if (e === "pendiente") return "pendiente";
+  if (e === "en proceso" || e === "en_proceso") return "en_proceso";
+  if (e === "resuelto") return "resuelto";
+  // Por defecto, si es algo raro, mapeamos según la lógica
+  return "pendiente";
 }
 
 function normalizarPrioridad(p: string): "alta" | "media" | "baja" {
-  const x = (p || "").toUpperCase();
-  if (x === "ALTA") return "alta";
-  if (x === "MEDIA") return "media";
+  const x = (p || "").toLowerCase().trim();
+  if (x === "alta") return "alta";
+  if (x === "media") return "media";
+  if (x === "baja") return "baja";
   return "baja";
 }
 
@@ -134,6 +137,16 @@ export const getTicketsByTecnico = async (
     `${BASE_PATH}/tecnico/${idTecnico}`
   );
   return response.data.map(mapTicketBackToTecnico);
+};
+
+/**
+ * Actualiza el estado de un ticket a "Resuelto"
+ * @param ticketId - ID del ticket a actualizar
+ */
+export const resolverTicket = async (ticketId: number): Promise<void> => {
+  await instance.patch(`${BASE_PATH}/${ticketId}`, {
+    estado: "Resuelto",
+  });
 };
 
 //
