@@ -14,6 +14,9 @@ export default function EditarUsuarioAdmin() {
   const [nombre, setNombre] = useState("");
   const [correo, setCorreo] = useState("");
   const [rol, setRol] = useState("INQUILINO");
+  const [estadoCuenta, setEstadoCuenta] = useState("Activo");
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -26,6 +29,7 @@ export default function EditarUsuarioAdmin() {
         setNombre(data.nombre);
         setCorreo(data.correo);
         setRol(data.tipo_usuario);
+        setEstadoCuenta(data.estado_cuenta);
       } catch (e) {
         setError("No se pudo cargar el usuario");
         console.error(e);
@@ -44,12 +48,34 @@ export default function EditarUsuarioAdmin() {
     setSaving(true);
     setError(null);
 
+    // Validar contraseñas si se ingresó alguna
+    if (password || confirmPassword) {
+      if (password !== confirmPassword) {
+        setError("Las contraseñas no coinciden");
+        setSaving(false);
+        return;
+      }
+      if (password.length < 6) {
+        setError("La contraseña debe tener al menos 6 caracteres");
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
-      await updateUser(id, {
+      const updateData: any = {
         nombre,
         correo,
         tipo_usuario: rol,
-      });
+        estado_cuenta: estadoCuenta,
+      };
+
+      // Solo incluir password si se ingresó uno nuevo
+      if (password) {
+        updateData.password = password;
+      }
+
+      await updateUser(id, updateData);
 
       router.push("/admin/usuarios");
     } catch (e) {
@@ -77,12 +103,15 @@ export default function EditarUsuarioAdmin() {
           label="Nombre completo"
           value={nombre}
           onChange={(e) => setNombre(e.target.value)}
+          required
         />
 
         <Input
           label="Correo electrónico"
+          type="email"
           value={correo}
           onChange={(e) => setCorreo(e.target.value)}
+          required
         />
 
         <div className="space-y-1">
@@ -91,6 +120,7 @@ export default function EditarUsuarioAdmin() {
             className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
             value={rol}
             onChange={(e) => setRol(e.target.value)}
+            required
           >
             <option value="INQUILINO">Inquilino</option>
             <option value="PROPIETARIO">Propietario</option>
@@ -99,12 +129,48 @@ export default function EditarUsuarioAdmin() {
           </select>
         </div>
 
+        <div className="space-y-1">
+          <label className="text-sm text-slate-600">Estado de cuenta</label>
+          <select
+            className="w-full border border-slate-300 rounded-md px-3 py-2 text-sm"
+            value={estadoCuenta}
+            onChange={(e) => setEstadoCuenta(e.target.value)}
+            required
+          >
+            <option value="Activo">Activo</option>
+            <option value="Inactivo">Inactivo</option>
+            <option value="Suspendido">Suspendido</option>
+          </select>
+        </div>
+
+        <div className="border-t border-slate-200 pt-4 mt-6">
+          <p className="text-sm text-slate-600 mb-3">
+            Cambiar contraseña (opcional)
+          </p>
+
+          <Input
+            label="Nueva contraseña"
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Dejar vacío para mantener la actual"
+          />
+
+          <Input
+            label="Confirmar contraseña"
+            type="password"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="Repetir la nueva contraseña"
+          />
+        </div>
+
         <button
           type="submit"
           disabled={saving}
           className="w-full bg-emerald-600 text-white hover:bg-emerald-700 py-2 rounded-full text-sm font-semibold disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {saving ? "Actualizando..." : "Actualizar"}
+          {saving ? "Actualizando..." : "Actualizar Usuario"}
         </button>
       </form>
     </div>
