@@ -1,50 +1,121 @@
 "use client";
 
-import Image from "next/image";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
-type Propiedad = {
-  id: number;
-  nombre: string;
+// ----------------------
+// Tipos
+// ----------------------
+type PropiedadBack = {
+  id_propiedad: number;
+  direccion: string;
   tipo: string;
-  ubicacion: string;
-  estado: "Disponible" | "Ocupada";
-  imagen: string;
+  estado: string;
+  propietario?: {
+    id_usuario: number;
+    nombre?: string;
+    nombre_completo?: string;
+  };
 };
 
-const propiedades: Propiedad[] = [
-  {
-    id: 1,
-    nombre: "Departamento - Av. América",
-    tipo: "Departamento",
-    ubicacion: "Cochabamba",
-    estado: "Ocupada",
-    imagen: "/departamento.png",
-  },
-  {
-    id: 2,
-    nombre: "Casa - Tiquipaya",
-    tipo: "Casa",
-    ubicacion: "Tiquipaya",
-    estado: "Ocupada",
-    imagen: "/propiedad-2.png",
-  },
-  {
-    id: 3,
-    nombre: "Garzonier - Cala Cala",
-    tipo: "Garzonier",
-    ubicacion: "Cala Cala",
-    estado: "Disponible",
-    imagen: "/garzonier.png",
-  },
-];
+type PropiedadRow = {
+  id: number;
+  direccion: string;
+  tipo: string;
+  estado: string;
+  propietario: string;
+};
+
+// ----------------------
+// API URL
+// ----------------------
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+// ----------------------
+// Mapper back → front
+// ----------------------
+function mapFromBack(p: PropiedadBack): PropiedadRow {
+  const propietarioNombre =
+    p.propietario?.nombre_completo ||
+    p.propietario?.nombre ||
+    (p.propietario
+      ? `Propietario #${p.propietario.id_usuario}`
+      : "Sin propietario");
+
+  return {
+    id: p.id_propiedad,
+    direccion: p.direccion,
+    tipo: p.tipo,
+    estado: p.estado,
+    propietario: propietarioNombre,
+  };
+}
+
+// ----------------------
+// Estilo visual para estado
+// ----------------------
+function pillEstadoClase(estado: string) {
+  const norm = (estado || "").toUpperCase();
+
+  if (norm === "DISPONIBLE" || norm === "LIBRE") {
+    return "bg-emerald-100 text-emerald-700 border border-emerald-200";
+  }
+
+  if (norm === "OCUPADA" || norm === "OCUPADO") {
+    return "bg-sky-100 text-sky-700 border border-sky-200";
+  }
+
+  return "bg-slate-100 text-slate-700 border border-slate-200";
+}
 
 export default function AdminPropiedadesPage() {
   const router = useRouter();
 
+  const [propiedades, setPropiedades] = useState<PropiedadRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // ----------------------
+  // Fetch propiedades
+  // ----------------------
+  useEffect(() => {
+    async function cargarPropiedades() {
+      try {
+        setLoading(true);
+        setError(null);
+
+        const res = await fetch(`${API_URL}/propiedades`, {
+          cache: "no-store",
+        });
+
+        const text = await res.text();
+
+        if (!res.ok) {
+          throw new Error(
+            `Error al obtener propiedades: ${res.status} - ${text}`
+          );
+        }
+
+        const data: PropiedadBack[] = JSON.parse(text);
+        const rows = Array.isArray(data) ? data.map(mapFromBack) : [];
+        setPropiedades(rows);
+      } catch (err: any) {
+        console.error("Error cargando propiedades:", err);
+        setError(err?.message || "No se pudieron cargar las propiedades.");
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    cargarPropiedades();
+  }, []);
+
+  // ----------------------
+  // Render
+  // ----------------------
   return (
     <div className="px-6 py-6 space-y-8">
-      {/* Header */}
+      {/* HEADER */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Propiedades</h1>
@@ -63,52 +134,62 @@ export default function AdminPropiedadesPage() {
         </button>
       </div>
 
-      {/* GRID DE PROPIEDADES */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {propiedades.map((p) => (
-          <div
-            key={p.id}
-            className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden hover:shadow-md transition cursor-pointer"
-          >
-            {/* IMAGEN */}
-            <div className="relative h-48 w-full">
-              <Image
-                src={p.imagen}
-                alt={p.nombre}
-                fill
-                className="object-cover"
-              />
-            </div>
+      {/* ESTADOS CARGA / ERROR */}
+      {loading && <p className="text-sm text-slate-500">Cargando propiedades...</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
-            {/* INFO */}
-            <div className="p-5 space-y-2">
-              <p className="font-bold text-slate-900 text-lg">{p.nombre}</p>
-              <p className="text-sm text-slate-600">{p.tipo}</p>
-              <p className="text-sm text-slate-600">{p.ubicacion}</p>
-
-              {/* ESTADO */}
-              <span
-                className={
-                  "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold mt-2 " +
-                  (p.estado === "Disponible"
-                    ? "bg-emerald-100 text-emerald-700 border border-emerald-200"
-                    : "bg-sky-100 text-sky-700 border border-sky-200")
-                }
-              >
-                {p.estado}
-              </span>
-
-              {/* BOTÓN extra opcional */}
-              <button
-                className="mt-3 w-full rounded-lg border border-slate-300 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100 transition"
-                onClick={() => router.push(`/admin/propiedades/${p.id}`)}
-              >
-                Ver detalles
-              </button>
-            </div>
+      {/* TABLA */}
+      {!loading && !error && (
+        <div className="rounded-2xl border border-slate-200 bg-white shadow-sm overflow-hidden">
+          <div className="border-b border-slate-100 px-6 py-3 flex items-center justify-between">
+            <p className="text-sm font-medium text-slate-700">Listado de propiedades</p>
+            <p className="text-xs text-slate-400">{propiedades.length} propiedades registradas</p>
           </div>
-        ))}
-      </div>
+
+          <div className="overflow-x-auto">
+            <table className="min-w-full text-sm">
+              <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
+                <tr>
+                  <th className="px-6 py-3 text-left">ID</th>
+                  <th className="px-6 py-3 text-left">Dirección</th>
+                  <th className="px-6 py-3 text-left">Tipo</th>
+                  <th className="px-6 py-3 text-left">Propietario</th>
+                  <th className="px-6 py-3 text-left">Estado</th>
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-100">
+                {propiedades.map((p) => (
+                  <tr key={p.id} className="hover:bg-slate-50/80">
+                    <td className="px-6 py-3 text-slate-700 font-medium">#{p.id}</td>
+                    <td className="px-6 py-3 text-slate-900">{p.direccion}</td>
+                    <td className="px-6 py-3 text-slate-700">{p.tipo}</td>
+                    <td className="px-6 py-3 text-slate-700">{p.propietario}</td>
+                    <td className="px-6 py-3">
+                      <span
+                        className={
+                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
+                          pillEstadoClase(p.estado)
+                        }
+                      >
+                        {p.estado}
+                      </span>
+                    </td>
+                  </tr>
+                ))}
+
+                {propiedades.length === 0 && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-slate-400">
+                      No hay propiedades registradas todavía.
+                    </td>
+                  </tr>
+                )}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

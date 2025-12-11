@@ -14,6 +14,7 @@ import { PAGO_REPOSITORY } from './ports/pago.repo';
 import type { PagoRepositoryPort } from './ports/pago.repo';
 
 import { CuotaService } from '../cuota/cuota.service';
+import { UpdateCuotaDto } from '../cuota/dto/update-cuota.dto'; // 👈 IMPORT CORRECTO
 
 @Injectable()
 export class PagoService {
@@ -26,15 +27,19 @@ export class PagoService {
   ) {}
 
   async create(dto: CreatePagoDto): Promise<Pago> {
+    // 1) Verificar que la cuota exista
     const cuota = await this.cuotaService.findOne(dto.id_cuota);
-    // findOne ya lanza NotFoundException si no existe
+    // 👆 Si no existe, CuotaService.findOne debería lanzar NotFoundException
 
-    if (cuota.pago) {
+    // 2) Verificar si ya tiene pago usando el repositorio de pagos
+    const existingPago = await this.pagoRepo.findByCuota(dto.id_cuota);
+    if (existingPago) {
       throw new BadRequestException(
         `La cuota ${dto.id_cuota} ya tiene un pago registrado`,
       );
     }
 
+    // 3) Crear el pago
     const pago = new Pago();
     pago.fecha_pago = new Date(dto.fecha_pago);
     pago.metodo_pago = dto.metodo_pago;
@@ -43,15 +48,12 @@ export class PagoService {
 
     const creado = await this.pagoRepo.create(pago);
 
-    // actualizar estado de la cuota (mínimo el estado)
-    cuota.estado = 'PAGADA';
-    // si tu entidad/relación lo requiere, mantenemos la referencia en memoria
-    cuota.pago = creado;
+    // 4) Actualizar estado de la cuota a PAGADA
+    const updateCuotaDto: UpdateCuotaDto = {
+      estado: 'PAGADA',
+    } as UpdateCuotaDto;
 
-    // reutilizamos la lógica de actualización de cuota
-    await this.cuotaService.update(cuota.id_cuota, {
-      estado: cuota.estado,
-    } as UpdatePagoDto as any); // si tu UpdateCuotaDto solo tiene estado/monto/fecha
+    await this.cuotaService.update(cuota.id_cuota, updateCuotaDto);
 
     return creado;
   }
@@ -74,8 +76,12 @@ export class PagoService {
     if (dto.fecha_pago !== undefined) {
       partial.fecha_pago = new Date(dto.fecha_pago);
     }
-    if (dto.metodo_pago !== undefined) partial.metodo_pago = dto.metodo_pago;
-    if (dto.monto !== undefined) partial.monto = dto.monto;
+    if (dto.metodo_pago !== undefined) {
+      partial.metodo_pago = dto.metodo_pago;
+    }
+    if (dto.monto !== undefined) {
+      partial.monto = dto.monto;
+    }
 
     return this.pagoRepo.update(id, partial);
   }

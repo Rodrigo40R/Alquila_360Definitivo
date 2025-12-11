@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { registrarPago } from "@/app/services/pagos.services";
+import { registrarPago } from "../../../services/pagos.services";
 
 export default function NuevoPagoPage() {
   const router = useRouter();
@@ -27,6 +27,16 @@ export default function NuevoPagoPage() {
       return;
     }
 
+    if (!fechaPago) {
+      setError("La fecha de pago es obligatoria.");
+      return;
+    }
+
+    if (!metodoPago.trim()) {
+      setError("El método de pago es obligatorio.");
+      return;
+    }
+
     try {
       setSaving(true);
 
@@ -38,9 +48,12 @@ export default function NuevoPagoPage() {
       });
 
       router.push("/admin/pagos");
-    } catch (err) {
-      console.error(err);
-      setError("No se pudo registrar el pago.");
+    } catch (err: any) {
+      console.error("Error al registrar pago:", err);
+      // 👇 AQUÍ MOSTRAMOS EL MENSAJE REAL
+      setError(
+        err?.message || "No se pudo registrar el pago. Revisa la consola."
+      );
     } finally {
       setSaving(false);
     }

@@ -5,24 +5,18 @@ import { useRouter } from "next/navigation";
 import {
   getPagos,
   type Pago,
-  type EstadoPago,
-} from "@/app/services/pagos.services";
-
-function pillEstadoPago(estado: EstadoPago) {
-  if (estado === "Completado") {
-    return "bg-emerald-100 text-emerald-700 border border-emerald-200";
-  }
-  if (estado === "Pendiente") {
-    return "bg-amber-100 text-amber-700 border border-amber-200";
-  }
-  return "bg-rose-100 text-rose-700 border border-rose-200";
-}
+} from "../../services/pagos.services"; // 👈 ruta relativa
 
 function formatMonto(monto: number) {
   return `Bs. ${monto.toLocaleString("es-BO", {
     minimumFractionDigits: 0,
     maximumFractionDigits: 2,
   })}`;
+}
+
+function formatFecha(fecha: string) {
+  if (!fecha) return "-";
+  return new Date(fecha).toLocaleDateString("es-BO");
 }
 
 export default function AdminPagosPage() {
@@ -93,35 +87,22 @@ export default function AdminPagosPage() {
             <table className="min-w-full text-sm">
               <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wide">
                 <tr>
-                  <th className="px-6 py-3 text-left">Propiedad</th>
-                  <th className="px-6 py-3 text-left">Inquilino</th>
+                  <th className="px-6 py-3 text-left">Método de pago</th>
                   <th className="px-6 py-3 text-left">Monto</th>
-                  <th className="px-6 py-3 text-left">Fecha</th>
-                  <th className="px-6 py-3 text-left">Estado</th>
+                  <th className="px-6 py-3 text-left">Fecha de pago</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
                 {pagos.map((pago) => (
                   <tr key={pago.id} className="hover:bg-slate-50/80">
                     <td className="px-6 py-4 text-slate-900">
-                      {pago.propiedad}
-                    </td>
-                    <td className="px-6 py-4 text-slate-700">
-                      {pago.inquilino}
+                      {pago.metodo}
                     </td>
                     <td className="px-6 py-4 font-semibold text-emerald-600">
                       {formatMonto(pago.monto)}
                     </td>
-                    <td className="px-6 py-4 text-slate-600">{pago.fecha}</td>
-                    <td className="px-6 py-4">
-                      <span
-                        className={
-                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
-                          pillEstadoPago(pago.estado)
-                        }
-                      >
-                        {pago.estado}
-                      </span>
+                    <td className="px-6 py-4 text-slate-600">
+                      {formatFecha(pago.fecha)}
                     </td>
                   </tr>
                 ))}
@@ -129,7 +110,7 @@ export default function AdminPagosPage() {
                 {pagos.length === 0 && (
                   <tr>
                     <td
-                      colSpan={5}
+                      colSpan={3}
                       className="px-6 py-6 text-center text-sm text-slate-400"
                     >
                       No hay pagos registrados todavía.
