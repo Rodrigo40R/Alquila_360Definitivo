@@ -104,15 +104,22 @@ export class UserService {
 
     const hoy = new Date();
 
-    // 6. Filtrar: cuota próxima (vence en el futuro) y cuota vencida (vencio en el pasado)
-    const proximaCuota = cuotasOrdenadas.find(
+    // 6. Filtrar: solo cuotas PENDIENTES (no pagadas)
+    const cuotasPendientes = cuotasOrdenadas.filter(
+      (c) => c.estado === 'PENDIENTE'
+    );
+
+    // Próxima cuota pendiente (vence en el futuro)
+    const proximaCuota = cuotasPendientes.find(
       (c) => new Date(c.fecha_vencimiento) >= hoy
     );
-    const cuotasVencidas = cuotasOrdenadas.filter(
+    
+    // Cuota vencida pendiente (vencio en el pasado pero aún no pagada)
+    const cuotasVencidasPendientes = cuotasPendientes.filter(
       (c) => new Date(c.fecha_vencimiento) < hoy
     );
-    const cuotaVencidaReciente = cuotasVencidas.length > 0 
-      ? cuotasVencidas[cuotasVencidas.length - 1] // la más vencida recientemente
+    const cuotaVencidaReciente = cuotasVencidasPendientes.length > 0 
+      ? cuotasVencidasPendientes[0] // la más antigua vencida
       : null;
 
     // 7. Convertir a DTOs, buscando multas si aplica
@@ -162,5 +169,57 @@ export class UserService {
       alquilerPropiedad,
       multa,
     };
+  }
+  /**
+   * Obtiene todas las cuotas PAGADAS de todos los contratos del inquilino
+   */
+  async getHistorialPagos(userId: number) {
+    // 1. Validar que el usuario existe
+    const user = await this.userRepo.findOne(userId);
+    if (!user) {
+      throw new NotFoundException(`Usuario con id ${userId} no encontrado`);
+    }
+
+    // 2. Buscar todos los contratos del inquilino
+    const contratos = await this.contratoRepo.findByInquilino(userId);
+    if (contratos.length === 0) {
+      return [];
+    }
+
+    // 3. Obtener todas las cuotas de todos los contratos
+    const todasLasCuotas: any[] = [];
+    for (const contrato of contratos) {
+      const cuotasDelContrato = await this.cuotaRepo.findByContrato(contrato.id_contrato);
+      
+      // Agregar información del contrato a cada cuota
+      const cuotasConContrato = cuotasDelContrato.map(cuota => ({
+        ...cuota,
+        contrato: contrato,
+      }));
+      
+      todasLasCuotas.push(...cuotasConContrato);
+    }
+
+    // 4. Filtrar solo las cuotas PAGADAS
+    const cuotasPagadas = todasLasCuotas.filter(c => c.estado === 'PAGADA');
+
+    // 5. Ordenar por fecha de vencimiento descendente (más reciente primero)
+    cuotasPagadas.sort((a, b) => 
+      new Date(b.fecha_vencimiento).getTime() - new Date(a.fecha_vencimiento).getTime()
+    );
+
+    // 6. Mapear a DTOs
+    const resultado: any[] = [];
+    for (const cuota of cuotasPagadas) {
+      const dto = await this.mapearCuotaADto(cuota, cuota.contrato.monto_mensual);
+      // Agregar información adicional del contrato
+      resultado.push({
+        ...dto,
+        id_contrato: cuota.contrato.id_contrato,
+        fecha_pago: cuota.fecha_vencimiento, // Aquí podrías usar pago.fecha si tienes relación
+      });
+    }
+
+    return resultado;
   }
 }

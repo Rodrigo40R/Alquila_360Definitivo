@@ -53,6 +53,30 @@ export class UserController {
   }
 
   /**
+   * Historial de pagos del inquilino
+   * GET /users/historial-pagos
+   * NOTA: Esta ruta DEBE estar antes de GET /users/:id
+   */
+  @UseGuards(JwtAuthGuard)
+  @Get('historial-pagos')
+  getHistorialPagos(
+    @CurrentUser('id_usuario') userId: number,
+  ) {
+    return this.userService.getHistorialPagos(userId);
+  }
+
+  /**
+   * Dashboard del inquilino por ID (para desarrollo/testing)
+   * GET /users/:id/dashboard-inquilino
+   */
+  @Get(':id/dashboard-inquilino')
+  getInquilinoDashboardById(
+    @Param('id', ParseIntPipe) userId: number,
+  ): Promise<InquilinoDashboardDto> {
+    return this.userService.getInquilinoDashboard(userId);
+  }
+
+  /**
    * Obtener un usuario por ID (protegido)
    * GET /users/:id
    */
