@@ -48,4 +48,9 @@ export class CuotaController {
   findByContrato(@Param('idContrato', ParseIntPipe) idContrato: number) {
     return this.cuotaService.findByContrato(idContrato);
   }
+
+  @Patch(':id/pagar')
+  pagarCuota(@Param('id', ParseIntPipe) id: number) {
+    return this.cuotaService.pagarCuota(id);
+  }
 }

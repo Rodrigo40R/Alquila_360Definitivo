@@ -70,4 +70,14 @@ export class CuotaService {
     // await this.contratoService.findOne(idContrato);
     return this.cuotaRepo.findByContrato(idContrato);
   }
+
+  async pagarCuota(id: number): Promise<Cuota> {
+    const cuota = await this.findOne(id);
+    
+    if (cuota.estado === 'PAGADA') {
+      throw new NotFoundException(`La cuota ${id} ya está pagada`);
+    }
+    
+    return this.cuotaRepo.update(id, { estado: 'PAGADA' });
+  }
 }
