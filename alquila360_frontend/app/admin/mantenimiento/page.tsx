@@ -101,6 +101,7 @@ export default function AdminTicketsPage() {
                   <th className="px-6 py-3 text-left">Tipo</th>
                   <th className="px-6 py-3 text-left">Prioridad</th>
                   <th className="px-6 py-3 text-left">Estado</th>
+                  <th className="px-6 py-3 text-left">Acciones</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -133,6 +134,20 @@ export default function AdminTicketsPage() {
                       >
                         {t.estado}
                       </span>
+                    </td>
+                    <td className="px-6 py-4">
+                      {!t.tieneTecnico ? (
+                        <button
+                          onClick={() =>
+                            router.push(`/admin/mantenimiento/${t.id}`)
+                          }
+                          className="text-sm text-emerald-600 hover:text-emerald-700 font-medium"
+                        >
+                          Asignar técnico
+                        </button>
+                      ) : (
+                        <span className="text-sm text-slate-400">Asignado</span>
+                      )}
                     </td>
                   </tr>
                 ))}
