@@ -18,9 +18,9 @@ function pillPrioridad(p: Prioridad) {
 }
 
 function pillEstado(e: EstadoTicket) {
-  if (e === "Solicitado")
+  if (e === "SOLICITADO")
     return "bg-slate-100 text-slate-700 border border-slate-200";
-  if (e === "En proceso")
+  if (e === "EN PROCESO")
     return "bg-amber-100 text-amber-700 border border-amber-200";
   return "bg-emerald-100 text-emerald-700 border border-emerald-200";
 }
@@ -128,8 +128,8 @@ export default function AdminTicketsPage() {
                     <td className="px-6 py-4">
                       <span
                         className={
-                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold " +
-                          pillEstado(t.estado)
+                          "inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase " +
+                          pillEstado(t.estado.toUpperCase())
                         }
                       >
                         {t.estado}
