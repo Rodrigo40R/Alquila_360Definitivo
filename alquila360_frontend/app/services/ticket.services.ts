@@ -1,5 +1,7 @@
+
 // app/services/ticket.services.ts
 import { instance } from "../utils/axios.util";
+import { getStoredSession } from "@/lib/auth";
 
 export type Prioridad = "Alta" | "Media" | "Baja" | string;
 export type EstadoTicket = string;
@@ -125,4 +127,73 @@ export const getTicketsByTecnico = async (
     `${BASE_PATH}/tecnico/${idTecnico}`
   );
   return response.data.map(mapTicketBackToTecnico);
+};
+
+//
+// ------------- SERVICIO PARA TICKETS DEL INQUILINO AUTENTICADO ---------
+//
+
+export type EstadoTicketInquilino = "Pendiente" | "En proceso" | "Resuelto";
+
+/**
+ * Estructura de ticket para la página del inquilino
+ */
+export interface TicketInquilino {
+  id: number;
+  titulo: string;
+  fecha: string;
+  estado: EstadoTicketInquilino;
+  descripcion: string;
+}
+
+/**
+ * Obtiene los tickets del inquilino autenticado (desde JWT)
+ * Incluye el token Bearer automáticamente
+ */
+export const getMisTickets = async (): Promise<TicketInquilino[]> => {
+  const session = getStoredSession();
+  const token = session?.token;
+
+  if (!token) {
+    throw new Error("No hay sesión activa");
+  }
+
+  const response = await instance.get<TicketInquilino[]>(
+    `${BASE_PATH}/mis-tickets`,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
+};
+
+/**
+ * Crea un ticket desde el inquilino autenticado (JWT)
+ * El id_inquilino se obtiene del token
+ */
+export const createMiTicket = async (data: {
+  descripcion: string;
+  prioridad: string;
+}): Promise<TicketInquilino> => {
+  const session = getStoredSession();
+  const token = session?.token;
+
+  if (!token) {
+    throw new Error("No hay sesión activa");
+  }
+
+  const response = await instance.post<TicketInquilino>(
+    `${BASE_PATH}/mis-tickets`,
+    data,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+
+  return response.data;
 };
