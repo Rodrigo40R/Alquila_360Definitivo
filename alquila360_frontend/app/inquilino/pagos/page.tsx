@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { getDashboardInquilino, DashboardInquilino } from "@/app/services/inquilino-dashboard.services";
+import { getHistorialPagos, PagoHistorialDto } from "@/app/services/user.services";
 
 type Vista = "resumen" | "factura";
 
@@ -11,6 +12,8 @@ export default function InquilinoPagosPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [dashboard, setDashboard] = useState<DashboardInquilino | null>(null);
+  const [historialPagos, setHistorialPagos] = useState<PagoHistorialDto[]>([]);
+  const [pagoSeleccionado, setPagoSeleccionado] = useState<PagoHistorialDto | null>(null);
 
   // Cargar datos del dashboard al montar el componente
   useEffect(() => {
@@ -20,6 +23,10 @@ export default function InquilinoPagosPage() {
         setError(null);
         const data = await getDashboardInquilino();
         setDashboard(data);
+        
+        // Cargar historial de pagos
+        const historial = await getHistorialPagos();
+        setHistorialPagos(historial);
       } catch (err: any) {
         setError(err.message || "Error al cargar los pagos");
         console.error(err);
@@ -60,30 +67,153 @@ export default function InquilinoPagosPage() {
     });
   };
 
+  // Función para generar PDF simulado
+  const generarPDFSimulado = () => {
+    if (!pagoSeleccionado) return;
+
+    const montoCuota = pagoSeleccionado.monto;
+    const montoMulta = pagoSeleccionado.multa?.monto || 0;
+    const montoTotal = montoCuota + montoMulta;
+
+    // Crear un blob con texto simple
+    const contenido = `
+═══════════════════════════════════════
+         FACTURA - ALQUILA 360
+═══════════════════════════════════════
+
+CONTRATO: #${pagoSeleccionado.id_contrato}
+CUOTA: #${pagoSeleccionado.id_cuota}
+
+FECHA DE VENCIMIENTO: ${formatearFecha(pagoSeleccionado.fecha_vencimiento)}
+FECHA DE PAGO: ${formatearFecha(pagoSeleccionado.fecha_pago)}
+
+───────────────────────────────────────
+DETALLE DEL PAGO
+───────────────────────────────────────
+
+Alquiler mensual:          Bs ${montoCuota.toFixed(2)}
+${montoMulta > 0 ? `Multa por mora:            Bs ${montoMulta.toFixed(2)}\n` : ''}
+                          ─────────────
+TOTAL PAGADO:              Bs ${montoTotal.toFixed(2)}
+
+───────────────────────────────────────
+Estado: ${pagoSeleccionado.estado}
+
+═══════════════════════════════════════
+Fecha de emisión: ${new Date().toLocaleDateString("es-BO")}
+    `;
+
+    const blob = new Blob([contenido], { type: "text/plain" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `factura-cuota-${pagoSeleccionado.id_cuota}-${new Date().getTime()}.txt`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+
+    // Mostrar modal de éxito
+    setShowSuccessModal(true);
+  };
+
   // ───────────────────────────────────────────────
   // VISTA FACTURA
   // ───────────────────────────────────────────────
   if (vista === "factura") {
+    if (!pagoSeleccionado) {
+      return (
+        <div className="h-full flex flex-col">
+          <h1 className="text-2xl font-semibold text-slate-900 mb-6">Inquilino</h1>
+          <div className="bg-slate-100 border border-slate-300 rounded-lg p-8 text-center">
+            <p className="text-slate-600">No se ha seleccionado ningún pago para ver la factura.</p>
+          </div>
+        </div>
+      );
+    }
+
+    const montoCuota = pagoSeleccionado.monto;
+    const montoMulta = pagoSeleccionado.multa?.monto || 0;
+    const montoTotal = montoCuota + montoMulta;
+
     return (
       <div className="h-full flex flex-col">
         <h1 className="text-2xl font-semibold text-slate-900 mb-6">Inquilino</h1>
 
         <div className="flex-1 bg-slate-100 rounded-xl p-4 overflow-auto">
           <div className="mx-auto max-w-4xl bg-white rounded-lg shadow border border-slate-200 p-8">
-            <h2 className="text-xl font-bold mb-4">Factura</h2>
+            <h2 className="text-xl font-bold mb-6">Vista Previa de Factura</h2>
 
-            <p className="text-sm text-slate-700">
-              Aquí irá el PDF o la vista previa real cuando el backend lo genere, Hola adro.
-            </p>
+            {/* Información de la factura */}
+            <div className="space-y-6">
+              <div className="border border-slate-200 rounded-lg p-6 bg-slate-50">
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">
+                  Información del Pago
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Contrato:</span>
+                    <span className="font-semibold">#{pagoSeleccionado.id_contrato}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Cuota:</span>
+                    <span className="font-semibold">#{pagoSeleccionado.id_cuota}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Fecha de vencimiento:</span>
+                    <span className="font-semibold">{formatearFecha(pagoSeleccionado.fecha_vencimiento)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Fecha de pago:</span>
+                    <span className="font-semibold">{formatearFecha(pagoSeleccionado.fecha_pago)}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Estado:</span>
+                    <span className="font-semibold text-green-700">{pagoSeleccionado.estado}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="border border-blue-200 rounded-lg p-6 bg-blue-50">
+                <h3 className="text-lg font-semibold text-blue-900 mb-4">
+                  Detalle del Pago
+                </h3>
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-slate-600">Alquiler mensual:</span>
+                    <span className="font-semibold">Bs {montoCuota.toFixed(2)}</span>
+                  </div>
+                  {montoMulta > 0 && (
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Multa por mora ({pagoSeleccionado.multa?.tipo}):</span>
+                      <span className="font-semibold text-red-700">Bs {montoMulta.toFixed(2)}</span>
+                    </div>
+                  )}
+                  <div className="flex justify-between pt-2 border-t border-blue-300 text-base">
+                    <span className="text-slate-900 font-bold">TOTAL PAGADO:</span>
+                    <span className="font-bold text-blue-900">Bs {montoTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div className="mt-4 flex justify-end">
+        <div className="mt-4 flex justify-between">
           <button
-            onClick={() => setVista("resumen")}
-            className="px-6 py-2 rounded-full border border-slate-300 text-sm font-medium hover:bg-slate-100"
+            onClick={() => {
+              setVista("resumen");
+              setPagoSeleccionado(null);
+            }}
+            className="px-6 py-2 border border-slate-300 rounded-lg hover:bg-slate-50 transition font-medium"
           >
-            Volver a pagos
+            Volver
+          </button>
+          <button
+            onClick={generarPDFSimulado}
+            className="px-6 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition font-medium"
+          >
+            Generar Factura
           </button>
         </div>
       </div>
@@ -202,21 +332,63 @@ export default function InquilinoPagosPage() {
 
           </div>
 
-          {/* BOTONES FACTURAS */}
-          <div className="flex justify-center gap-10 mt-4">
-            <button
-              onClick={() => setVista("factura")}
-              className="px-12 py-3 rounded-full bg-[#00A68B] hover:bg-[#009076] text-white text-sm font-semibold shadow"
-            >
-              Facturas
-            </button>
-
-            <button
-              onClick={() => setShowSuccessModal(true)}
-              className="px-12 py-3 rounded-full bg-[#E34848] hover:bg-[#d13a3a] text-white text-sm font-semibold shadow"
-            >
-              Generar Facturas
-            </button>
+          {/* HISTORIAL DE PAGOS */}
+          <div className="w-full max-w-6xl">
+            <h2 className="text-xl font-semibold text-slate-900 mb-4">Historial de Pagos</h2>
+            
+            {historialPagos.length === 0 ? (
+              <div className="bg-slate-100 border border-slate-300 rounded-lg p-8 text-center">
+                <p className="text-slate-600">No tienes pagos realizados aún</p>
+              </div>
+            ) : (
+              <div className="bg-white rounded-xl shadow border border-slate-200 overflow-hidden">
+                <table className="w-full">
+                  <thead className="bg-slate-100 border-b border-slate-200">
+                    <tr>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Contrato</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Cuota</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Fecha Vencimiento</th>
+                      <th className="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase">Fecha Pago</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase">Monto</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase">Multa</th>
+                      <th className="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase">Total</th>
+                      <th className="px-4 py-3 text-center text-xs font-semibold text-slate-700 uppercase">Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-200">
+                    {historialPagos.map((pago) => {
+                      const montoMulta = pago.multa?.monto || 0;
+                      const montoTotal = pago.monto + montoMulta;
+                      
+                      return (
+                        <tr key={pago.id_cuota} className="hover:bg-slate-50 transition">
+                          <td className="px-4 py-3 text-sm text-slate-700">#{pago.id_contrato}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700">#{pago.id_cuota}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700">{formatearFecha(pago.fecha_vencimiento)}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700">{formatearFecha(pago.fecha_pago)}</td>
+                          <td className="px-4 py-3 text-sm text-slate-700 text-right">Bs {pago.monto.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-sm text-red-700 text-right">
+                            {montoMulta > 0 ? `Bs ${montoMulta.toFixed(2)}` : '-'}
+                          </td>
+                          <td className="px-4 py-3 text-sm font-semibold text-slate-900 text-right">Bs {montoTotal.toFixed(2)}</td>
+                          <td className="px-4 py-3 text-center">
+                            <button
+                              onClick={() => {
+                                setPagoSeleccionado(pago);
+                                setVista("factura");
+                              }}
+                              className="px-4 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs rounded-lg transition font-medium"
+                            >
+                              Ver Factura
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
         </div>
