@@ -1,83 +1,83 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { getMisTickets, createMiTicket, TicketInquilino, EstadoTicketInquilino } from "@/app/services/ticket.services";
 
-type EstadoTicket = "Pendiente" | "En proceso" | "Resuelto";
+type EstadoTicket = EstadoTicketInquilino;
 
-interface Ticket {
-  id: number;
-  titulo: string;
-  fecha: string;
-  estado: EstadoTicket;
-  descripcion: string;
-}
-
-const TICKETS_MOCK: Ticket[] = [
-  {
-    id: 1,
-    titulo: "Falta de electricidad en el cuarto",
-    fecha: "17 de Enero de 2024",
-    estado: "Pendiente",
-    descripcion:
-      "No hay electricidad en el cuarto principal desde anoche. Se revisó el breaker pero todo parece normal.",
-  },
-  {
-    id: 2,
-    titulo: "Fuga de agua en el baño",
-    fecha: "17 de Enero de 2024",
-    estado: "Pendiente",
-    descripcion:
-      "Se detectó una fuga de agua en el lavamanos del baño. Hay goteo constante.",
-  },
-];
+interface Ticket extends TicketInquilino {}
 
 export default function InquilinoTicketsPage() {
-  const [tickets, setTickets] = useState<Ticket[]>(TICKETS_MOCK);
+  const [tickets, setTickets] = useState<Ticket[]>([]);
   const [tab, setTab] = useState<EstadoTicket>("Pendiente");
-  const [selectedId, setSelectedId] = useState<number | null>(1);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const [successMessage, setSuccessMessage] = useState(
     "Se envió con éxito la solicitud"
   );
   const [evaluarServicio, setEvaluarServicio] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   // Campos del formulario
   const [titulo, setTitulo] = useState("");
-  const [descripcion, setDescripcion] = useState("");
-  const [tipoProblema, setTipoProblema] = useState("Plomería");
-  const [cargaEvidencia, setCargaEvidencia] = useState("Alta");
+  const [prioridad, setPrioridad] = useState("Alta");
+
+  // Cargar tickets del backend
+  useEffect(() => {
+    const fetchTickets = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await getMisTickets();
+        setTickets(data);
+        // Seleccionar el primer ticket si existe
+        if (data.length > 0 && !selectedId) {
+          setSelectedId(data[0].id);
+        }
+      } catch (err: any) {
+        setError(err.message || "Error al cargar los tickets");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTickets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const filteredTickets = tickets.filter((t) => t.estado === tab);
   const selectedTicket =
     tickets.find((t) => t.id === selectedId) ?? filteredTickets[0] ?? null;
 
-  const handleCrearTicket = (e: React.FormEvent) => {
+  const handleCrearTicket = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!titulo.trim()) return;
 
-    const nuevo: Ticket = {
-      id: Date.now(),
-      titulo: titulo.trim(),
-      fecha: new Date().toLocaleDateString("es-BO", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }),
-      estado: "Pendiente",
-      descripcion:
-        descripcion.trim() ||
-        "Solicitud de mantenimiento generada desde el portal del inquilino.",
-    };
+    try {
+      // Llamar al backend para crear el ticket
+      const nuevoTicket = await createMiTicket({
+        descripcion: titulo.trim(),
+        prioridad: prioridad,
+      });
 
-    setTickets((prev) => [nuevo, ...prev]);
-    setTab("Pendiente");
-    setSelectedId(nuevo.id);
-    setTitulo("");
-    setDescripcion("");
-    setTipoProblema("Plomería");
-    setCargaEvidencia("Alta");
-    setSuccessMessage("Se envió con éxito la solicitud");
-    setShowSuccess(true);
+      // Agregar el nuevo ticket a la lista
+      setTickets((prev) => [nuevoTicket, ...prev]);
+      setTab("Pendiente");
+      setSelectedId(nuevoTicket.id);
+
+      // Limpiar el formulario
+      setTitulo("");
+      setPrioridad("Alta");
+
+      // Mostrar mensaje de éxito
+      setSuccessMessage("Se envió con éxito la solicitud");
+      setShowSuccess(true);
+    } catch (err: any) {
+      setError(err.message || "Error al crear el ticket");
+      console.error(err);
+    }
   };
 
   const handleEvaluarEnvio = (e: React.FormEvent) => {
@@ -149,11 +149,37 @@ export default function InquilinoTicketsPage() {
   }
 
   // Vista normal de mantenimiento
+  
+  // Mostrar loading
+  if (loading) {
+    return (
+      <div className="min-h-full flex flex-col">
+        <h1 className="text-2xl font-bold text-slate-900 mb-6">Inquilino</h1>
+        <div className="flex justify-center items-center py-12">
+          <div className="text-slate-600">Cargando tickets...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Mostrar error
+  if (error) {
+    return (
+      <div className="min-h-full flex flex-col">
+        <h1 className="text-2xl font-bold text-slate-900 mb-6">Inquilino</h1>
+        <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+          <p className="text-red-800 font-medium">Error</p>
+          <p className="text-red-700 text-sm">{error}</p>
+        </div>
+      </div>
+    );
+  }
+  
   return (
     <div className="min-h-full flex flex-col">
       <h1 className="text-2xl font-bold text-slate-900 mb-6">Inquilino</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Columna 1: Mis solicitudes */}
         <section className="rounded-[32px] border border-slate-300 bg-slate-50 px-6 py-6 flex flex-col">
           <h2 className="text-lg font-semibold mb-4">
@@ -269,82 +295,37 @@ export default function InquilinoTicketsPage() {
           <form onSubmit={handleCrearTicket} className="space-y-4 text-sm">
             <div className="space-y-1">
               <label className="block font-medium text-slate-900">
-                Título corto
+                Descripción del problema
               </label>
               <input
                 value={titulo}
                 onChange={(e) => setTitulo(e.target.value)}
                 className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
                 placeholder="Ej. Fuga de agua en el baño"
+                required
               />
             </div>
 
-            <div className="space-y-1">
-              <label className="block font-medium text-slate-900">
-                Descripción completa
-              </label>
-              <textarea
-                value={descripcion}
-                onChange={(e) => setDescripcion(e.target.value)}
-                className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm min-h-[140px] outline-none focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500"
-                placeholder="Describe el problema con más detalle..."
-              />
-            </div>
-
-            {/* Tipo de problema */}
+            {/* Prioridad */}
             <div className="space-y-2">
               <p className="text-xs font-semibold text-slate-900">
-                Tipo de Problema (Opcional)
-              </p>
-              <div className="flex flex-wrap gap-4 text-xs">
-                {["Plomería", "Electricidad", "Carpintería", "Otro"].map(
-                  (tipo) => (
-                    <label key={tipo} className="flex items-center gap-1.5">
-                      <input
-                        type="radio"
-                        name="tipo-problema"
-                        value={tipo}
-                        checked={tipoProblema === tipo}
-                        onChange={() => setTipoProblema(tipo)}
-                        className="h-3 w-3"
-                      />
-                      <span>{tipo}</span>
-                    </label>
-                  )
-                )}
-              </div>
-            </div>
-
-            {/* Carga de evidencia */}
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-slate-900">
-                Carga de Evidencia
+                Prioridad
               </p>
               <div className="flex flex-wrap gap-4 text-xs">
                 {["Alta", "Media", "Baja"].map((nivel) => (
                   <label key={nivel} className="flex items-center gap-1.5">
                     <input
                       type="radio"
-                      name="carga-evidencia"
+                      name="prioridad"
                       value={nivel}
-                      checked={cargaEvidencia === nivel}
-                      onChange={() => setCargaEvidencia(nivel)}
+                      checked={prioridad === nivel}
+                      onChange={() => setPrioridad(nivel)}
                       className="h-3 w-3"
                     />
                     <span>{nivel}</span>
                   </label>
                 ))}
               </div>
-            </div>
-
-            {/* Subir archivo (solo UI) */}
-            <div className="space-y-2">
-              <button
-                type="button"
-                className="w-full rounded-md border border-dashed border-slate-400 bg-white px-3 py-2 text-xs text-slate-600 hover:bg-slate-50"
-              >
-                + Subir Foto o PDF
-              </button>
             </div>
 
             <button
@@ -357,14 +338,13 @@ export default function InquilinoTicketsPage() {
         </section>
 
         {/* Columna 3: Detalle del ticket seleccionado */}
-        <section className="rounded-[32px] border border-slate-300 bg-slate-50 px-6 py-6 flex flex-col">
+        {/* <section className="rounded-[32px] border border-slate-300 bg-slate-50 px-6 py-6 flex flex-col">
           {selectedTicket ? (
             <>
               <h2 className="text-lg font-semibold mb-4">
                 {selectedTicket.titulo}
               </h2>
 
-              {/* Estado + info básica */}
               <div className="mb-4 rounded-md bg-white border border-slate-200 px-4 py-3 space-y-1 text-xs">
                 <div className="flex items-center justify-between">
                   <span className="inline-flex items-center rounded-full bg-emerald-100 text-emerald-700 px-3 py-0.5 text-[11px] font-semibold">
@@ -385,7 +365,6 @@ export default function InquilinoTicketsPage() {
                 </p>
               </div>
 
-              {/* Comentarios / seguimiento */}
               <div className="mb-4 rounded-md bg-white border border-slate-200 px-4 py-3 text-xs space-y-2">
                 <p className="font-semibold text-slate-900">
                   Comentarios / Seguimiento
@@ -405,7 +384,6 @@ export default function InquilinoTicketsPage() {
                 </div>
               </div>
 
-              {/* Evidencias */}
               <div className="mb-6 rounded-md bg-white border border-slate-200 px-4 py-3 text-xs">
                 <p className="font-semibold text-slate-900 mb-2">Evidencias</p>
                 <div className="flex gap-2">
@@ -427,7 +405,7 @@ export default function InquilinoTicketsPage() {
               Selecciona un ticket de la lista para ver el detalle.
             </p>
           )}
-        </section>
+        </section> */}
       </div>
 
       {/* Footer */}
